@@ -27,12 +27,8 @@ use app\api\controller\cms\Index      as CmsIndex;
 use app\api\controller\cms\Channel    as CmsChannel;
 use app\api\controller\cms\Archives   as CmsArchives;
 use app\api\controller\cms\Tag        as CmsTag;
-use app\api\controller\cms\Page       as CmsPage;
-use app\api\controller\cms\Special    as CmsSpecial;
 use app\api\controller\cms\Search     as CmsSearch;
 use app\api\controller\cms\Comment    as CmsComment;
-use app\api\controller\cms\Diyform    as CmsDiyform;
-use app\api\controller\cms\Order      as CmsOrder;
 use app\api\controller\cms\User       as CmsUser;
 
 Route::group('v1', function () {
@@ -151,32 +147,17 @@ Route::post('archives/view', [CmsArchives::class, 'view']);
 Route::get('tags', [CmsTag::class, 'index']);
 Route::get('tags/archives', [CmsTag::class, 'archives']);
 
-Route::get('pages', [CmsPage::class, 'index']);
-Route::get('pages/detail', [CmsPage::class, 'detail']);
-
-Route::get('specials', [CmsSpecial::class, 'index']);
-Route::get('specials/detail', [CmsSpecial::class, 'detail']);
-
+/* 搜索 */
 Route::get('search', [CmsSearch::class, 'index']);
 Route::get('search/hot', [CmsSearch::class, 'hot']);
 Route::get('search/suggest', [CmsSearch::class, 'suggest']);
+
 /* 评论 */
 Route::get('comments', [CmsComment::class, 'index']);
 Route::post('comments', [CmsComment::class, 'post']);
 Route::post('comments/delete', [CmsComment::class, 'delete']);
 Route::post('comments/subscribe', [CmsComment::class, 'subscribe']);
 
-/* 自定义表单 */
-Route::get('diyform', [CmsDiyform::class, 'index']);
-Route::get('diyform/data', [CmsDiyform::class, 'data']);
-Route::post('diyform/post', [CmsDiyform::class, 'post']);
-
-/* 订单（内容付费） */
-Route::get('orders', [CmsOrder::class, 'index']);
-Route::post('orders', [CmsOrder::class, 'save']);
-Route::get('orders/detail', [CmsOrder::class, 'detail']);
-Route::post('orders/cancel', [CmsOrder::class, 'cancel']);
-Route::post('orders/notify', [CmsOrder::class, 'notify']);
 
 /* 会员中心 */
 Route::get('user/overview', [CmsUser::class, 'overview']);

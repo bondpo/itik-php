@@ -719,20 +719,7 @@ class ApiTester
         $res = $this->request('GET', '/api/cms/tags/archives', ['name' => $tagName]);
         $this->record('CMS', '按标签索引文章', 'GET', '/api/cms/tags/archives', $res);
 
-        // 10.5 单页与专题
-        $res = $this->request('GET', '/api/cms/pages');
-        $this->record('CMS', '单页列表', 'GET', '/api/cms/pages', $res);
-
-        $res = $this->request('GET', '/api/cms/pages/detail', ['diyname' => 'aboutus']);
-        $this->record('CMS', '单页详情', 'GET', '/api/cms/pages/detail', $res);
-
-        $res = $this->request('GET', '/api/cms/specials');
-        $this->record('CMS', '专题列表', 'GET', '/api/cms/specials', $res);
-
-        $res = $this->request('GET', '/api/cms/specials/detail', ['diyname' => 'it']);
-        $this->record('CMS', '专题详情', 'GET', '/api/cms/specials/detail', $res);
-
-        // 10.6 搜索
+        // 10.5 搜索
         $res = $this->request('GET', '/api/cms/search', ['keyword' => '测试']);
         $this->record('CMS', '全文关键字搜索', 'GET', '/api/cms/search', $res);
 
@@ -742,7 +729,7 @@ class ApiTester
         $res = $this->request('GET', '/api/cms/search/suggest', ['keyword' => '测']);
         $this->record('CMS', '搜索关键字联想', 'GET', '/api/cms/search/suggest', $res);
 
-        // 10.7 评论互动
+        // 10.6 评论互动
         $res = $this->request('GET', '/api/cms/comments', ['aid' => $archId]);
         $this->record('CMS', '获取文章评论列表', 'GET', '/api/cms/comments', $res);
 
@@ -752,11 +739,7 @@ class ApiTester
         ], $this->getMemberToken());
         $this->record('CMS', '发表互动评论', 'POST', '/api/cms/comments', $res);
 
-        // 10.8 自定义表单
-        $res = $this->request('GET', '/api/cms/diyform', ['id' => 1]);
-        $this->record('CMS', '自定义表单配置查询', 'GET', '/api/cms/diyform', $res);
-
-        // 10.9 会员中心
+        // 10.7 会员中心
         $res = $this->request('GET', '/api/cms/user/overview', [], $this->getMemberToken());
         $this->record('CMS', 'CMS 会员概览', 'GET', '/api/cms/user/overview', $res);
 

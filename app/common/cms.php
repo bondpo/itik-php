@@ -32,7 +32,7 @@ if (!function_exists('get_cms_config')) {
                 $config[$item['name']] = $value;
             }
         }
-        // 运行时的临时覆盖（set_addon_config）
+        // 运行时的临时覆盖
         $override = \think\facade\Config::get('cms_runtime_override', []);
         if ($override) {
             $config = array_merge($config, $override);
@@ -45,49 +45,62 @@ if (!function_exists('get_cms_config')) {
     }
 }
 
-if (!function_exists('set_addon_config')) {
+if (!function_exists('get_cms_fullconfig')) {
     /**
-     * 兼容原 FastAdmin 的 set_addon_config 调用：在当前请求内临时覆盖模块配置
-     * @param string $name   模块名称
-     * @param array  $config 需要覆盖的配置
-     * @param bool   $merge  是否合并
+     * 获取 CMS 模块完整配置列表（用于后台系统配置管理）
+     * @return array
+     */
+    function get_cms_fullconfig(): array
+    {
+        $list = Db::name('config')->where('group', 'cms')->order('id asc')->select()->toArray();
+        foreach ($list as &$item) {
+            if (in_array($item['type'], ['array', 'checkbox', 'selects'])) {
+                $item['value'] = ($item['value'] === '' || $item['value'] === null) ? [] : json_decode($item['value'], true);
+            }
+        }
+        return $list;
+    }
+}
+
+if (!function_exists('set_cms_fullconfig')) {
+    /**
+     * 将 CMS 配置更新回数据库
+     * @param array $config 配置列表
      * @return bool
      */
-    function set_addon_config(string $name, array $config, bool $merge = true)
+    function set_cms_fullconfig(array $config): bool
     {
-        if ($name !== 'cms') {
+        if (!$config) {
             return false;
         }
-        $current = \think\facade\Config::get('cms_runtime_override', []);
-        \think\facade\Config::set([
-            'cms_runtime_override' => $merge ? array_merge($current, $config) : $config,
-        ]);
+        foreach ($config as $item) {
+            if (empty($item['name'])) {
+                continue;
+            }
+            $value = $item['value'] ?? '';
+            if (is_array($value)) {
+                $value = json_encode($value, JSON_UNESCAPED_UNICODE);
+            }
+            Db::name('config')
+                ->where('group', 'cms')
+                ->where('name', $item['name'])
+                ->update(['value' => $value]);
+        }
+        \app\admin\model\Config::clearCache();
         return true;
     }
 }
 
-if (!function_exists('get_addon_config')) {
+if (!function_exists('cms_url')) {
     /**
-     * 兼容原 FastAdmin 的 get_addon_config 调用
-     * @param string $name 模块名称
-     * @return array
-     */
-    function get_addon_config(string $name)
-    {
-        return $name === 'cms' ? get_cms_config() : [];
-    }
-}
-
-if (!function_exists('addon_url')) {
-    /**
-     * 生成 CMS 前台地址，例如 cms/archives/index + [':id' => 3] => /cms/archives/3
+     * 生成 CMS 模块前台访问地址，如 cms_url('archives/detail', [':id' => 3])
      * @param string $url    模块地址，如 cms/archives/index
-     * @param array  $vars   路径变量，如 [':id' => 3]
+     * @param array  $vars   路径或查询参数，如 [':id' => 3]
      * @param string $suffix 后缀（当前项目路由未启用后缀，此项忽略）
      * @param bool   $domain 是否返回完整域名
      * @return string
      */
-    function addon_url(string $url, array $vars = [], string $suffix = '', bool $domain = false)
+    function cms_url(string $url, array $vars = [], string $suffix = '', bool $domain = false): string
     {
         $url = trim((string)$url, '/');
         $url = preg_replace('#^cms/#', '', $url);
@@ -107,6 +120,8 @@ if (!function_exists('addon_url')) {
                 if ($primary === '' && !in_array($key, ['id'])) {
                     $primary = (string)$value;
                 }
+            } else {
+                $query[$key] = $value;
             }
         }
 
@@ -121,6 +136,33 @@ if (!function_exists('addon_url')) {
         $result = (string)url($path, $query, false);
 
         return $domain ? request()->domain() . $result : $result;
+    }
+}
+
+if (!function_exists('get_addon_config')) {
+    /**
+     * 兼容别名：直接获取 CMS 配置
+     * @param string $name 模块名称
+     * @return mixed
+     */
+    function get_addon_config(string $name = 'cms')
+    {
+        return get_cms_config();
+    }
+}
+
+if (!function_exists('addon_url')) {
+    /**
+     * 兼容别名：转发至 cms_url
+     * @param string $url
+     * @param array  $vars
+     * @param string $suffix
+     * @param bool   $domain
+     * @return string
+     */
+    function addon_url(string $url, array $vars = [], string $suffix = '', bool $domain = false): string
+    {
+        return cms_url($url, $vars, $suffix, $domain);
     }
 }
 
@@ -148,29 +190,6 @@ if (!function_exists('db')) {
     }
 }
 
-if (!function_exists('get_addon_info')) {
-    /**
-     * 兼容原 FastAdmin 的 get_addon_info 调用
-     * @param string $name 模块名称
-     * @return array
-     */
-    function get_addon_info(string $name)
-    {
-        return ['name' => $name, 'title' => 'CMS系统', 'state' => 1];
-    }
-}
-
-if (!function_exists('get_addon_fullconfig')) {
-    /**
-     * 兼容原 FastAdmin 的 get_addon_fullconfig 调用
-     * @param string $name 模块名称
-     * @return array
-     */
-    function get_addon_fullconfig(string $name)
-    {
-        return get_cms_config();
-    }
-}
 
 if (!function_exists('addtion')) {
     /**
@@ -213,35 +232,6 @@ if (!function_exists('addtion')) {
     }
 }
 
-if (!function_exists('set_addon_fullconfig')) {
-    /**
-     * 兼容原 FastAdmin 的 set_addon_fullconfig 调用：将配置写回系统配置表
-     * @param string $name 模块名称
-     * @param array  $config 配置数组
-     * @return bool
-     */
-    function set_addon_fullconfig(string $name, array $config)
-    {
-        if ($name !== 'cms' || !$config) {
-            return false;
-        }
-        foreach ($config as $item) {
-            if (empty($item['name'])) {
-                continue;
-            }
-            $value = $item['value'] ?? '';
-            if (is_array($value)) {
-                $value = json_encode($value, JSON_UNESCAPED_UNICODE);
-            }
-            \think\facade\Db::name('config')
-                ->where('group', 'cms')
-                ->where('name', $item['name'])
-                ->update(['value' => $value]);
-        }
-        \app\admin\model\Config::clearCache();
-        return true;
-    }
-}
 
 if (!function_exists('datetime')) {
     /**

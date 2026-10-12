@@ -3,7 +3,6 @@
 namespace app\common\library\cms;
 
 use app\common\model\cms\Archives;
-use addons\epay\library\Service;
 use app\common\library\FrontendAuth as Auth;
 use app\common\model\User;
 use badou\Http;
@@ -80,7 +79,7 @@ class Order
      * @param string $openid      Openid
      * @param string $notifyurl   通知地址
      * @param string $returnurl   返回地址
-     * @return \addons\epay\library\Collection|\addons\epay\library\RedirectResponse|\addons\epay\library\Response|null
+     * @return mixed
      * @throws OrderException
      */
     public static function submit($archives_id, $paytype = 'wechat', $method = 'web', $openid = '', $notifyurl = '', $returnurl = '')
@@ -154,55 +153,11 @@ class Order
         }
 
         $response = null;
-        $epay = get_addon_info('epay');
-        if ($epay && $epay['state']) {
-            $notifyurl = $notifyurl ? $notifyurl : $request->root(true) . '/addons/cms/order/epay/type/notify/paytype/' . $paytype;
-            $returnurl = $returnurl ? $returnurl : $request->root(true) . '/addons/cms/order/epay/type/return/paytype/' . $paytype . '/orderid/' . $order->orderid;
-
-            //保证取出的金额一致，不一致将导致订单重复错误
-            $amount = sprintf("%.2f", $order->amount);
-            $custom = [];
-            $config = get_addon_config('cms');
-            if ($paytype == 'wechat') {
-                //优化使用插件中配置的appid
-                $app_id = empty($config['app_id']) ? '' : $config['app_id'];
-                $official_appid = empty($config['official_appid']) ? '' : $config['official_appid'];
-                $miniapp_id = empty($config['wxappid']) ? '' : $config['wxappid'];
-                $custom = Service::isVersionV3() ? [
-                    'app_id'      => $app_id, //APP
-                    'mp_app_id'   => $official_appid,//公众号
-                    'mini_app_id' => $miniapp_id,//小程序
-                ] : [
-                    'appid'      => $app_id, //APP
-                    'app_id'     => $official_appid, //公众号
-                    'miniapp_id' => $miniapp_id, //小程序
-                ];
-                $custom = array_filter($custom);
-            }
-            $params = [
-                'amount'    => $amount,
-                'orderid'   => $order->orderid,
-                'type'      => $paytype,
-                'title'     => "支付{$amount}元",
-                'notifyurl' => $notifyurl,
-                'returnurl' => $returnurl,
-                'method'    => $method,
-                'openid'    => $openid,
-                'buyer_id'  => $openid,
-                'custom'    => $custom
-            ];
-            try {
-                $response = \addons\epay\library\Service::submitOrder($params);
-            } catch (GatewayException $e) {
-                throw new OrderException(app()->isDebug() ? $e->getMessage() : "支付失败，请稍后重试");
-            }
-        } else {
-            $result = \think\Event::trigger('cms_order_submit', $order);
-            if (!$result) {
-                throw new OrderException("请在后台安装配置微信支付宝整合插件");
-            }
+        $result = Event::trigger('cms_order_submit', $order);
+        if (!$result) {
+            throw new OrderException("当前系统未配置在线支付渠道，请联系管理员");
         }
-        return $response;
+        return $result;
     }
 
     /**

@@ -276,37 +276,7 @@ class Ajax extends Backend
     //配置
     public function config()
     {
-        $name = $this->request->get('name');
-        if ($name == 'sms') {
-            $config = config('addons.hooks');
-            if (isset($config['sms_send']) && $config['sms_send']) {
-                $name = reset($config['sms_send']);
-            } else {
-                $this->error("请在插件管理中安装一款短信验证插件", "");
-            }
-        } elseif ($name == 'oss') {
-            $config = config('addons.hooks');
-            if (isset($config['upload_config_init']) && $config['upload_config_init']) {
-                $availableArr = array_intersect($config['upload_config_init'], ['alioss', 'bos', 'cos', 'upyun', 'ucloud', 'hwobs', 'qiniu']);
-                if ($availableArr) {
-                    $name = reset($availableArr);
-                }
-            }
-            if (!$name || $name == 'oss') {
-                $this->error("请在插件管理中安装一款云存储插件", "");
-            }
-        } else {
-            $info = get_addon_info($name);
-            $addonArr = [
-                'third'  => '第三方登录',
-                'signin' => '会员签到',
-                'epay'   => '微信支付宝整合',
-            ];
-            if (!$info) {
-                $this->error('请检查对应插件' . (isset($addonArr[$name]) ? "《{$addonArr[$name]}》" : "") . '是否安装且启动', "");
-            }
-        }
-        $this->redirect((string)url('module/config', ['name' => $name, 'dialog' => 1]));
+        $this->error("系统已采用内置模块架构，不再支持独立插件扩展");
     }
 
     /**

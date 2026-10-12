@@ -2,7 +2,6 @@
 
 namespace app\admin\controller\cms;
 
-use addons\vip\library\Service;
 use app\admin\model\Admin;
 use app\admin\model\AdminGroupAccess;
 use app\admin\model\cms\ChannelAdmin;
@@ -55,7 +54,7 @@ class Channel extends Backend
         $this->view->assign("flagList", $this->model->getFlagList());
         $this->view->assign("statusList", ChannelModel::getStatusList());
         $this->view->assign("listtypeList", ChannelModel::getListtypeList());
-        $this->view->assign("vipList", get_addon_info('vip') ? Service::getVipList() : []);
+        $this->view->assign("vipList", []);
     }
 
     /**

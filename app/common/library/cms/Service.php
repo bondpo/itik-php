@@ -682,10 +682,14 @@ class Service
             throw new Exception("未找到指定类型");
         }
         $type = ucfirst(strtolower($type));
-        $model = model("\\addons\cms\\model\\{$type}");
-        if (!$model) {
+        $class = "\\app\\admin\\model\\cms\\{$type}";
+        if (!class_exists($class)) {
+            $class = "\\app\\common\\model\\cms\\{$type}";
+        }
+        if (!class_exists($class)) {
             return null;
         }
+        $model = new $class;
         if ($source_id) {
             $model = $model->find($source_id, $with);
         }
@@ -728,7 +732,7 @@ class Service
         $config['path'] = $paginateArr[3] ?? '';
         $config['fragment'] = $paginateArr[4] ?? '';
         $config['query'] = request()->get();
-        $config['type'] = '\\addons\\cms\\library\\Bootstrap';
+        $config['type'] = '\\app\\common\\library\\cms\\Bootstrap';
         return [$listRows, $simple, $config];
     }
 
