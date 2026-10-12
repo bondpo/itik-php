@@ -295,26 +295,49 @@ class Config extends Backend
         if (!$data) {
             $this->error(__('Parameter %s can not be empty', ['']));
         }
-        $mail = new Email();
-        try {
-            $mail->Host       = $data['smtp_server'];
-            $mail->SMTPAuth   = true;
-            $mail->Username   = $data['smtp_user'];
-            $mail->Password   = $data['smtp_pass'];
-            $mail->SMTPSecure = $data['smtp_verification'] == 'SSL' ? PHPMailer::ENCRYPTION_SMTPS : PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port       = $data['smtp_port'];
-
-            $mail->setFrom($data['smtp_sender_mail'], $data['smtp_user']);
-
-            $mail->isSMTP();
-            $mail->addAddress($data['test_email']);
-            $mail->isHTML();
-            $mail->setSubject(__('This is a test email') . '-' . get_sys_config('site_name'));
-            $mail->Body = __('The mail service has been configured correctly');
-            $mail->send();
-        } catch (PHPMailerException) {
-            $this->error($mail->ErrorInfo);
+        $testEmail = $data['test_email'] ?? '';
+        if (!$testEmail) {
+            $this->error(__('请输入接收测试邮件的邮箱'));
         }
+
+        $mailType = $data['mail_type'] ?? (get_sys_config('mail_type') ?: 'resend');
+        try {
+            if ($mailType === 'resend') {
+                $apiKey    = $data['resend_key'] ?? (get_sys_config('resend_key') ?: config('resend.api_key'));
+                $fromEmail = $data['resend_from'] ?? (get_sys_config('resend_from') ?: config('resend.from_email', 'service@itiklink.com'));
+                $fromName  = $data['resend_from_name'] ?? (get_sys_config('resend_from_name') ?: config('resend.from_name', 'ITIK'));
+                $from      = $fromName ? "{$fromName} <{$fromEmail}>" : $fromEmail;
+
+                \app\common\library\Resend::send([
+                    'api_key' => $apiKey,
+                    'from'    => $from,
+                    'to'      => [$testEmail],
+                    'subject' => __('This is a test email') . '-' . get_sys_config('site_name'),
+                    'html'    => '<p>' . __('The mail service has been configured correctly') . '</p>',
+                ]);
+            } else {
+                $mail = new Email();
+                $mail->driver     = 'smtp';
+                $mail->Host       = $data['smtp_server'] ?? '';
+                $mail->SMTPAuth   = true;
+                $mail->Username   = $data['smtp_user'] ?? '';
+                $mail->Password   = $data['smtp_pass'] ?? '';
+                $mail->SMTPSecure = ($data['smtp_verification'] ?? '') == 'SSL' ? PHPMailer::ENCRYPTION_SMTPS : PHPMailer::ENCRYPTION_STARTTLS;
+                $mail->Port       = $data['smtp_port'] ?? 465;
+
+                $mail->setFrom($data['smtp_sender_mail'] ?? '', $data['smtp_user'] ?? '');
+
+                $mail->isSMTP();
+                $mail->addAddress($testEmail);
+                $mail->isHTML();
+                $mail->setSubject(__('This is a test email') . '-' . get_sys_config('site_name'));
+                $mail->Body = __('The mail service has been configured correctly');
+                $mail->send();
+            }
+        } catch (\Throwable $e) {
+            $this->error($e->getMessage());
+        }
+
         $this->success(__('Test mail sent successfully~'));
     }
 }

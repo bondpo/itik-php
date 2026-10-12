@@ -88,12 +88,11 @@ class Ems
                 $result = true;
                 try {
                     $mail = new Email();
-                    $mail->isSMTP();
                     $mail->addAddress($params->email);
                     $mail->setSubject('请查收你的验证码！');
                     $mail->message("你的验证码是：" . $params->code . "，" . ceil(self::$expire / 60) . "分钟内有效。")
                         ->send();
-                } catch (PHPMailerException $e) {
+                } catch (\Throwable $e) {
                     $result = false;
                     self::setErrorMessage($e->getMessage());
                 }
@@ -125,15 +124,20 @@ class Ems
         ];
         if (!Event::hasListener('ems_notice')) {
             Event::listen('ems_notice', function ($params) {
-                $subject = '你收到一封新的邮件！';
-                $content = $params['msg'];
-                $mail = new Email();
-                $mail->isSMTP();
-                $mail->addAddress($params['email']);
-                $mail->setSubject($subject);
-                $result = $mail
-                    ->message($content)
-                    ->send();
+                $result = true;
+                try {
+                    $subject = '你收到一封新的邮件！';
+                    $content = $params['msg'];
+                    $mail = new Email();
+                    $mail->addAddress($params['email']);
+                    $mail->setSubject($subject);
+                    $result = $mail
+                        ->message($content)
+                        ->send();
+                } catch (\Throwable $e) {
+                    $result = false;
+                    self::setErrorMessage($e->getMessage());
+                }
                 return $result;
             });
         }
