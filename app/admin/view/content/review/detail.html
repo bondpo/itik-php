@@ -1,0 +1,212 @@
+{layout name="layout/default" /}
+
+<style>
+    .content-detail-container {
+        padding: 15px;
+    }
+    .detail-card {
+        border-radius: 6px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        margin-bottom: 15px;
+    }
+    .article-header {
+        border-bottom: 1px solid #f0f0f0;
+        padding-bottom: 12px;
+        margin-bottom: 15px;
+    }
+    .article-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: #1f2937;
+        line-height: 1.4;
+        margin-bottom: 8px;
+    }
+    .meta-item {
+        display: inline-block;
+        margin-right: 18px;
+        font-size: 13px;
+        color: #6b7280;
+    }
+    .meta-item i {
+        margin-right: 4px;
+    }
+    .article-body {
+        padding: 16px;
+        background: #fafafa;
+        border: 1px solid #e5e7eb;
+        border-radius: 4px;
+        min-height: 200px;
+        font-size: 14px;
+        line-height: 1.8;
+        color: #374151;
+        overflow-x: auto;
+    }
+    .article-body img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 4px;
+    }
+    .cover-img {
+        max-height: 160px;
+        border-radius: 4px;
+        border: 1px solid #eee;
+    }
+    .timeline-item-box {
+        background: #f9fafb;
+        padding: 10px 14px;
+        border-radius: 4px;
+        border-left: 3px solid #009688;
+        margin-bottom: 10px;
+    }
+    .timeline-item-box.rejected {
+        border-left-color: #ff5722;
+    }
+</style>
+
+<div class="content-detail-container">
+    <!-- 基础概览卡片 -->
+    <div class="layui-card detail-card">
+        <div class="layui-card-body">
+            <div class="article-header">
+                <div class="article-title">
+                    {$row.title}
+                    {switch name="row.status"}
+                        {case value="pending"}<span class="layui-badge layui-bg-orange">待审核</span>{/case}
+                        {case value="normal"}<span class="layui-badge layui-bg-green">已通过</span>{/case}
+                        {case value="rejected"}<span class="layui-badge layui-bg-red">已驳回</span>{/case}
+                        {case value="hidden"}<span class="layui-badge layui-bg-gray">已下架</span>{/case}
+                        {default /}<span class="layui-badge layui-bg-black">草稿</span>
+                    {/switch}
+                    <span class="layui-badge layui-badge-rim">v{$row.version|default='1'}</span>
+                </div>
+                <div class="article-meta">
+                    <span class="meta-item"><i class="fa fa-user"></i> 作者: {$author.nickname|default=($author.username|default='ID: ' . $row.author_id)}</span>
+                    {if !empty($project)}
+                    <span class="meta-item"><i class="fa fa-cubes"></i> 项目: {$project.name}</span>
+                    {/if}
+                    <span class="meta-item"><i class="fa fa-folder-open"></i> 分类: {$row.category_l1|default='无'}{if !empty($row.category_l2)} / {$row.category_l2}{/if}</span>
+                    <span class="meta-item"><i class="fa fa-eye"></i> 浏览: {$row.views|default=0}</span>
+                    <span class="meta-item"><i class="fa fa-clock-o"></i> 提交: {if !empty($row.create_time)}{:date('Y-m-d H:i:s', $row.create_time)}{else}-{/if}</span>
+                    {if !empty($row.published_at)}
+                    <span class="meta-item"><i class="fa fa-check-circle"></i> 发布: {:date('Y-m-d H:i:s', $row.published_at)}</span>
+                    {/if}
+                </div>
+            </div>
+
+            <!-- 封面与摘要 -->
+            <div class="layui-row layui-col-space15" style="margin-bottom: 12px;">
+                {if !empty($row.cover)}
+                <div class="layui-col-md3 layui-col-sm4">
+                    <img src="{$row.cover}" class="cover-img" alt="封面" onerror="this.style.display='none'" />
+                </div>
+                {/if}
+                <div class="{if !empty($row.cover)}layui-col-md9 layui-col-sm8{else}layui-col-md12{/if}">
+                    <blockquote class="layui-elem-quote layui-quote-nm" style="margin-bottom: 0;">
+                        <strong>内容摘要：</strong> {$row.summary|default='暂无摘要说明'}
+                        {if !empty($row.tags)}
+                        <div style="margin-top: 8px;">
+                            <strong>标签：</strong>
+                            {foreach :explode(',', $row['tags']) as $t}
+                            <span class="layui-badge layui-bg-blue" style="margin-right: 4px;">{$t}</span>
+                            {/foreach}
+                        </div>
+                        {/if}
+                    </blockquote>
+                </div>
+            </div>
+
+            <!-- 正文区域 -->
+            <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+                <legend>内容正文</legend>
+            </fieldset>
+            <div class="article-body">
+                {if !empty($row.content)}
+                {$row.content|raw}
+                {else}
+                <p style="color: #9ca3af; text-align: center; padding: 20px 0;">正文内容为空</p>
+                {/if}
+            </div>
+        </div>
+    </div>
+
+    <!-- 审核历史流水 -->
+    <div class="layui-card detail-card">
+        <div class="layui-card-header">
+            <i class="fa fa-history"></i> 审核流转记录 ({:count($reviews)} 条)
+        </div>
+        <div class="layui-card-body">
+            {if empty($reviews)}
+            <p style="color: #9ca3af; padding: 10px 0;">暂无审核记录</p>
+            {else}
+            <ul class="layui-timeline">
+                {volist name="reviews" id="rv"}
+                <li class="layui-timeline-item">
+                    <i class="layui-icon layui-timeline-axis {if $rv.result=='normal'}layui-icon-ok-circle layui-font-green{else}layui-icon-close-fill layui-font-red{/if}"></i>
+                    <div class="layui-timeline-content layui-text">
+                        <h4 class="layui-timeline-title">
+                            {:date('Y-m-d H:i:s', $rv.create_time)}
+                            <span class="layui-badge {if $rv.result=='normal'}layui-bg-green{else}layui-bg-red{/if}">
+                                {if $rv.result=='normal'}审核通过{else}已驳回{/if}
+                            </span>
+                            <span style="font-size: 12px; color: #6b7280; font-weight: normal;">
+                                审核人: {$rv.reviewer_nickname|default=($rv.reviewer_name|default='管理员(ID:' . $rv.reviewer_id . ')')}
+                            </span>
+                        </h4>
+                        <div class="timeline-item-box {if $rv.result!='normal'}rejected{/if}">
+                            {if !empty($rv.reason)}
+                            <strong>批注说明 / 驳回原因：</strong> {$rv.reason}
+                            {else}
+                            <em>未填写审核备注</em>
+                            {/if}
+                        </div>
+                    </div>
+                </li>
+                {/volist}
+            </ul>
+            {/if}
+        </div>
+    </div>
+
+    <!-- 底部操作按钮 -->
+    <div style="text-align: right; margin-top: 15px; margin-bottom: 25px;">
+        {if $row.status == 'pending'}
+        <button type="button" class="layui-btn layui-bg-green btn-quick-audit" data-action="pass"><i class="fa fa-check"></i> 立即通过</button>
+        <button type="button" class="layui-btn layui-bg-red btn-quick-audit" data-action="reject"><i class="fa fa-times"></i> 驳回修改</button>
+        {/if}
+        <button type="button" class="layui-btn layui-btn-primary" onclick="parent.layer.close(parent.layer.getFrameIndex(window.name));">关闭窗口</button>
+    </div>
+</div>
+
+<script>
+    layui.use(['layer', 'jquery'], function () {
+        var layer = layui.layer;
+        var $ = layui.jquery;
+
+        $('.btn-quick-audit').on('click', function () {
+            var action = $(this).data('action');
+            var isPass = action === 'pass';
+
+            layer.prompt({
+                title: isPass ? '确认通过审核（可附带备注）' : '请填写驳回原因',
+                formType: 2,
+            }, function (value, index) {
+                $.post("{:url('content.review/review')}", {
+                    ids: "{$row.id}",
+                    action: action,
+                    reason: value,
+                    __token__: $('meta[name="csrf-token"]').attr("content") || ""
+                }, function (ret) {
+                    layer.close(index);
+                    if (ret.code === 1) {
+                        layer.msg(ret.msg || '操作成功', { icon: 1, time: 1000 }, function () {
+                            parent.$('.btn-refresh').trigger('click');
+                            parent.layer.close(parent.layer.getFrameIndex(window.name));
+                        });
+                    } else {
+                        layer.msg(ret.msg || '操作失败', { icon: 2 });
+                    }
+                });
+            });
+        });
+    });
+</script>

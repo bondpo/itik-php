@@ -14,6 +14,12 @@
     <button class="layui-btn layui-bg-orange btn-disabled disabled {:$auth->check('content.review/offline')?'':'hide'}" lay-event="offline"><i class="fa fa-eye-slash"></i> 下架</button>
 </script>
 
+<script type="text/html" id="operate">
+    <button class="layui-btn layui-btn-xs layui-btn-primary" lay-event="detail"><i class="fa fa-eye"></i> 查看</button>
+    <button class="layui-btn layui-btn-xs layui-bg-blue {:$auth->check('content.review/edit')?'':'hide'}" lay-event="edit"><i class="fa fa-edit"></i> 编辑</button>
+    <button class="layui-btn layui-btn-xs layui-bg-red {:$auth->check('content.review/del')?'':'hide'}" lay-event="del"><i class="fa fa-trash"></i> 删除</button>
+</script>
+
 <script>
     layui.use(["badou", "table"], function () {
         var bdTable = layui.bdTable;
@@ -25,6 +31,7 @@
             table: table,
             extend: {
                 index_url: "content.review/index" + location.search,
+                detail_url: "content.review/detail",
                 edit_url: "content.review/edit",
                 del_url: "content.review/del",
                 multi_url: "content.review/multi",
@@ -43,7 +50,9 @@
                 [
                     { type: "checkbox" },
                     { field: "id", title: "ID", width: 70, sort: true },
-                    { field: "title", title: "标题", operate: "LIKE" },
+                    { field: "title", title: "标题", operate: "LIKE", templet: function(d) {
+                        return '<a href="javascript:;" class="layui-font-blue btn-title-detail" data-id="' + d.id + '" title="点击查看详情">' + (d.title || '-') + '</a>';
+                    } },
                     { field: "type", title: "类型", searchList: { news: "资讯", material: "资料", member_upload: "会员上传" } },
                     { field: "author_id", title: "作者ID", operate: "BETWEEN", sortable: true },
                     { field: "project_id", title: "关联项目", operate: "BETWEEN", sortable: true },
@@ -54,6 +63,7 @@
                     { field: "version", title: "版本", operate: false },
                     { field: "published_at", title: "发布时间", templet: bdTable.api.formatter.datetime, operate: false },
                     { field: "create_time", title: "提交时间", templet: bdTable.api.formatter.datetime, operate: false },
+                    { title: "操作", width: 180, align: "center", fixed: "right", toolbar: "#operate" },
                 ],
             ],
         });
@@ -94,6 +104,51 @@
                     });
                 });
             }
+        });
+
+        // 打开详情弹窗通用函数
+        function openDetailDialog(id, title) {
+            layer.open({
+                type: 2,
+                title: "内容详情 - " + (title || "ID:" + id),
+                shade: 0.2,
+                maxmin: true,
+                area: ["920px", "90%"],
+                content: "{:url('content.review/detail')}?ids=" + id,
+            });
+        }
+
+        // 行工具条事件（查看 / 编辑 / 删除）
+        table.on("tool(contentreview)", function (obj) {
+            var event = obj.event;
+            var data = obj.data;
+            if (event === "detail") {
+                openDetailDialog(data.id, data.title);
+            } else if (event === "edit") {
+                layer.open({
+                    type: 2,
+                    title: "编辑内容 - " + (data.title || "ID:" + data.id),
+                    shade: 0.2,
+                    maxmin: true,
+                    area: ["920px", "90%"],
+                    content: "{:url('content.review/edit')}?ids=" + data.id,
+                });
+            } else if (event === "del") {
+                layer.confirm("确认删除该内容？", function (index) {
+                    $.post("{:url('content.review/del')}", { ids: data.id }, function (ret) {
+                        layer.close(index);
+                        layer.msg(ret.msg || "操作完成");
+                        if (ret.code === 1) { tableObj.reload(); }
+                    });
+                });
+            }
+        });
+
+        // 点击标题快速查看详情
+        $(document).on("click", ".btn-title-detail", function () {
+            var id = $(this).data("id");
+            var title = $(this).text();
+            openDetailDialog(id, title);
         });
     });
 </script>

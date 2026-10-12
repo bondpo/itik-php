@@ -143,4 +143,43 @@ class Review extends Backend
         }
         $this->success('已下架 ' . count($ids) . ' 条内容');
     }
+
+    /**
+     * 查看内容详情与审核历史
+     */
+    public function detail($ids = null)
+    {
+        $id = $ids ? (int)$ids : (int)$this->request->param('ids');
+        $row = $this->model->where('id', $id)->whereNull('deletetime')->find();
+        if (!$row) {
+            $this->error('内容不存在或已被删除');
+        }
+
+        // 作者信息
+        $author = Db::name('user')->where('id', (int)$row['author_id'])
+            ->field('id,username,nickname,avatar,email,wallet_address')->find();
+
+        // 关联项目
+        $project = null;
+        if (!empty($row['project_id'])) {
+            $project = Db::name('app_project')->where('id', (int)$row['project_id'])
+                ->field('id,name,slug,logo,summary')->find();
+        }
+
+        // 审核历史记录
+        $reviews = Db::name('app_content_review')
+            ->alias('r')
+            ->leftJoin('admin a', 'a.id = r.reviewer_id')
+            ->where('r.content_type', 'content')
+            ->where('r.content_id', $id)
+            ->order('r.id', 'desc')
+            ->field('r.*, a.username as reviewer_name, a.nickname as reviewer_nickname')
+            ->select()->toArray();
+
+        $this->view->assign('row', $row);
+        $this->view->assign('author', $author);
+        $this->view->assign('project', $project);
+        $this->view->assign('reviews', $reviews);
+        return $this->view->fetch();
+    }
 }
