@@ -22,16 +22,16 @@ class SearchLog extends Model
 
     protected function initializeEvents()
     {
-        static::$config = get_addon_config('cms');
+        static::$config = get_cms_config();
     }
 
     public function getUrlAttr($value, $data)
     {
-        return addon_url('cms/search/index', ['q' => $data['keywords']], static::$config['urlsuffix']);
+        return cms_url('cms/search/index', ['q' => $data['keywords']], static::$config['urlsuffix'] ?? '');
     }
 
     public function getFullurlAttr($value, $data)
     {
-        return addon_url('cms/search/index', ['q' => $data['keywords']], static::$config['urlsuffix'], true);
+        return cms_url('cms/search/index', ['q' => $data['keywords']], static::$config['urlsuffix'] ?? '', true);
     }
 }

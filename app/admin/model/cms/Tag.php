@@ -23,7 +23,7 @@ class Tag extends Model
 
     protected function initializeEvents()
     {
-        static::$config = get_addon_config('cms');
+        static::$config = get_cms_config();
         self::beforeUpdate(function ($row) {
             $changedData = $row->getChangedData();
             if (isset($changedData['name'])) {
@@ -86,7 +86,7 @@ class Tag extends Model
             ':month'   => date("m", $time),
             ':day'     => date("d", $time)
         ];
-        return addon_url('cms/tag/index', $vars, static::$config['urlsuffix'], $domain);
+        return cms_url('cms/tag/index', $vars, static::$config['urlsuffix'] ?? '', $domain);
     }
 
     /**

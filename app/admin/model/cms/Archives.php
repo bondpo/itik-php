@@ -74,7 +74,7 @@ class Archives extends Model
             ':month'    => date("m", $time),
             ':day'      => date("d", $time),
         ];
-        return addon_url('cms/archives/index', $vars, static::$config['urlsuffix'], true);
+        return cms_url('cms/archives/index', $vars, static::$config['urlsuffix'] ?? '', true);
     }
 
     public function getOriginData()
@@ -98,7 +98,7 @@ class Archives extends Model
 
     protected function initializeEvents()
     {
-        self::$config = $config = get_addon_config('cms');
+        self::$config = $config = get_cms_config();
         self::beforeInsert(function ($row) {
             if (!isset($row['admin_id']) || !$row['admin_id']) {
                 $admin_id = session('admin.id');
@@ -293,11 +293,6 @@ class Archives extends Model
     public function channel()
     {
         return $this->belongsTo('Channel', 'channel_id', '', [], 'LEFT');
-    }
-
-    public function special()
-    {
-        return $this->belongsTo('Special', 'special_id', '', [], 'LEFT');
     }
 
     /**

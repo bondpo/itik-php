@@ -72,13 +72,12 @@ class Comment extends Base
         if (mb_strlen($content) > 500) {
             $this->fail('评论内容过长（最多 500 字）', self::CODE_PARAM_INVALID);
         }
-        if (!in_array($type, ['archives', 'page', 'special'], true)) {
+        if ($type !== 'archives') {
             $this->fail('评论类型不合法', self::CODE_PARAM_INVALID);
         }
 
         // 内容存在性
-        $tableMap = ['archives' => 'cms_archives', 'page' => 'cms_page', 'special' => 'cms_special'];
-        if (!Db::name($tableMap[$type])->where('id', $aid)->find()) {
+        if (!Db::name('cms_archives')->where('id', $aid)->find()) {
             $this->fail('评论对象不存在', self::CODE_NOT_FOUND);
         }
 

@@ -29,7 +29,7 @@ class Tag extends Model
 
     protected function initializeEvents()
     {
-        $config = get_addon_config('cms');
+        $config = get_cms_config();
         self::$config = $config;
     }
 
@@ -61,8 +61,8 @@ class Tag extends Model
             ':month'   => date("m", $time),
             ':day'     => date("d", $time)
         ];
-        $suffix = static::$config['moduleurlsuffix']['tag'] ?? static::$config['urlsuffix'];
-        return addon_url('cms/tag/index', $vars, $suffix, $domain);
+        $suffix = static::$config['moduleurlsuffix']['tag'] ?? (static::$config['urlsuffix'] ?? '');
+        return cms_url('cms/tag/index', $vars, $suffix, $domain);
     }
 
     /**

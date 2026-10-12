@@ -72,10 +72,10 @@ class FakeData extends Command
             $timelineCount = $this->seedProjectTimelines($createdUsers);
             $output->writeln(sprintf('      已为各项目生成 %d 条发展历程节点（包含主网上线、融资、重大版本等）', $timelineCount));
 
-            // 7. CMS 单页、专题与评论数据
-            $output->writeln('<comment>[8/8] 生成 CMS 单页、专题与互动评论数据...</comment>');
-            [$pageCount, $specialCount, $commentCount] = $this->seedCmsData($createdUsers);
-            $output->writeln(sprintf('      已生成 %d 篇单页，%d 个专题，%d 条评论', $pageCount, $specialCount, $commentCount));
+            // 7. CMS 文章互动评论数据
+            $output->writeln('<comment>[8/8] 生成 CMS 文章互动评论数据 (bd_cms_comment)...</comment>');
+            $commentCount = $this->seedCmsComments($createdUsers);
+            $output->writeln(sprintf('      已生成 %d 条文章互动评论', $commentCount));
 
             Db::commit();
 
@@ -113,8 +113,6 @@ class FakeData extends Command
 
         Db::name('app_project_category')->where('id', '>', 0)->delete();
         Db::name('app_project_timeline')->where('id', '>', 0)->delete();
-        Db::name('cms_page')->whereLike('diyname', 'fake_%')->delete();
-        Db::name('cms_special')->whereLike('diyname', 'fake_%')->delete();
         Db::name('cms_comment')->whereLike('content', '%[测试评论]%')->delete();
     }
 
@@ -812,116 +810,11 @@ class FakeData extends Command
     }
 
     /**
-     * 生成 CMS 单页、专题与评论数据
+     * 生成 CMS 文章互动评论数据
      */
-    protected function seedCmsData(array $users): array
+    protected function seedCmsComments(array $users): int
     {
         $now = time();
-
-        // 1. 单页测试数据
-        $mockPages = [
-            [
-                'title'       => '关于 ITIK 生态平台',
-                'diyname'     => 'fake_about',
-                'content'     => '<h3>ITIK 社区信息交互平台</h3><p>ITIK 是面向 Web3 生态与前沿科技项目的去中心化商业交互枢纽，链接优质项目方、社区长与投资者。</p>',
-                'description' => 'ITIK 社区平台定位与使命愿景',
-            ],
-            [
-                'title'       => '用户服务与法律协议',
-                'diyname'     => 'fake_terms',
-                'content'     => '<h3>用户服务条款</h3><p>使用本平台服务前，请认真阅读本条款全部内容。用户使用钱包授权或邮箱注册即视为同意并遵守相关约定。</p>',
-                'description' => '平台服务条款与法律规范',
-            ],
-            [
-                'title'       => '隐私安全与数据保护政策',
-                'diyname'     => 'fake_privacy',
-                'content'     => '<h3>隐私与数据安全</h3><p>我们严格保护所有会员的链上隐私与账户安全，平台绝不保存任何用户的钱包私钥或助记词。</p>',
-                'description' => '平台隐私保护与链上加密安全规范',
-            ],
-            [
-                'title'       => 'Web3 钱包授权免责声明',
-                'diyname'     => 'fake_disclaimer',
-                'content'     => '<h3>去中心化钱包签名免责声明</h3><p>本平台签名质询（personal_sign）仅作为去中心化身份登录凭证，绝不会发起任何转账交易或资产授权授权请求。</p>',
-                'description' => '去中心化钱包签名安全免责声明',
-            ],
-        ];
-
-        $pageCount = 0;
-        foreach ($mockPages as $pg) {
-            $exist = Db::name('cms_page')->where('diyname', $pg['diyname'])->find();
-            if (!$exist) {
-                Db::name('cms_page')->insert([
-                    'category_id' => 0,
-                    'admin_id'    => 1,
-                    'type'        => 'page',
-                    'title'       => $pg['title'],
-                    'seotitle'    => $pg['title'],
-                    'keywords'    => 'ITIK,Web3,平台服务,协议',
-                    'description' => $pg['description'],
-                    'flag'        => 'recommend',
-                    'image'       => '',
-                    'content'     => $pg['content'],
-                    'icon'        => 'fa fa-file-text-o',
-                    'views'       => rand(200, 3000),
-                    'likes'       => rand(10, 200),
-                    'dislikes'    => 0,
-                    'comments'    => rand(2, 20),
-                    'diyname'     => $pg['diyname'],
-                    'iscomment'   => 1,
-                    'weigh'       => 50,
-                    'status'      => 'normal',
-                    'createtime'  => $now - rand(86400, 864000),
-                    'updatetime'  => $now,
-                ]);
-                $pageCount++;
-            }
-        }
-
-        // 2. 专题测试数据
-        $mockSpecials = [
-            [
-                'title'       => '2026 Web3 优质去中心化生态项目精选展',
-                'diyname'     => 'fake_web3_expo_2026',
-                'label'       => '年度精选',
-                'intro'       => '汇聚经过严格认证的优质 Web3 项目方与高活跃度社区，赋能下一代去中心化应用生态！',
-            ],
-            [
-                'title'       => '从零开始：玩转去中心化钱包与 EIP 身份授权',
-                'diyname'     => 'fake_wallet_guide',
-                'label'       => '新手必读',
-                'intro'       => '带你搞懂 MetaMask、OKX 钱包连接、personal_sign 签名原理及防诈骗全攻略。',
-            ],
-        ];
-
-        $specialCount = 0;
-        foreach ($mockSpecials as $sp) {
-            $exist = Db::name('cms_special')->where('diyname', $sp['diyname'])->find();
-            if (!$exist) {
-                Db::name('cms_special')->insert([
-                    'admin_id'    => 1,
-                    'title'       => $sp['title'],
-                    'tag_ids'     => '1,2,3',
-                    'flag'        => 'hot,recommend',
-                    'label'       => $sp['label'],
-                    'image'       => '',
-                    'banner'      => '',
-                    'diyname'     => $sp['diyname'],
-                    'seotitle'    => $sp['title'],
-                    'keywords'    => 'Web3,专题,精选,去中心化',
-                    'description' => $sp['intro'],
-                    'intro'       => $sp['intro'],
-                    'views'       => rand(1000, 5000),
-                    'comments'    => rand(5, 30),
-                    'iscomment'   => 1,
-                    'status'      => 'normal',
-                    'createtime'  => $now - rand(86400, 864000),
-                    'updatetime'  => $now,
-                ]);
-                $specialCount++;
-            }
-        }
-
-        // 3. 评论测试数据
         $firstArchiveId = (int)(Db::name('cms_archives')->order('id', 'asc')->value('id') ?: 1);
         $mockComments = [
             '这个项目的跨链借贷效率确实高，体验非常顺畅！[测试评论]',
@@ -952,7 +845,7 @@ class FakeData extends Command
             $commentCount++;
         }
 
-        return [$pageCount, $specialCount, $commentCount];
+        return $commentCount;
     }
 
     /**

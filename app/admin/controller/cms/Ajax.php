@@ -11,14 +11,13 @@ use think\facade\Config;
 use think\facade\Db;
 
 /**
- * Ajax
+ * Ajax 辅助接口
  *
  * @icon fa fa-circle-o
  * @internal
  */
 class Ajax extends Backend
 {
-
     /**
      * 模型对象
      */
@@ -35,13 +34,7 @@ class Ajax extends Backend
         $keyValue = $this->request->request("keyValue");
         if (!$keyValue) {
             $type = $this->request->request("type");
-            $name = $this->request->request("name");
-            if ($name) {
-                //$files[] = ['name' => $name . '.html'];
-            }
-            //设置过滤方法
             $this->request->filter(['strip_tags']);
-            $config = get_addon_config('cms');
             $themeDir = root_path() . 'public' . DS . 'assets' . DS . 'addons' . DS . 'cms' . DS;
             if (is_dir($themeDir) && ($dh = opendir($themeDir))) {
                 while (false !== ($filename = readdir($dh))) {
@@ -63,7 +56,7 @@ class Ajax extends Backend
         }
         $filename = array_column($files, 'name');
         array_multisort($filename, SORT_ASC, $files);
-        return $result = ['total' => count($files), 'list' => $files];
+        return ['total' => count($files), 'list' => $files];
     }
 
     /**
@@ -71,16 +64,14 @@ class Ajax extends Backend
      */
     public function check_content_islegal()
     {
-        $config = get_addon_config('cms');
+        $config = get_cms_config();
         $content = $this->request->post('content');
         if (!$content) {
             $this->error(__('Please input your content'));
         }
-        if ($config['audittype'] == 'local') {
-            // 敏感词过滤
+        if (($config['audittype'] ?? 'local') == 'local') {
             $wordsFile = app_path('common/data/cms/words.dic');
             $handle = SensitiveHelper::init()->setTreeByFile($wordsFile);
-            //首先检测是否合法
             $arr = $handle->getBadWord($content);
             if ($arr) {
                 $this->error(__('The content is not legal'), null, $arr);
@@ -88,11 +79,11 @@ class Ajax extends Backend
                 $this->success(__('The content is legal'));
             }
         } else {
-            $client = new AipContentCensor($config['aip_appid'], $config['aip_apikey'], $config['aip_secretkey']);
+            $client = new AipContentCensor($config['aip_appid'] ?? '', $config['aip_apikey'] ?? '', $config['aip_secretkey'] ?? '');
             $result = $client->textCensorUserDefined($content);
             if (isset($result['conclusionType']) && $result['conclusionType'] > 1) {
                 $msg = [];
-                foreach ($result['data'] as $index => $datum) {
+                foreach ($result['data'] as $datum) {
                     $msg[] = $datum['msg'];
                 }
                 $this->error(implode("<br>", $msg), null, []);
@@ -103,12 +94,10 @@ class Ajax extends Backend
     }
 
     /**
-     * 获取关键字
-     * @throws \Exception
+     * 获取关键字与摘要
      */
     public function get_content_keywords()
     {
-        $config = get_addon_config('cms');
         $title = $this->request->post('title');
         $tags = $this->request->post('tags', '');
         $content = $this->request->post('content');
@@ -131,13 +120,12 @@ class Ajax extends Backend
      */
     public function get_title_pinyin()
     {
-        $config = get_addon_config('cms');
+        $config = get_cms_config();
         $title = $this->request->post("title");
-        //分隔符
         $delimiter = $this->request->post("delimiter", "");
         $pinyin = new \Overtrue\Pinyin\Pinyin('Overtrue\Pinyin\MemoryFileDictLoader');
         if ($title) {
-            if ($config['autopinyin']) {
+            if (!empty($config['autopinyin'])) {
                 $result = $pinyin->permalink($title, $delimiter);
                 $this->success("", null, ['pinyin' => $result]);
             } else {
@@ -168,12 +156,9 @@ class Ajax extends Backend
         $this->view->engine->layout(false);
         $source = $this->request->post('source');
         $id = $this->request->post('id/d');
-        if (in_array($source, ['channel', 'page', 'special'])) {
-            $values = \think\facade\Db::name("cms_{$source}")->where('id', $id)->find();
-            $values = $values ? $values : [];
-
-            $fields = \app\common\library\cms\Service::getCustomFields($source, 0, $values);
-
+        if ($source === 'channel') {
+            $values = Db::name("cms_channel")->where('id', $id)->find() ?: [];
+            $fields = Service::getCustomFields($source, 0, $values);
             $this->view->assign('fields', $fields);
             $this->view->assign('values', $values);
             $this->success('', null, ['html' => $this->view->fetch('cms/common/fields')]);
@@ -186,34 +171,11 @@ class Ajax extends Backend
     {
         $pageList = [
             ['path' => 'https://www.baidu.com', 'name' => '外部链接'],
-            ['path' => '/pages/index/index?model=1', 'name' => '主页（model=模型ID或channel=栏目ID）'],
+            ['path' => '/pages/index/index', 'name' => '主页'],
             ['path' => '/pages/index/my', 'name' => '个人中心'],
-            ['path' => '/pages/my/profile', 'name' => '个人资料'],
-            ['path' => '/pages/my/agreement', 'name' => '用户协议'],
-            ['path' => '/pages/my/article', 'name' => '我发布的文章'],
-            ['path' => '/pages/my/comment', 'name' => '我发表的评论'],
-            ['path' => '/pages/my/order', 'name' => '我的消费订单'],
-            ['path' => '/pages/my/aboutus', 'name' => '关于我们'],
-            ['path' => '/pages/my/member', 'name' => 'VIP会员'],
-            ['path' => '/pages/my/collection', 'name' => '我的收藏'],
-            ['path' => '/pages/my/moneylog', 'name' => '余额日志'],
-            ['path' => '/pages/my/scorelog', 'name' => '积分日志'],
-            ['path' => '/pages/article/article', 'name' => '文章列表（?model=模型ID或channel=栏目ID）'],
-            ['path' => '/pages/article/detail?id=1', 'name' => '文章详情（id=资讯ID）'],
-            ['path' => '/pages/product/product', 'name' => '产品列表（?model=模型ID或channel=栏目ID）'],
-            ['path' => '/pages/product/detail?id=1', 'name' => '产品详情（id=产品ID）'],
-            ['path' => '/pages/publish/channel', 'name' => '发布文章'],
+            ['path' => '/pages/article/article', 'name' => '文章列表'],
             ['path' => '/pages/search/search', 'name' => '搜索'],
-            ['path' => '/pages/diyform/lists?diyname=diyname', 'name' => '自定义表单列表（diyname=表单自定义URL名称）'],
-            ['path' => '/pages/diyform/detail?id=1&diyname=diyname', 'name' => '自定义表单详情（id=数据ID和diyname=表单自定义URL名称）'],
-            ['path' => '/pages/tag/tag?name=tagName', 'name' => '标签'],
-            ['path' => '/pages/user/user?user_id=1', 'name' => '用户主页'],
-            ['path' => '/pages/signin/signin', 'name' => '签到'],
-            ['path' => '/pages/signin/ranking', 'name' => '签到排行榜'],
-            ['path' => '/pages/signin/logs', 'name' => '签到日志'],
-            ['path' => '/pages/special/special', 'name' => '专题列表'],
-            ['path' => '/pages/special/detail?diyname=name', 'name' => '专题详情(diyname=专题自定义URL名称)'],
-            ['path' => '/pages/page/detail?diyname=name', 'name' => '单页详情(diyname=单页自定义URL名称)'],
+            ['path' => '/pages/tag/tag', 'name' => '标签'],
         ];
         $this->view->assign('pageList', $pageList);
         return $this->view->fetch('cms/common/pages');
@@ -225,62 +187,23 @@ class Ajax extends Backend
     public function get_link_list()
     {
         if ($this->request->isAjax()) {
-            $filter = $this->request->request("filter", '', 'trim');
-            $filter = (array)json_decode($filter, true);
-            $pageList = \app\admin\model\cms\Page::select();
-            $specialList = \app\admin\model\cms\Special::select();
-            $diyformList = \app\admin\model\cms\Diyform::select();
-            $rows = [];
-            if (!isset($filter['type']) || $filter['type'] == 'page') {
-                foreach ($pageList as $index => $item) {
-                    $rows[] = ['type' => 'page', 'url' => $item['url'], 'title' => $item['title'], 'source_id' => $item['id']];
-                }
-            }
-            if (!isset($filter['type']) || $filter['type'] == 'special') {
-                foreach ($specialList as $index => $item) {
-                    $rows[] = ['type' => 'special', 'url' => $item['url'], 'title' => $item['title'], 'source_id' => $item['id']];
-                }
-            }
-            if (!isset($filter['type']) || $filter['type'] == 'diyform') {
-                foreach ($diyformList as $index => $item) {
-                    $rows[] = ['type' => 'diyform', 'url' => $item['url'], 'title' => $item['name'] . ' - 列表页', 'source_id' => $item['id']];
-                    $rows[] = ['type' => 'diyform', 'url' => $item['post_url'], 'title' => $item['name'] . " - 投稿页", 'source_id' => $item['id']];
-                }
-            }
-            foreach ($rows as $index => $row) {
-                if (isset($filter['url']) && stripos($row['url'], $filter['url']) === false) {
-                    unset($rows[$index]);
-                    continue;
-                }
-                if (isset($filter['title']) && stripos($row['title'], $filter['title']) === false) {
-                    unset($rows[$index]);
-                    continue;
-                }
-            }
-            $offset = $this->request->request('offset/d', 0);
-            $limit = $this->request->request('limit/d', 10);
             return [
-                'rows'  => array_slice(array_values($rows), $offset, $limit),
-                'total' => count($rows)
+                'rows'  => [],
+                'total' => 0
             ];
         }
-        $typeList = [
-            'special' => '专题',
-            'page'    => '单页',
-            'diyform' => '自定义表单',
-        ];
-        $this->view->assign('typeList', $typeList);
+        $this->view->assign('typeList', []);
         return $this->view->fetch('cms/common/links');
     }
 
-    //配置
+    // 配置
     public function config()
     {
         $this->error("系统已采用内置模块架构，不再支持独立插件扩展");
     }
 
     /**
-     * 检测元素是否可用
+     * 检测配置项是否合法
      * @internal
      */
     public function check_config_available()
@@ -317,9 +240,7 @@ class Ajax extends Backend
     public function clearcache()
     {
         Cache::clear("cms");
-        $config = get_addon_config('cms');
         @rmdirs(TEMP_PATH, false);
         $this->success("");
     }
-
 }

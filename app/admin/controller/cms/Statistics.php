@@ -32,7 +32,7 @@ class Statistics extends Backend
         } catch (\Exception $e) {
 
         }
-        $config = get_addon_config('cms');
+        $config = get_cms_config();
         if ($this->request->isPost()) {
             $date = $this->request->post('date', '');
             $type = $this->request->post('type', '');
@@ -157,7 +157,7 @@ class Statistics extends Backend
         $this->view->assign("weekContributeList", $weekContributeList);
         $this->view->assign("monthContributeList", $monthContributeList);
 
-        $this->view->assign("modelList", \app\admin\model\cms\Modelx::order('id asc')->select());
+        $this->view->assign("modelList", []);
 
         return $this->view->fetch();
     }
@@ -172,23 +172,12 @@ class Statistics extends Backend
         $starttime = \badou\Date::unixtime();
         $endtime = \badou\Date::unixtime('day', 0, 'end');
 
-        $format = '%H:00';
-
-        $orderList = \app\admin\model\cms\Order::where('paytime', 'between time', [$starttime, $endtime])
-            ->field('paytime, status, COUNT(*) AS nums, SUM(payamount) AS amount, MIN(paytime) AS min_paytime, MAX(paytime) AS max_paytime, 
-            DATE_FORMAT(FROM_UNIXTIME(paytime), "' . $format . '") AS paydate')
-            ->group('paydate')
-            ->select();
         $column = [];
         for ($time = $starttime; $time <= $endtime;) {
             $column[] = date("H:00", $time);
             $time += 3600;
         }
         $orderSaleNums = $orderSaleAmount = array_fill_keys($column, 0);
-        foreach ($orderList as $k => $v) {
-            $orderSaleNums[$v['paydate']] = $v['nums'];
-            $orderSaleAmount[$v['paydate']] = round($v['amount'], 2);
-        }
         $orderSaleCategory = array_keys($orderSaleAmount);
         $orderSaleAmount = array_values($orderSaleAmount);
         $orderSaleNums = array_values($orderSaleNums);
@@ -202,34 +191,7 @@ class Statistics extends Backend
      */
     protected function getPercentStatisticsData($date = '')
     {
-        $starttime = \badou\Date::unixtime();
-        $endtime = \badou\Date::unixtime('day', 0, 'end');
-        $modelList = [];
-        $orderPercentCategory = $orderPercentAmount = $orderPercentNums = [];
-        // 关联内容表统计各模型的订单占比
-        $archivesTable = \think\facade\Db::name('cms_archives')->getTable();
-        $list = \app\admin\model\cms\Order::with('archives')
-            ->alias('o')
-            ->join($archivesTable . ' archives', 'archives.id=o.archives_id')
-            ->where('o.createtime', 'between time', [$starttime, $endtime])
-            ->where('o.status', 'paid')
-            ->field("archives.model_id,SUM(payamount) as amount,COUNT(*) as nums")
-            ->group('archives.model_id')
-            ->select();
-        foreach ($list as $index => $item) {
-            $modelList[$item['archives']['model']['name']] = $item['amount'];
-            $name = $item['archives']['model']['name'];
-            $name = $name ? $name : "其它";
-            $orderPercentCategory[] = $name;
-            $orderPercentAmount[] = ['value' => round($item['amount'], 2), 'name' => $name];
-            $orderPercentNums[] = ['value' => $item['nums'], 'name' => $name];
-        }
-        if (!$orderPercentCategory) {
-            $orderPercentCategory = [""];
-            $orderPercentNums = [['value' => 0, 'name' => '订单数']];
-            $orderPercentAmount = [['value' => 0, 'name' => '订单额']];
-        }
-        return [$orderPercentCategory, $orderPercentAmount, $orderPercentNums];
+        return [[""], [['value' => 0, 'name' => '订单额']], [['value' => 0, 'name' => '订单数']]];
     }
 
     /**
@@ -241,7 +203,6 @@ class Statistics extends Backend
     {
         if ($date) {
             list($start, $end) = explode(' - ', $date);
-
             $starttime = strtotime($start);
             $endtime = strtotime($end);
         } else {
@@ -250,34 +211,7 @@ class Statistics extends Backend
         }
         $totalseconds = $endtime - $starttime;
 
-        $format = '%Y-%m-%d';
-        if ($totalseconds > 86400 * 30 * 2) {
-            $format = '%Y-%m';
-        } else {
-            if ($totalseconds > 86400) {
-                $format = '%Y-%m-%d';
-            } else {
-                $format = '%H:00';
-            }
-        }
-
-        $model_id = $this->request->post("model_id");
-        $orderList = \app\admin\model\cms\Order::where('paytime', 'between time', [$starttime, $endtime])
-            ->where(function ($query) use ($model_id, $starttime, $endtime) {
-                if ($model_id) {
-                    //如果指定模型
-                    $query->where('archives_id', 'in', function ($query) use ($model_id, $starttime, $endtime) {
-                        $query->name("cms_archives")->where('model_id', $model_id)->where('id', 'in', function ($query) use ($starttime, $endtime) {
-                            $query->name('cms_order')->where('paytime', 'between time', [$starttime, $endtime])->field('archives_id');
-                        })->field('id');
-                    });
-                }
-            })
-            ->field('paytime, status, SUM(payamount) AS amount, MIN(paytime) AS min_paytime, MAX(paytime) AS max_paytime, 
-            DATE_FORMAT(FROM_UNIXTIME(createtime), "' . $format . '") AS pay_date')
-            ->group('pay_date')
-            ->select();
-
+        $column = [];
         if ($totalseconds > 84600 * 30 * 2) {
             $starttime = strtotime('last month', $starttime);
             while (($starttime = strtotime('next month', $starttime)) <= $endtime) {
@@ -297,13 +231,9 @@ class Statistics extends Backend
             }
         }
         $list = array_fill_keys($column, 0);
-        foreach ($orderList as $k => $v) {
-            $list[$v['pay_date']] = round($v['amount'], 2);
-        }
         $category = array_keys($list);
         $data = array_values($list);
         return [$category, $data];
-
     }
 
     /**

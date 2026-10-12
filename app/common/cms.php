@@ -151,20 +151,6 @@ if (!function_exists('get_addon_config')) {
     }
 }
 
-if (!function_exists('addon_url')) {
-    /**
-     * 兼容别名：转发至 cms_url
-     * @param string $url
-     * @param array  $vars
-     * @param string $suffix
-     * @param bool   $domain
-     * @return string
-     */
-    function addon_url(string $url, array $vars = [], string $suffix = '', bool $domain = false): string
-    {
-        return cms_url($url, $vars, $suffix, $domain);
-    }
-}
 
 if (!function_exists('collection')) {
     /**

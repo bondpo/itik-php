@@ -67,10 +67,10 @@ class Comment extends Model
 
         $params['user_id'] = $auth->id;
         $params['pid'] = $params['pid'] ?? 0;
-        $params['type'] = $params['type'] ?? 'archives';
+        $params['type'] = 'archives';
         $params['content'] = nl2br($params['content']);
 
-        $archives = $params['type'] == 'archives' ? Archives::find($params['aid']) : ($params['type'] == 'special' ? Special::find($params['aid']) : Page::find($params['aid']));
+        $archives = Archives::find($params['aid']);
         if (!$archives || $archives['status'] == 'hidden') {
             throw new Exception("文档未找到或正在审核");
         }
@@ -78,7 +78,7 @@ class Comment extends Model
             throw new Exception("文档评论功能已关闭");
         }
         $rule = [
-            'type'       => 'require|in:archives,page,special',
+            'type'       => 'require|in:archives',
             'pid'        => 'require|number',
             'user_id'    => 'require|number',
             'content|内容' => 'require|length:3,250',
@@ -143,10 +143,10 @@ class Comment extends Model
             $parentComment = self::with(['user'])->find($params['pid']);
             if ($parentComment && $parentComment['subscribe'] && Validate::is($parentComment->user->email, 'email')) {
                 $domain = $request->domain();
-                $config = get_addon_config('cms');
+                $config = get_cms_config();
                 $title = "{$parentComment->user->nickname}，您发表在《{$archives['title']}》上的评论有了新回复 - {$config['sitename']}";
                 $archivesurl = $domain . $archives['url'];
-                $unsubscribe_url = addon_url("cms/comment/unsubscribe", ['id' => $parentComment['id'], 'key' => md5($parentComment['id'] . $parentComment->user->email)], true, true);
+                $unsubscribe_url = cms_url("cms/comment/unsubscribe", ['id' => $parentComment['id'], 'key' => md5($parentComment['id'] . $parentComment->user->email)], '', true);
                 $content = "亲爱的{$parentComment->user->nickname}：<br />您于" . date("Y-m-d H:i:s") .
                     "在《<a href='{$archivesurl}' target='_blank'>{$archives['title']}</a>》上发表的评论<br /><blockquote>{$parentComment['content']}</blockquote>" .
                     "<br />{$auth->nickname}发表了回复，内容是<br /><br />您可以<a href='{$archivesurl}'>点击查看评论详情</a>。" .
@@ -234,21 +234,10 @@ class Comment extends Model
     }
 
     /**
-     * 关联单页模型
-     */
-    public function spage()
-    {
-        return $this->belongsTo("app\common\model\cms\Page", 'aid', 'id', [], 'LEFT')->field('id,title,createtime');
-    }
-
-    /**
      * 关联模型
      */
     public function source()
     {
-        $type = $this->getData('type');
-        $modelArr = ['page' => 'Page', 'archives' => 'Archives', 'special' => 'Special'];
-        $model = $modelArr[$type] ?? $modelArr['archives'];
-        return $this->belongsTo($model, "aid");
+        return $this->belongsTo("app\common\model\cms\Archives", "aid");
     }
 }

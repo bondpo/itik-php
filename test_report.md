@@ -1,6 +1,6 @@
 # ITIK API 全接口自动化测试报告
 
-> **测试执行时间**: `2026-10-13 01:06:28`  
+> **测试执行时间**: `2026-10-13 01:41:06`  
 > **测试目标服务器**: `http://127.0.0.1:8000`  
 > **接口总数**: **81** 个 | **通过数**: <font color='green'>**81**</font> | **失败数**: <font color='red'>**0**</font> | **测试通过率**: **100%**
 
@@ -24,87 +24,87 @@
 
 | 序号 | 所属模块 | 接口描述 | HTTP Method | 请求路径 (Path) | 耗时 | HTTP状态 | 业务码 | 测试判定 |
 | :--- | :--- | :--- | :---: | :--- | :---: | :---: | :---: | :---: |
-| 1 | Auth | 发送邮箱验证码 | `POST` | `/api/v1/auth/email/send-code` | 20ms | 200 | 40002 | ✅ PASS |
-| 2 | Auth | 钱包挑战 (Challenge) | `POST` | `/api/v1/auth/wallet/challenge` | 15ms | 200 | 1 | ✅ PASS |
-| 3 | Auth | 钱包验签登录 (Verify) | `POST` | `/api/v1/auth/wallet/verify` | 33ms | 200 | 1 | ✅ PASS |
-| 4 | User | 获取个人信息 | `GET` | `/api/v1/users/me` | 25ms | 200 | 1 | ✅ PASS |
-| 5 | User | 更新个人信息 | `PUT` | `/api/v1/users/me` | 25ms | 200 | 1 | ✅ PASS |
+| 1 | Auth | 发送邮箱验证码 | `POST` | `/api/v1/auth/email/send-code` | 537ms | 200 | 1 | ✅ PASS |
+| 2 | Auth | 钱包挑战 (Challenge) | `POST` | `/api/v1/auth/wallet/challenge` | 22ms | 200 | 1 | ✅ PASS |
+| 3 | Auth | 钱包验签登录 (Verify) | `POST` | `/api/v1/auth/wallet/verify` | 34ms | 200 | 1 | ✅ PASS |
+| 4 | User | 获取个人信息 | `GET` | `/api/v1/users/me` | 23ms | 200 | 1 | ✅ PASS |
+| 5 | User | 更新个人信息 | `PUT` | `/api/v1/users/me` | 30ms | 200 | 1 | ✅ PASS |
 | 6 | User | 查询身份凭证 | `GET` | `/api/v1/users/me/identities` | 25ms | 200 | 1 | ✅ PASS |
-| 7 | User | 查询用户订阅 | `GET` | `/api/v1/users/me/subscription` | 23ms | 200 | 1 | ✅ PASS |
-| 8 | Billing | 获取角色套餐列表 | `GET` | `/api/v1/roles/plans` | 17ms | 200 | 1 | ✅ PASS |
-| 9 | Billing | 查询订单列表 | `GET` | `/api/v1/billing/orders` | 26ms | 200 | 1 | ✅ PASS |
-| 10 | Billing | 创建新订单 | `POST` | `/api/v1/billing/orders` | 27ms | 200 | 1 | ✅ PASS |
-| 11 | Billing | 查询当前订阅态 | `GET` | `/api/v1/billing/subscription` | 21ms | 200 | 1 | ✅ PASS |
-| 12 | Billing | 续费下单 | `POST` | `/api/v1/billing/subscription/renew` | 28ms | 200 | 1 | ✅ PASS |
-| 13 | Project | 获取项目分类树形列表 | `GET` | `/api/v1/projects/categories?tree=1` | 19ms | 200 | 1 | ✅ PASS |
-| 14 | Project | 获取项目分类平铺列表 | `GET` | `/api/v1/projects/categories?tree=0` | 19ms | 200 | 1 | ✅ PASS |
-| 15 | Project | 项目广场公开列表 | `GET` | `/api/v1/projects` | 21ms | 200 | 1 | ✅ PASS |
+| 7 | User | 查询用户订阅 | `GET` | `/api/v1/users/me/subscription` | 21ms | 200 | 1 | ✅ PASS |
+| 8 | Billing | 获取角色套餐列表 | `GET` | `/api/v1/roles/plans` | 16ms | 200 | 1 | ✅ PASS |
+| 9 | Billing | 查询订单列表 | `GET` | `/api/v1/billing/orders` | 24ms | 200 | 1 | ✅ PASS |
+| 10 | Billing | 创建新订单 | `POST` | `/api/v1/billing/orders` | 29ms | 200 | 1 | ✅ PASS |
+| 11 | Billing | 查询当前订阅态 | `GET` | `/api/v1/billing/subscription` | 22ms | 200 | 1 | ✅ PASS |
+| 12 | Billing | 续费下单 | `POST` | `/api/v1/billing/subscription/renew` | 30ms | 200 | 1 | ✅ PASS |
+| 13 | Project | 获取项目分类树形列表 | `GET` | `/api/v1/projects/categories?tree=1` | 20ms | 200 | 1 | ✅ PASS |
+| 14 | Project | 获取项目分类平铺列表 | `GET` | `/api/v1/projects/categories?tree=0` | 18ms | 200 | 1 | ✅ PASS |
+| 15 | Project | 项目广场公开列表 | `GET` | `/api/v1/projects` | 19ms | 200 | 1 | ✅ PASS |
 | 16 | Project | 按分类赛道筛选项目列表 | `GET` | `/api/v1/projects?category_id=73` | 20ms | 200 | 1 | ✅ PASS |
 | 17 | Project | 项目详情查询(含关联分类) | `GET` | `/api/v1/projects/detail` | 27ms | 200 | 1 | ✅ PASS |
-| 18 | Project | 创建项目草稿(绑定分类) | `POST` | `/api/v1/projects` | 32ms | 200 | 1 | ✅ PASS |
-| 19 | Project | 修改项目资料 | `POST` | `/api/v1/projects/update` | 25ms | 200 | 1 | ✅ PASS |
-| 20 | Project | 查询项目资料库 | `GET` | `/api/v1/projects/materials` | 24ms | 200 | 1 | ✅ PASS |
-| 21 | Project | 上传新增项目资料 | `POST` | `/api/v1/projects/materials` | 24ms | 200 | 1 | ✅ PASS |
-| 22 | Project | 查询项目成员列表 | `GET` | `/api/v1/projects/members` | 25ms | 200 | 1 | ✅ PASS |
-| 23 | Project | 查询项目数据看板 | `GET` | `/api/v1/projects/stats` | 37ms | 200 | 1 | ✅ PASS |
-| 24 | Project | 查询项目发展历程时间轴 | `GET` | `/api/v1/projects/timelines` | 18ms | 200 | 1 | ✅ PASS |
+| 18 | Project | 创建项目草稿(绑定分类) | `POST` | `/api/v1/projects` | 33ms | 200 | 1 | ✅ PASS |
+| 19 | Project | 修改项目资料 | `POST` | `/api/v1/projects/update` | 24ms | 200 | 1 | ✅ PASS |
+| 20 | Project | 查询项目资料库 | `GET` | `/api/v1/projects/materials` | 25ms | 200 | 1 | ✅ PASS |
+| 21 | Project | 上传新增项目资料 | `POST` | `/api/v1/projects/materials` | 30ms | 200 | 1 | ✅ PASS |
+| 22 | Project | 查询项目成员列表 | `GET` | `/api/v1/projects/members` | 29ms | 200 | 1 | ✅ PASS |
+| 23 | Project | 查询项目数据看板 | `GET` | `/api/v1/projects/stats` | 36ms | 200 | 1 | ✅ PASS |
+| 24 | Project | 查询项目发展历程时间轴 | `GET` | `/api/v1/projects/timelines` | 17ms | 200 | 1 | ✅ PASS |
 | 25 | Project | 项目方发布时间轴里程碑 | `POST` | `/api/v1/projects/timelines` | 33ms | 200 | 1 | ✅ PASS |
-| 26 | Project | 项目方更新时间轴节点 | `POST` | `/api/v1/projects/timelines/update` | 25ms | 200 | 1 | ✅ PASS |
+| 26 | Project | 项目方更新时间轴节点 | `POST` | `/api/v1/projects/timelines/update` | 28ms | 200 | 1 | ✅ PASS |
 | 27 | Project | 项目方删除时间轴节点 | `POST` | `/api/v1/projects/timelines/delete` | 26ms | 200 | 1 | ✅ PASS |
 | 28 | Content | 资讯公开列表 | `GET` | `/api/v1/contents` | 19ms | 200 | 1 | ✅ PASS |
-| 29 | Content | 我的发布列表 | `GET` | `/api/v1/contents/mine` | 26ms | 200 | 1 | ✅ PASS |
-| 30 | Content | 创建资讯草稿 | `POST` | `/api/v1/contents` | 34ms | 200 | 1 | ✅ PASS |
-| 31 | Content | 查看资讯详情 | `GET` | `/api/v1/contents/detail` | 27ms | 200 | 1 | ✅ PASS |
-| 32 | Content | 更新资讯内容 | `POST` | `/api/v1/contents/update` | 29ms | 200 | 1 | ✅ PASS |
-| 33 | Content | 提交资讯审核 | `POST` | `/api/v1/contents/submit` | 33ms | 200 | 1 | ✅ PASS |
-| 34 | Relation | 关注用户 | `POST` | `/api/v1/relations/follow` | 34ms | 200 | 1 | ✅ PASS |
-| 35 | Relation | 获取关注列表 | `GET` | `/api/v1/relations/following` | 26ms | 200 | 1 | ✅ PASS |
-| 36 | Relation | 获取粉丝列表 | `GET` | `/api/v1/relations/followers` | 26ms | 200 | 1 | ✅ PASS |
-| 37 | Relation | 取消关注 | `POST` | `/api/v1/relations/unfollow` | 34ms | 200 | 1 | ✅ PASS |
-| 38 | Relation | 收藏项目 | `POST` | `/api/v1/relations/favorite` | 28ms | 200 | 1 | ✅ PASS |
-| 39 | Relation | 获取收藏列表 | `GET` | `/api/v1/relations/favorites` | 26ms | 200 | 1 | ✅ PASS |
-| 40 | Relation | 取消收藏项目 | `POST` | `/api/v1/relations/unfavorite` | 29ms | 200 | 1 | ✅ PASS |
-| 41 | Relation | 拉黑用户 | `POST` | `/api/v1/relations/block` | 24ms | 200 | 1 | ✅ PASS |
-| 42 | Relation | 查看黑名单列表 | `GET` | `/api/v1/relations/blocks` | 24ms | 200 | 1 | ✅ PASS |
-| 43 | Relation | 解除拉黑 | `POST` | `/api/v1/relations/unblock` | 26ms | 200 | 1 | ✅ PASS |
-| 44 | Relation | 举报反馈 | `POST` | `/api/v1/relations/reports` | 31ms | 200 | 30004 | ✅ PASS |
+| 29 | Content | 我的发布列表 | `GET` | `/api/v1/contents/mine` | 24ms | 200 | 1 | ✅ PASS |
+| 30 | Content | 创建资讯草稿 | `POST` | `/api/v1/contents` | 31ms | 200 | 1 | ✅ PASS |
+| 31 | Content | 查看资讯详情 | `GET` | `/api/v1/contents/detail` | 23ms | 200 | 1 | ✅ PASS |
+| 32 | Content | 更新资讯内容 | `POST` | `/api/v1/contents/update` | 24ms | 200 | 1 | ✅ PASS |
+| 33 | Content | 提交资讯审核 | `POST` | `/api/v1/contents/submit` | 26ms | 200 | 1 | ✅ PASS |
+| 34 | Relation | 关注用户 | `POST` | `/api/v1/relations/follow` | 32ms | 200 | 1 | ✅ PASS |
+| 35 | Relation | 获取关注列表 | `GET` | `/api/v1/relations/following` | 25ms | 200 | 1 | ✅ PASS |
+| 36 | Relation | 获取粉丝列表 | `GET` | `/api/v1/relations/followers` | 23ms | 200 | 1 | ✅ PASS |
+| 37 | Relation | 取消关注 | `POST` | `/api/v1/relations/unfollow` | 26ms | 200 | 1 | ✅ PASS |
+| 38 | Relation | 收藏项目 | `POST` | `/api/v1/relations/favorite` | 25ms | 200 | 1 | ✅ PASS |
+| 39 | Relation | 获取收藏列表 | `GET` | `/api/v1/relations/favorites` | 25ms | 200 | 1 | ✅ PASS |
+| 40 | Relation | 取消收藏项目 | `POST` | `/api/v1/relations/unfavorite` | 25ms | 200 | 1 | ✅ PASS |
+| 41 | Relation | 拉黑用户 | `POST` | `/api/v1/relations/block` | 25ms | 200 | 1 | ✅ PASS |
+| 42 | Relation | 查看黑名单列表 | `GET` | `/api/v1/relations/blocks` | 25ms | 200 | 1 | ✅ PASS |
+| 43 | Relation | 解除拉黑 | `POST` | `/api/v1/relations/unblock` | 31ms | 200 | 1 | ✅ PASS |
+| 44 | Relation | 举报反馈 | `POST` | `/api/v1/relations/reports` | 23ms | 200 | 30004 | ✅ PASS |
 | 45 | Recommend | 查询今日推荐配额 | `GET` | `/api/v1/recommendations/quota` | 27ms | 200 | 1 | ✅ PASS |
-| 46 | Recommend | 撮合生成智能推荐 | `POST` | `/api/v1/recommendations/generate` | 35ms | 200 | 40002 | ✅ PASS |
-| 47 | Recommend | 获取推荐列表 | `GET` | `/api/v1/recommendations` | 38ms | 200 | 1 | ✅ PASS |
-| 48 | Recommend | 标记推荐已浏览 | `POST` | `/api/v1/recommendations/view` | 21ms | 200 | 1 | ✅ PASS |
-| 49 | Recommend | 响应推荐结果 | `POST` | `/api/v1/recommendations/respond` | 23ms | 200 | 1 | ✅ PASS |
-| 50 | Recommend | 提交推荐满意度反馈 | `POST` | `/api/v1/recommendations/feedback` | 34ms | 200 | 1 | ✅ PASS |
+| 46 | Recommend | 撮合生成智能推荐 | `POST` | `/api/v1/recommendations/generate` | 23ms | 200 | 40002 | ✅ PASS |
+| 47 | Recommend | 获取推荐列表 | `GET` | `/api/v1/recommendations` | 28ms | 200 | 1 | ✅ PASS |
+| 48 | Recommend | 标记推荐已浏览 | `POST` | `/api/v1/recommendations/view` | 25ms | 200 | 1 | ✅ PASS |
+| 49 | Recommend | 响应推荐结果 | `POST` | `/api/v1/recommendations/respond` | 24ms | 200 | 1 | ✅ PASS |
+| 50 | Recommend | 提交推荐满意度反馈 | `POST` | `/api/v1/recommendations/feedback` | 32ms | 200 | 1 | ✅ PASS |
 | 51 | Promotion | 查询推流投放套餐 | `GET` | `/api/v1/promotions/packages` | 17ms | 200 | 1 | ✅ PASS |
-| 52 | Promotion | 查询当前活跃推流展位 | `GET` | `/api/v1/promotions/active` | 22ms | 200 | 1 | ✅ PASS |
-| 53 | Promotion | 查询推流投放计划 | `GET` | `/api/v1/promotions/campaigns` | 25ms | 200 | 1 | ✅ PASS |
+| 52 | Promotion | 查询当前活跃推流展位 | `GET` | `/api/v1/promotions/active` | 16ms | 200 | 1 | ✅ PASS |
+| 53 | Promotion | 查询推流投放计划 | `GET` | `/api/v1/promotions/campaigns` | 23ms | 200 | 1 | ✅ PASS |
 | 54 | Promotion | 推流数据上报埋点 | `POST` | `/api/v1/promotions/track` | 16ms | 200 | 30001 | ✅ PASS |
 | 55 | Consult | 发起业务咨询 | `POST` | `/api/v1/consultations` | 34ms | 200 | 1 | ✅ PASS |
-| 56 | Consult | 查询咨询会话列表 | `GET` | `/api/v1/consultations` | 38ms | 200 | 1 | ✅ PASS |
-| 57 | Consult | 发送咨询消息 | `POST` | `/api/v1/consultations/messages` | 29ms | 200 | 1 | ✅ PASS |
-| 58 | Consult | 查询咨询消息记录 | `GET` | `/api/v1/consultations/messages` | 28ms | 200 | 1 | ✅ PASS |
+| 56 | Consult | 查询咨询会话列表 | `GET` | `/api/v1/consultations` | 33ms | 200 | 1 | ✅ PASS |
+| 57 | Consult | 发送咨询消息 | `POST` | `/api/v1/consultations/messages` | 99ms | 200 | 1 | ✅ PASS |
+| 58 | Consult | 查询咨询消息记录 | `GET` | `/api/v1/consultations/messages` | 32ms | 200 | 1 | ✅ PASS |
 | 59 | Consult | 标记会话已读 | `POST` | `/api/v1/consultations/read` | 27ms | 200 | 1 | ✅ PASS |
-| 60 | Consult | 结束咨询会话 | `POST` | `/api/v1/consultations/close` | 24ms | 200 | 1 | ✅ PASS |
-| 61 | CMS | CMS 首页数据聚合 | `GET` | `/api/cms/index` | 31ms | 200 | 1 | ✅ PASS |
-| 62 | CMS | CMS 站点全局配置 | `GET` | `/api/cms/config` | 20ms | 200 | 1 | ✅ PASS |
-| 63 | CMS | 主导航菜单列表 | `GET` | `/api/cms/navigation` | 19ms | 200 | 1 | ✅ PASS |
-| 64 | CMS | 友情链接列表 | `GET` | `/api/cms/friendlink` | 21ms | 200 | 1 | ✅ PASS |
+| 60 | Consult | 结束咨询会话 | `POST` | `/api/v1/consultations/close` | 26ms | 200 | 1 | ✅ PASS |
+| 61 | CMS | CMS 首页数据聚合 | `GET` | `/api/cms/index` | 35ms | 200 | 1 | ✅ PASS |
+| 62 | CMS | CMS 站点全局配置 | `GET` | `/api/cms/config` | 21ms | 200 | 1 | ✅ PASS |
+| 63 | CMS | 主导航菜单列表 | `GET` | `/api/cms/navigation` | 17ms | 200 | 1 | ✅ PASS |
+| 64 | CMS | 友情链接列表 | `GET` | `/api/cms/friendlink` | 19ms | 200 | 1 | ✅ PASS |
 | 65 | CMS | 栏目分类列表 | `GET` | `/api/cms/channels` | 19ms | 200 | 1 | ✅ PASS |
-| 66 | CMS | 栏目详情查询 | `GET` | `/api/cms/channels/detail` | 27ms | 200 | 1 | ✅ PASS |
-| 67 | CMS | 栏目下文章列表 | `GET` | `/api/cms/channels/archives` | 27ms | 200 | 1 | ✅ PASS |
+| 66 | CMS | 栏目详情查询 | `GET` | `/api/cms/channels/detail` | 24ms | 200 | 1 | ✅ PASS |
+| 67 | CMS | 栏目下文章列表 | `GET` | `/api/cms/channels/archives` | 24ms | 200 | 1 | ✅ PASS |
 | 68 | CMS | 文章正文详情 | `GET` | `/api/cms/archives/detail` | 30ms | 200 | 1 | ✅ PASS |
-| 69 | CMS | 相关推荐文章 | `GET` | `/api/cms/archives/relative` | 21ms | 200 | 1 | ✅ PASS |
-| 70 | CMS | 文章点赞 | `POST` | `/api/cms/archives/like` | 34ms | 200 | 1 | ✅ PASS |
-| 71 | CMS | 文章浏览数计数 | `POST` | `/api/cms/archives/view` | 19ms | 200 | 1 | ✅ PASS |
-| 72 | CMS | 热门标签列表 | `GET` | `/api/cms/tags` | 20ms | 200 | 1 | ✅ PASS |
-| 73 | CMS | 按标签索引文章 | `GET` | `/api/cms/tags/archives` | 24ms | 200 | 1 | ✅ PASS |
-| 74 | CMS | 全文关键字搜索 | `GET` | `/api/cms/search` | 23ms | 200 | 1 | ✅ PASS |
+| 69 | CMS | 相关推荐文章 | `GET` | `/api/cms/archives/relative` | 19ms | 200 | 1 | ✅ PASS |
+| 70 | CMS | 文章点赞 | `POST` | `/api/cms/archives/like` | 25ms | 200 | 1 | ✅ PASS |
+| 71 | CMS | 文章浏览数计数 | `POST` | `/api/cms/archives/view` | 26ms | 200 | 1 | ✅ PASS |
+| 72 | CMS | 热门标签列表 | `GET` | `/api/cms/tags` | 19ms | 200 | 1 | ✅ PASS |
+| 73 | CMS | 按标签索引文章 | `GET` | `/api/cms/tags/archives` | 23ms | 200 | 1 | ✅ PASS |
+| 74 | CMS | 全文关键字搜索 | `GET` | `/api/cms/search` | 21ms | 200 | 1 | ✅ PASS |
 | 75 | CMS | 热门搜索词 | `GET` | `/api/cms/search/hot` | 16ms | 200 | 1 | ✅ PASS |
-| 76 | CMS | 搜索关键字联想 | `GET` | `/api/cms/search/suggest` | 17ms | 200 | 1 | ✅ PASS |
+| 76 | CMS | 搜索关键字联想 | `GET` | `/api/cms/search/suggest` | 16ms | 200 | 1 | ✅ PASS |
 | 77 | CMS | 获取文章评论列表 | `GET` | `/api/cms/comments` | 18ms | 200 | 1 | ✅ PASS |
-| 78 | CMS | 发表互动评论 | `POST` | `/api/cms/comments` | 27ms | 200 | 1 | ✅ PASS |
-| 79 | CMS | CMS 会员概览 | `GET` | `/api/cms/user/overview` | 33ms | 200 | 1 | ✅ PASS |
-| 80 | CMS | CMS 会员收藏列表 | `GET` | `/api/cms/user/favorites` | 26ms | 200 | 1 | ✅ PASS |
-| 81 | Auth | 退出登录 | `POST` | `/api/v1/auth/logout` | 22ms | 200 | 1 | ✅ PASS |
+| 78 | CMS | 发表互动评论 | `POST` | `/api/cms/comments` | 24ms | 200 | 1 | ✅ PASS |
+| 79 | CMS | CMS 会员概览 | `GET` | `/api/cms/user/overview` | 29ms | 200 | 1 | ✅ PASS |
+| 80 | CMS | CMS 会员收藏列表 | `GET` | `/api/cms/user/favorites` | 25ms | 200 | 1 | ✅ PASS |
+| 81 | Auth | 退出登录 | `POST` | `/api/v1/auth/logout` | 23ms | 200 | 1 | ✅ PASS |
 
 ## 三、重点接口返回值抽检
 
@@ -116,12 +116,12 @@
     "msg": "挑战生成成功",
     "data": {
         "address": "0x380d7f00d4bb7870cad919837269636c8420d3bd",
-        "nonce": "643b757cabff4857986c60a222494567",
-        "message": "127.0.0.1:8000 wants you to sign in with your Ethereum account:\n0x380d7f00d4bb7870cad919837269636c8420d3bd\n\nSign in to ITIK with your decentralized wallet.\n\nURI: http://127.0.0.1:8000\nVersion: 1\nChain ID: 1\nNonce: 643b757cabff4857986c60a222494567\nIssued At: 2026-10-12T17:06:26Z",
+        "nonce": "6a2a7cec924709d8b88f0d8a6b451d18",
+        "message": "127.0.0.1:8000 wants you to sign in with your Ethereum account:\n0x380d7f00d4bb7870cad919837269636c8420d3bd\n\nSign in to ITIK with your decentralized wallet.\n\nURI: http://127.0.0.1:8000\nVersion: 1\nChain ID: 1\nNonce: 6a2a7cec924709d8b88f0d8a6b451d18\nIssued At: 2026-10-12T17:41:04Z",
         "expire": 300
     },
-    "request_id": "f93984d05a7901170bee2f4d62aab133",
-    "time": 1791824786
+    "request_id": "0dd58114064b9bb7208b5d05e0232078",
+    "time": 1791826864
 }
 ```
 
@@ -140,10 +140,10 @@
         "inviter_id": 0,
         "is_new_user": false,
         "role": "OWNER",
-        "token": "6b24cc04-2f28-4d7b-bb53-e8c86c825a1c"
+        "token": "dfdd92cb-bba9-4d88-9e3e-f398d487feae"
     },
-    "request_id": "d93cd4fc29c6f3897d5fc1d6bf55292f",
-    "time": 1791824786
+    "request_id": "d37d34ef0c6a12515eb987eb5d8dcd56",
+    "time": 1791826864
 }
 ```
 
@@ -164,7 +164,7 @@
             "inviter_id": 0,
             "avatar": "/assets/img/avatar.png",
             "gender": 0,
-            "bio": "自动化测试写入的个人简介 01:05:55",
+            "bio": "自动化测试写入的个人简介 01:36:31",
             "money": "28888.88",
             "score": 9999,
             "level": 1
@@ -180,8 +180,8 @@
             "active": true
         }
     },
-    "request_id": "3bed089085bc362deda97dafbde783d4",
-    "time": 1791824786
+    "request_id": "3687879903953303f00e6812c793ac3c",
+    "time": 1791826864
 }
 ```
 
@@ -244,8 +244,8 @@
             }
         ]
     },
-    "request_id": "4b23f4fb211c306169cc696b0417f15e",
-    "time": 1791824786
+    "request_id": "0be5a86749d6010ffaf9a60b4232ebb2",
+    "time": 1791826864
 }
 ```
 
@@ -266,7 +266,7 @@
                 "region": "全球",
                 "tags": "DEX,去中心化交易,闪兑,流动性",
                 "certified": 1,
-                "views": 15610,
+                "views": 15615,
                 "follows": 3210,
                 "sort_weight": 79,
                 "create_time": "2026-10-10 04:09:23",
@@ -367,8 +367,8 @@
         "page": 1,
         "limit": 5
     },
-    "request_id": "496f3874b7edfeb650651fff9647be74",
-    "time": 1791824787
+    "request_id": "33752d3d0b93212bfbf9af81b0d0c510",
+    "time": 1791826864
 }
 ```
 
@@ -379,11 +379,11 @@
     "code": 1,
     "msg": "咨询已发送",
     "data": {
-        "conversation_id": 25,
-        "message_id": 50
+        "conversation_id": 30,
+        "message_id": 60
     },
-    "request_id": "7727cd1ad2ac225825a4e82e3f7dd9d8",
-    "time": 1791824788
+    "request_id": "ab3d87df32d766d0ceb7a6a3521c2f83",
+    "time": 1791826865
 }
 ```
 
@@ -554,8 +554,8 @@
                 "title": "奥睿科ORICO HU3温室加湿器",
                 "image": "/assets/addons/cms/img/800x600-3.png",
                 "description": "加湿器可以说是目前家里比较常见的生活用品之一了，特别是爱美的女性朋友们，为了能保持容颜润泽，经常会在身旁备用一台。其实对于更多的用户来说，加湿器的主要作用还是放在空调房里，用来调节房间湿度",
-                "views": 6015,
-                "likes": 168,
+                "views": 6020,
+                "likes": 173,
                 "comments": 0,
                 "publishtime": 1553702400
             },
@@ -634,13 +634,13 @@
                 "title": "奥睿科ORICO HU3温室加湿器",
                 "image": "/assets/addons/cms/img/800x600-3.png",
                 "description": "加湿器可以说是目前家里比较常见的生活用品之一了，特别是爱美的女性朋友们，为了能保持容颜润泽，经常会在身旁备用一台。其实对于更多的用户来说，加湿器的主要作用还是放在空调房里，用来调节房间湿度",
-                "views": 6015,
+                "views": 6020,
                 "publishtime": 1553702400
             }
         ]
     },
-    "request_id": "43201874145c414bb0dfc6714f5c8a75",
-    "time": 1791824788
+    "request_id": "c147249ba08324d4e307e6b0407af3fc",
+    "time": 1791826865
 }
 ```
 

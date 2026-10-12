@@ -4,8 +4,6 @@ namespace app\common\library\cms;
 
 use app\common\library\cms\aip\AipContentCensor;
 use app\common\library\cms\aip\AipNlp;
-use app\common\model\cms\Autolink;
-use app\common\model\cms\Diyform;
 use app\common\model\cms\Fields;
 use app\common\model\cms\Modelx;
 use app\common\model\cms\Tag;
@@ -115,10 +113,7 @@ class Service
         foreach ($tagList as $index => $item) {
             $autolinkArr[$item['name']] = ['text' => $item['name'], 'type' => 'tag', 'url' => $item['fullurl']];
         }
-        $autolinkList = Autolink::where('status', 'normal')->cache(true, null, 'cms')->order('weigh DESC,id DESC')->select();
-        foreach ($autolinkList as $index => $item) {
-            $autolinkArr[$item['title']] = ['text' => $item['title'], 'type' => 'autolink', 'url' => $item['url'], 'target' => $item['target'], 'id' => $item['id']];
-        }
+        $autolinkList = [];
         foreach ($config['autolinks'] as $text => $url) {
             $autolinkArr[$text] = ['text' => $text, 'type' => 'config', 'url' => $url];
         }
@@ -135,7 +130,7 @@ class Service
         //替换链接
         foreach ($autolinkArr as $index => $item) {
             $content = preg_replace_callback('/(' . preg_quote($item['text'], '/') . ')/i', function ($match) use ($item, $config, &$stages) {
-                $url = $item['type'] == 'autolink' && isset($item['id']) ? addon_url('cms/go/index', [], $config['urlsuffix'], true) . '?id=' . $item['id'] : $item['url'];
+                $url = $item['type'] == 'autolink' && isset($item['id']) ? cms_url('cms/go/index', [], $config['urlsuffix'] ?? '', true) . '?id=' . $item['id'] : $item['url'];
                 $data = [$url, (isset($item['target']) && $item['target'] == 'blank' ? ' target="_blank"' : ''), $match[0]];
                 return '<' . array_push($stages, $data) . '>';
             }, $content, $limit);
@@ -150,7 +145,7 @@ class Service
             $urlArr = parse_url($url);
             //站内链接不中转，站外链接中转
             if (isset($urlArr['host']) && $urlArr['host'] != request()->host() && ($config['redirecturl'] ?? true)) {
-                $url = addon_url('cms/go/index', [], $config['urlsuffix'], true) . '?' . http_build_query(['url' => $url]);
+                $url = cms_url('cms/go/index', [], $config['urlsuffix'] ?? '', true) . '?' . http_build_query(['url' => $url]);
             }
             return "<a href=\"{$url}\" {$data[1]}>{$data[2]}</a>";
         }, $content);
@@ -279,9 +274,12 @@ class Service
         $multiValueFields = [];
 
         $fields = [];
-        if (in_array($source, ['model', 'diyform'])) {
+        if ($source === 'model') {
             //查找主表启用过滤搜索的字段
-            $model = $source == 'model' ? Modelx::find($source_id) : Diyform::find($source_id);
+            $model = Modelx::find($source_id);
+            if (!$model) {
+                return [];
+            }
             $setting = $model->setting;
             if (isset($setting['filterfields'])) {
                 foreach ($setting['filterfields'] as $index => $name) {

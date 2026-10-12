@@ -60,7 +60,7 @@ class Archives extends Model
 
     protected function initializeEvents()
     {
-        $config = get_addon_config('cms');
+        $config = get_cms_config();
         self::$config = $config;
     }
 
@@ -151,7 +151,7 @@ class Archives extends Model
             $pattern = '/<paid>(.*?)<\/paid>/is';
             if (preg_match($pattern, $value) && !$this->getAttr('ispaid')) {
                 $paytype = static::$config['defaultpaytype'];
-                $payurl = addon_url('cms/order/submit', ['id' => $data['id'], 'paytype' => $paytype]);
+                $payurl = cms_url('cms/order/submit', ['id' => $data['id'], 'paytype' => $paytype]);
                 if (!isset($data['price']) || $data['price'] <= 0) {
                     $value = preg_replace($pattern, "<div class='alert alert-warning alert-paid'><a href='javascript:' class=''>内容已经隐藏</a></div>", $value);
                 } else {
@@ -159,7 +159,7 @@ class Archives extends Model
                 }
             }
             //实时关键字内链替换
-            $config = get_addon_config('cms');
+            $config = get_cms_config();
             if (isset($config['realtimereplacelink']) && $config['realtimereplacelink']) {
                 $value = Service::autolinks($value);
             }
@@ -279,7 +279,7 @@ class Archives extends Model
         foreach ($tags as $k => $v) {
             $v_lower = strtolower($v);
             $vars = [':name' => $v, ':diyname' => $v, ':id' => $tagList[$v_lower] ?? '0', ':year' => date("Y", $time), ':month' => date("m", $time), ':day' => date("d", $time)];
-            $list[] = ['name' => $v, 'url' => addon_url('cms/tag/index', $vars)];
+            $list[] = ['name' => $v, 'url' => cms_url('cms/tag/index', $vars)];
         }
         $data['taglist'] = $list;
         return $list;
@@ -312,8 +312,8 @@ class Archives extends Model
             ':month'    => date("m", $time),
             ':day'      => date("d", $time),
         ];
-        $suffix = static::$config['moduleurlsuffix']['archives'] ?? static::$config['urlsuffix'];
-        return addon_url('cms/archives/index', $vars, $suffix, $domain);
+        $suffix = static::$config['moduleurlsuffix']['archives'] ?? (static::$config['urlsuffix'] ?? '');
+        return cms_url('cms/archives/index', $vars, $suffix, $domain);
     }
 
     public function getLikeratioAttr($value, $data)
@@ -435,14 +435,6 @@ class Archives extends Model
                 if ($arr) {
                     $condition .= "(" . implode(' OR ', $arr) . ")";
                 }
-            }
-        }
-        if ($special) {
-            $specialModel = Special::find($special);
-            if ($specialModel && $specialModel['tag_ids']) {
-                $archivesModel->where("a.id", "in", function ($query) use ($specialModel) {
-                    return $query->name("cms_taggable")->where("tag_id", "in", $specialModel['tag_ids'])->field("archives_id");
-                });
             }
         }
 

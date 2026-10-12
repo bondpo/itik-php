@@ -4,47 +4,56 @@
     {if isset($row)}<input type="hidden" name="row[id]" value="{$row.id}">{/if}
     <input type="hidden" name="row[type]" value="archives" />
 
-    <div class="layui-form-item">
-        <label class="layui-form-label">{:__('User_id')}</label>
-        <div class="layui-input-block">
-            <input type="number" name="row[user_id]" value="{$row.user_id|default='0'}" placeholder="{:__('User_id')}" class="layui-input" />
-        </div>
-    </div>
-    <div class="layui-form-item">
-        <label class="layui-form-label">{:__('Aid')}</label>
-        <div class="layui-input-block">
-            <input type="number" name="row[aid]" value="{$row.aid|default=''}" placeholder="{:__('Aid')}" class="layui-input" lay-verify="required" />
-        </div>
-    </div>
-    <div class="layui-form-item">
-        <label class="layui-form-label">{:__('Pid')}</label>
-        <div class="layui-input-block">
-            <input type="number" name="row[pid]" value="{$row.pid|default='0'}" placeholder="{:__('Pid')}" class="layui-input" />
-        </div>
-    </div>
     <div class="layui-form-item layui-form-text">
         <label class="layui-form-label">{:__('Content')}</label>
         <div class="layui-input-block">
-            <textarea name="row[content]" placeholder="{:__('Content')}" class="layui-textarea" lay-verify="required">{$row.content|default=''|htmlentities}</textarea>
+            <textarea name="row[content]" placeholder="{:__('Content')}" class="layui-textarea" lay-verify="required" rows="5">{$row.content|default=''|htmlentities}</textarea>
         </div>
     </div>
-    <div class="layui-form-item">
-        <label class="layui-form-label">{:__('Ip')}</label>
-        <div class="layui-input-block">
-            <input type="text" name="row[ip]" value="{$row.ip|default=''|htmlentities}" placeholder="{:__('Ip')}" class="layui-input" />
-        </div>
-    </div>
-    <div class="layui-form-item">
-        <label class="layui-form-label">{:__('Useragent')}</label>
-        <div class="layui-input-block">
-            <input type="text" name="row[useragent]" value="{$row.useragent|default=''|htmlentities}" placeholder="{:__('Useragent')}" class="layui-input" />
-        </div>
-    </div>
+
     <div class="layui-form-item">
         <label class="layui-form-label">{:__('Status')}</label>
         <div class="layui-input-block">
-            <input type="radio" name="row[status]" value="normal" title="normal" {if $row.status=='normal'}checked{/if} />
-            <input type="radio" name="row[status]" value="hidden" title="hidden" {if $row.status=='hidden'}checked{/if} />
+            <input type="radio" name="row[status]" value="normal" title="{:__('Normal')}" {if $row.status=='normal'}checked{/if} />
+            <input type="radio" name="row[status]" value="hidden" title="{:__('Hidden')}" {if $row.status=='hidden'}checked{/if} />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Aid')}</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[aid]" value="{$row.aid|default=''}" class="layui-input layui-disabled" readonly />
+            <div class="layui-form-mid layui-word-aux">关联文章 ID（只读审计属性）</div>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('User_id')}</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[user_id]" value="{$row.user_id|default='0'}" class="layui-input layui-disabled" readonly />
+            <div class="layui-form-mid layui-word-aux">发布用户 ID（0 表示匿名访客）</div>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Pid')}</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[pid]" value="{$row.pid|default='0'}" class="layui-input layui-disabled" readonly />
+            <div class="layui-form-mid layui-word-aux">父级评论 ID（0 为顶层评论）</div>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Ip')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[ip]" value="{$row.ip|default=''|htmlentities}" class="layui-input layui-disabled" readonly />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Useragent')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[useragent]" value="{$row.useragent|default=''|htmlentities}" class="layui-input layui-disabled" readonly />
         </div>
     </div>
 

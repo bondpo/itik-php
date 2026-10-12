@@ -37,7 +37,7 @@ class Channel extends Model
 
     protected function initializeEvents()
     {
-        $config = get_addon_config('cms');
+        $config = get_cms_config();
         self::$config = $config;
     }
 
@@ -84,8 +84,8 @@ class Channel extends Model
         if (isset($data['type']) && isset($data['outlink']) && $data['type'] == 'link') {
             return $this->getAttr('outlink');
         }
-        $suffix = static::$config['moduleurlsuffix']['channel'] ?? static::$config['urlsuffix'];
-        return addon_url('cms/channel/index', $vars, $suffix, $domain);
+        $suffix = static::$config['moduleurlsuffix']['channel'] ?? (static::$config['urlsuffix'] ?? '');
+        return cms_url('cms/channel/index', $vars, $suffix, $domain);
     }
 
     public function getImageAttr($value, $data)
@@ -213,7 +213,7 @@ class Channel extends Model
                 unset($channelList[$index]);
             }
         }
-        $config = get_addon_config('cms');
+        $config = get_cms_config();
         foreach ($channelList as $k => $v) {
             if ($v['type'] == 'link' || (($archives || input('model_id')) && $model && $model['id'] != $v['model_id']) || (!$v['iscontribute']) || (!($config['channelcontribute'] ?? true) && $v['type'] == 'channel' ? true : false)) {
                 $disabledIds[] = $v['id'];
@@ -355,7 +355,7 @@ class Channel extends Model
     public static function getBreadcrumb($channel, $archives = [], $tags = [], $page = [], $diyform = [], $special = [])
     {
         $list = [];
-        $list[] = ['name' => __('Home'), 'url' => addon_url('cms/index/index', [], false)];
+        $list[] = ['name' => __('Home'), 'url' => cms_url('cms/index/index', [], '', false)];
         if ($channel) {
             if ($channel['parent_id']) {
                 $channelList = self::where('status', 'normal')
@@ -391,7 +391,7 @@ class Channel extends Model
      */
     public static function getNav($channel, $params = [])
     {
-        $config = get_addon_config('cms');
+        $config = get_cms_config();
         $condition = empty($params['condition']) ? '' : $params['condition'];
         $maxLevel = !isset($params['maxlevel']) ? 0 : $params['maxlevel'];
 
@@ -447,7 +447,7 @@ class Channel extends Model
 
     public static function getChannelInfo($params)
     {
-        $config = get_addon_config('cms');
+        $config = get_cms_config();
         $cid = empty($params['cid']) ? '' : $params['cid'];
         $condition = empty($params['condition']) ? '' : $params['condition'];
         $field = empty($params['field']) ? '*' : $params['field'];

@@ -74,7 +74,7 @@ class Comment extends Model
 
     public function getTypeList()
     {
-        return ['archives' => __('Archives'), 'page' => __('Page'), 'special' => __('Special')];
+        return ['archives' => __('Archives')];
     }
 
     public function getStatusList()
@@ -131,29 +131,10 @@ class Comment extends Model
     }
 
     /**
-     * 关联单页模型
-     */
-    public function spage()
-    {
-        return $this->belongsTo("app\admin\model\cms\Page", 'aid', '', [], 'LEFT');
-    }
-
-    /**
-     * 关联专题模型
-     */
-    public function special()
-    {
-        return $this->belongsTo("app\admin\model\cms\Special", 'aid', '', [], 'LEFT');
-    }
-
-    /**
-     * 关联模型
+     * 关联来源模型
      */
     public function source()
     {
-        $type = $this->getData('type');
-        $modelArr = ['page' => 'Page', 'archives' => 'Archives', 'special' => 'Special'];
-        $model = isset($modelArr[$type]) ? $modelArr[$type] : $modelArr['archives'];
-        return $this->belongsTo($model, "aid");
+        return $this->belongsTo('Archives', 'aid');
     }
 }

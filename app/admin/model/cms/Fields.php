@@ -203,16 +203,16 @@ class Fields extends Model
     public static function refreshTable($row, $action = 'insert')
     {
         $model = null;
-        if (in_array($row['source'], ['model', 'diyform'])) {
-            $model = $row['source'] == 'model' ? Modelx::find($row['source_id']) : Diyform::find($row['source_id']);
+        if ($row['source'] == 'model') {
+            $model = Modelx::find($row['source_id']);
             if (!$model) {
                 throw new Exception("未找到指定模型");
             }
             $table = $model['table'];
 
             $fields = Fields::where('source', $row['source'])->where('source_id', $row['source_id'])->column('name');
-            Db::name("cms_" . $row['source'])->where('id', $row['source_id'])->update(['fields' => implode(',', $fields)]);
-        } elseif (in_array($row['source'], ['channel', 'page', 'special', 'block', 'archives'])) {
+            Db::name("cms_model")->where('id', $row['source_id'])->update(['fields' => implode(',', $fields)]);
+        } elseif (in_array($row['source'], ['channel', 'block', 'archives'])) {
             $table = "cms_" . $row['source'];
         } else {
             throw new Exception("未找到指定模型");

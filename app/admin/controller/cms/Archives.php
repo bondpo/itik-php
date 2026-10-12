@@ -4,7 +4,6 @@ namespace app\admin\controller\cms;
 
 use app\admin\model\cms\Channel;
 use app\admin\model\cms\ChannelAdmin;
-use app\admin\model\cms\Modelx;
 use app\common\controller\Backend;
 use app\common\model\User;
 use app\common\library\cms\Tree;
@@ -21,12 +20,11 @@ class Archives extends Backend
 {
     use \app\common\library\cms\traits\RecycleBin;
 
-
     /**
      * Archives模型对象
      */
     protected $model = null;
-    protected $noNeedRight = ['get_fields_html', 'check_element_available', 'suggestion', 'copy', 'tags', 'move', 'flag', 'get_channel_model_info'];
+    protected $noNeedRight = ['check_element_available', 'suggestion', 'copy', 'tags', 'move', 'flag'];
     protected $channelIds = [];
     protected $isSuperAdmin = false;
     protected $searchFields = 'id,title';
@@ -50,39 +48,37 @@ class Archives extends Backend
     {
         parent::initialize();
         $this->model = new \app\admin\model\cms\Archives;
-        $config = get_addon_config('cms');
-        if ($config['archivesdatalimit'] != 'all') {
+        $config = get_cms_config();
+        if (!empty($config['archivesdatalimit']) && $config['archivesdatalimit'] != 'all') {
             $this->dataLimit = $config['archivesdatalimit'];
         }
 
-        //复制/修改标签均检测编辑权限
+        // 复制/修改标签均检测编辑权限
         if (in_array($this->request->action(), ['copy', 'tags', 'move', 'flag']) && !$this->auth->check('cms/archives/edit')) {
             Event::trigger('admin_nopermission', $this);
             $this->error(__('You have no permission'), '');
         }
 
-        //是否超级管理员
+        // 是否超级管理员
         $this->isSuperAdmin = $this->auth->isSuperAdmin();
         $channelList = [];
         $disabledIds = [];
         $all = collection(Channel::order("weigh desc,id desc")->select())->toArray();
 
-        //允许的栏目
-        $this->channelIds = $this->isSuperAdmin || !$config['channelallocate'] ? Channel::column('id') : ChannelAdmin::getAdminChanneIds();
+        // 允许的栏目
+        $this->channelIds = $this->isSuperAdmin || empty($config['channelallocate']) ? Channel::column('id') : ChannelAdmin::getAdminChanneIds();
         $parentChannelIds = Channel::where('id', 'in', $this->channelIds)->column('parent_id');
         $parentChannelIds = array_unique($parentChannelIds);
-        $parentChannelList = \think\facade\Db::name('cms_channel')->where('id', 'in', $parentChannelIds)->where('parent_id', '<>', 0)->field('id,parent_id,name')->select();
+        $parentChannelList = Db::name('cms_channel')->where('id', 'in', $parentChannelIds)->where('parent_id', '<>', 0)->field('id,parent_id,name')->select();
         $tree = Tree::instance()->init($all, 'parent_id');
-        foreach ($parentChannelList as $index => $channel) {
+        foreach ($parentChannelList as $channel) {
             $parentChannelIds = array_merge($parentChannelIds, $tree->getParentsIds($channel['parent_id'], true));
         }
         $this->channelIds = array_merge($parentChannelIds, $this->channelIds);
         foreach ($all as $k => $v) {
             $state = ['opened' => true];
-            if ($v['type'] == 'link' || (!($config['channelcontribute'] ?? true) && $v['type'] == 'channel' ? true : false)) {
-                $disabledIds[] = $v['id'];
-            }
             if ($v['type'] == 'link') {
+                $disabledIds[] = $v['id'];
                 $state['checkbox_disabled'] = true;
             }
             if (!$this->isSuperAdmin) {
@@ -102,18 +98,12 @@ class Archives extends Backend
             ];
         }
         $tree = Tree::instance()->init($all, 'parent_id');
-        $channelOptions = $tree->getTree(0, "<option model='@model_id' value=@id @selected @disabled>@spacer@name</option>", '', $disabledIds);
-        $secondChannelOptions = $tree->getTree(0, "<option model='@model_id' value=@id disabled>@spacer@name</option>", '', $disabledIds);
+        $channelOptions = $tree->getTree(0, "<option value=@id @selected @disabled>@spacer@name</option>", '', $disabledIds);
         $this->view->assign('channelOptions', $channelOptions);
-        $this->view->assign('secondChannelOptions', $secondChannelOptions);
-        $this->assignconfig('channelList', $channelList);
-        $this->assignconfig('spiderRecord', intval($config['spiderrecord'] ?? 0));
+        $this->view->assign('channelList', $channelList);
 
-        $this->assignconfig("flagList", $this->model->getFlagList());
-        $this->view->assign("flagList", $this->model->getFlagList());
         $this->view->assign("statusList", $this->model->getStatusList());
-
-        $this->assignconfig('cms', ['archiveseditmode' => $config['archiveseditmode']]);
+        $this->view->assign("flagList", $this->model->getFlagList());
     }
 
     /**
@@ -121,26 +111,15 @@ class Archives extends Backend
      */
     public function index()
     {
-        //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
             $this->relationSearch = true;
-            //如果发送的来源是Selectpage，则转发到Selectpage
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
             [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             if (!$this->auth->isSuperAdmin()) {
                 $this->model->where('channel_id', 'in', $this->channelIds);
-            }
-            $fields = "archives.*";
-            $model_id = $this->request->request("model_id");
-            if ($model_id) {
-                $model = Modelx::find($model_id);
-                if ($model) {
-                    $this->model->join($model['table'] . ' addon', 'addon.id=archives.id', 'LEFT');
-                    $fields .= ",addon.*";
-                }
             }
             $total = $this->model
                 ->with('Channel')
@@ -152,17 +131,9 @@ class Archives extends Backend
                 $this->model->where('channel_id', 'in', $this->channelIds);
             }
 
-            $model_id = $this->request->request("model_id");
-            if ($model_id) {
-                $model = Modelx::find($model_id);
-                if ($model) {
-                    $this->model->join($model['table'] . ' addon', 'addon.id=archives.id', 'LEFT');
-                }
-            }
             $list = $this->model
                 ->with(['Channel'])
                 ->alias('archives')
-                ->field($fields)
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
@@ -171,12 +142,6 @@ class Archives extends Backend
             $this->result('', $list, $total);
         }
 
-        //主表字段
-        $fields = \app\admin\model\cms\Fields::getJsFieldsList('archives');
-        $this->assignconfig('fields', $fields);
-
-        $modelList = \app\admin\model\cms\Modelx::select();
-        $this->view->assign('modelList', $modelList);
         return $this->view->fetch();
     }
 
@@ -185,11 +150,6 @@ class Archives extends Backend
      */
     public function add()
     {
-        $values = [];
-        $fields = \app\common\library\cms\Service::getCustomFields('archives', 0, $values);
-
-        $this->view->assign('fields', $fields);
-        $this->view->assign('values', $values);
         return parent::add();
     }
 
@@ -205,10 +165,8 @@ class Archives extends Backend
             $this->error(__('No Results were found'));
         }
         $adminIds = $this->getDataLimitAdminIds();
-        if (is_array($adminIds)) {
-            if (!in_array($row[$this->dataLimitField], $adminIds)) {
-                $this->error(__('You have no permission'));
-            }
+        if (is_array($adminIds) && !in_array($row[$this->dataLimitField], $adminIds)) {
+            $this->error(__('You have no permission'));
         }
         if (!$this->isSuperAdmin && !in_array($row['channel_id'], $this->channelIds)) {
             $this->error(__('You have no permission'));
@@ -216,41 +174,18 @@ class Archives extends Backend
         if ($this->request->isPost()) {
             return parent::edit($ids);
         }
-        $channel = Channel::find($row['channel_id']);
-        if (!$channel) {
-            //栏目未找到仍然可以编辑文档
-            //$this->error(__('No specified channel found'));
-        }
-        $model = \app\admin\model\cms\Modelx::find($channel['model_id'] ?? $row['model_id']);
-        if (!$model) {
-            $this->error(__('No specified model found'));
-        }
-        $addon = db($model['table'])->where('id', $row['id'])->find();
-        if ($addon) {
-            $row->setRowData($addon);
-        }
 
         $disabledIds = [];
         $all = Db::name("cms_channel")->order("weigh DESC,id DESC")->select();
-        foreach ($all as $k => $v) {
-            if ($v['type'] == 'link' || ($channel && $v['model_id'] != $channel['model_id']) || ($model['id'] != $v['model_id'])) {
+        foreach ($all as $v) {
+            if ($v['type'] == 'link') {
                 $disabledIds[] = $v['id'];
             }
         }
-        $disabledIds = array_diff($disabledIds, [$row['channel_id']]);
         $tree = Tree::instance()->init($all, 'parent_id');
-        $channelOptions = $tree->getTree(0, "<option model='@model_id' value=@id @selected @disabled>@spacer@name</option>", $row['channel_id'], $disabledIds);
+        $channelOptions = $tree->getTree(0, "<option value=@id @selected @disabled>@spacer@name</option>", $row['channel_id'], $disabledIds);
         $this->view->assign('channelOptions', $channelOptions);
         $this->view->assign("row", $row);
-        // 自定义字段来自内容所属模型
-        $fields = [];
-        $contentModel = $channel ? Modelx::find($channel['model_id']) : null;
-        if ($contentModel) {
-            $fields = \app\common\library\cms\Service::getCustomFields('model', $contentModel['id'], $row->toArray());
-        }
-
-        $this->view->assign('fields', $fields);
-        $this->view->assign('values', $row->toArray());
         return $this->view->fetch();
     }
 
@@ -260,7 +195,6 @@ class Archives extends Backend
      */
     public function del($ids = "")
     {
-        // 事件回调只需注册一次，避免常驻进程下重复绑定
         if (!static::$deleteEventRegistered) {
             static::$deleteEventRegistered = true;
             \app\admin\model\cms\Archives::afterDelete(function ($row) {
@@ -279,19 +213,6 @@ class Archives extends Backend
         $ids = $ids ?: $this->request->param('ids');
         if (!$ids) {
             $this->error(__('Parameter %s can not be empty', ['ids']));
-        }
-        if (!static::$destroyEventRegistered) {
-            static::$destroyEventRegistered = true;
-            \app\admin\model\cms\Archives::afterDelete(function ($row) {
-                //删除副表
-                $channel = Channel::find($row->channel_id);
-                if ($channel) {
-                    $model = Modelx::find($channel['model_id']);
-                    if ($model) {
-                        db($model['table'])->where("id", $row['id'])->delete();
-                    }
-                }
-            });
         }
         $count = 0;
         $this->model->startTrans();
@@ -324,21 +245,20 @@ class Archives extends Backend
             $this->error(__('Parameter %s can not be empty', ['ids']));
         }
         $pk = $this->model->getPk();
-        $config = get_addon_config('cms');
+        $config = get_cms_config();
         $list = $this->model->onlyTrashed()->select();
         if ($list) {
             $ids = [];
             $refreshIds = [];
-            foreach ($list as $index => $item) {
-                if ($item['status'] == 'normal') {
+            foreach ($list as $item) {
+                if ($item['status'] == 'normal' && !empty($config['score']['postarchives'])) {
                     User::score($config['score']['postarchives'], $item['user_id'], '发布文章');
                 }
                 $ids[] = $item['id'];
                 $refreshIds[] = $item['channel_id'];
             }
             $refreshIds = array_filter(array_unique($refreshIds));
-            // think-orm 4 的模型 restore 依赖 softDelete 默认值，这里直接清空删除标记
-            \think\facade\Db::name('cms_archives')->where($pk, 'in', $ids)->update(['deletetime' => null]);
+            Db::name('cms_archives')->where($pk, 'in', $ids)->update(['deletetime' => null]);
             Channel::refreshItems($refreshIds);
             $this->success();
         }
@@ -354,10 +274,8 @@ class Archives extends Backend
         if (!$this->request->isPost()) {
             $this->error(__("Invalid parameters"));
         }
+        $ids = $ids ?: $this->request->param('ids');
         if ($ids) {
-            if (!$this->request->isPost()) {
-                $this->error(__("Invalid parameters"));
-            }
             $channel_id = $this->request->post('channel_id');
             $pk = $this->model->getPk();
             $adminIds = $this->getDataLimitAdminIds();
@@ -366,15 +284,8 @@ class Archives extends Backend
             }
             $this->model->where($pk, 'in', $ids);
             $channel = Channel::find($channel_id);
-            if ($channel && $channel['type'] === 'list') {
-                $channelNums = \app\admin\model\cms\Archives::with('channel')
-                    ->where('archives.' . $pk, 'in', $ids)
-                    ->where('channel_id', '<>', $channel['id'])
-                    ->field('channel_id,COUNT(*) AS nums')
-                    ->group('channel_id')
-                    ->select();
+            if ($channel) {
                 $result = $this->model
-                    ->where('model_id', '=', $channel['model_id'])
                     ->where('channel_id', '<>', $channel['id'])
                     ->update(['channel_id' => $channel_id]);
                 if ($result) {
@@ -383,7 +294,7 @@ class Archives extends Backend
                     $this->error(__('No rows were updated'));
                 }
             } else {
-                $this->error(__('No rows were updated'));
+                $this->error(__('未找到目标栏目'));
             }
         }
         $this->error(__('Parameter %s can not be empty', 'ids'));
@@ -398,6 +309,7 @@ class Archives extends Backend
         if (!$this->request->isPost()) {
             $this->error(__("Invalid parameters"));
         }
+        $ids = $ids ?: $this->request->param('ids');
         if ($ids) {
             $pk = $this->model->getPk();
             $adminIds = $this->getDataLimitAdminIds();
@@ -405,17 +317,14 @@ class Archives extends Backend
                 $this->model->where($this->dataLimitField, 'in', $adminIds);
             }
             $archivesList = $this->model->where('id', 'in', $ids)->select();
-            foreach ($archivesList as $index => $item) {
+            foreach ($archivesList as $item) {
                 try {
-                    $model = Modelx::find($item['model_id']);
-                    $addon = \think\facade\Db::name($model['table'])->find($item['id']);
                     $data = $item->toArray();
-                    $data = array_merge($data, $addon ?? []);
                     $data['title'] = $data['title'] . "_copy";
                     $data['status'] = 'hidden';
                     unset($data['id']);
                     \app\admin\model\cms\Archives::create($data, true);
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     //
                 }
             }
@@ -423,7 +332,6 @@ class Archives extends Backend
         }
         $this->error(__('Parameter %s can not be empty', 'ids'));
     }
-
 
     /**
      * 加入标签
@@ -434,9 +342,10 @@ class Archives extends Backend
         if (!$this->request->isPost()) {
             $this->error(__("Invalid parameters"));
         }
+        $ids = $ids ?: $this->request->param('ids');
         if ($ids) {
             $tags = $this->request->post('tags');
-            $newTagsArr = array_filter(explode(',', $tags));
+            $newTagsArr = array_filter(explode(',', (string)$tags));
             if ($newTagsArr) {
                 $pk = $this->model->getPk();
                 $adminIds = $this->getDataLimitAdminIds();
@@ -444,8 +353,8 @@ class Archives extends Backend
                     $this->model->where($this->dataLimitField, 'in', $adminIds);
                 }
                 $archivesList = $this->model->where($pk, 'in', $ids)->select();
-                foreach ($archivesList as $index => $item) {
-                    $tagsArr = explode(',', $item['tags']);
+                foreach ($archivesList as $item) {
+                    $tagsArr = explode(',', (string)$item['tags']);
                     $tagsArr = array_merge($tagsArr, $newTagsArr);
                     $item->save(['tags' => implode(',', array_unique(array_filter($tagsArr)))]);
                 }
@@ -466,10 +375,11 @@ class Archives extends Backend
         if (!$this->request->isPost()) {
             $this->error(__("Invalid parameters"));
         }
+        $ids = $ids ?: $this->request->param('ids');
         if ($ids) {
             $type = $this->request->post('type');
             $flag = $this->request->post('flag');
-            $changeFlagArr = array_filter(explode(',', $flag));
+            $changeFlagArr = array_filter(explode(',', (string)$flag));
             if ($changeFlagArr) {
                 $pk = $this->model->getPk();
                 $adminIds = $this->getDataLimitAdminIds();
@@ -477,8 +387,8 @@ class Archives extends Backend
                     $this->model->where($this->dataLimitField, 'in', $adminIds);
                 }
                 $archivesList = $this->model->where($pk, 'in', $ids)->select();
-                foreach ($archivesList as $index => $item) {
-                    $flagArr = explode(',', $item['flag']);
+                foreach ($archivesList as $item) {
+                    $flagArr = explode(',', (string)$item['flag']);
                     if ($type == 'add') {
                         $flagArr = array_merge($flagArr, $changeFlagArr);
                     } else {
@@ -492,43 +402,6 @@ class Archives extends Backend
             }
         }
         $this->error(__('Please select at least one row'));
-    }
-
-    /**
-     * 获取栏目列表
-     * @internal
-     */
-    public function get_fields_html()
-    {
-        $channel_id = $this->request->post('channel_id');
-        $archives_id = $this->request->post('archives_id');
-        $channel = Channel::with('model')->find($channel_id);
-        if ($channel) {
-            $model_id = $channel['model_id'];
-            $values = [];
-            if ($archives_id) {
-                $values = db($channel['model']['table'])->where('id', $archives_id)->find();
-
-                //优先从栏目获取模型ID，再从文档获取
-                $archives = \app\admin\model\cms\Archives::find($archives_id);
-                $model_id = $archives ? $archives['model_id'] : $model_id;
-            }
-
-            $fields = \app\common\library\cms\Service::getCustomFields('model', $model_id, $values);
-
-            $model = Modelx::find($model_id);
-
-            $setting = $model['setting'];
-            $publishfields = $setting['publishfields'] ?? [];
-            $titlelist = $setting['titlelist'] ?? [];
-
-            $this->view->assign('channel', $channel);
-            $this->view->assign('fields', $fields);
-            $this->view->assign('values', $values);
-            $this->success('', null, ['html' => $this->fetch('cms/common/fields'), 'publishfields' => $publishfields, 'titlelist' => $titlelist]);
-        } else {
-            $this->error(__('Please select channel'));
-        }
     }
 
     /**
@@ -561,43 +434,23 @@ class Archives extends Backend
      */
     public function suggestion()
     {
-        $config = get_addon_config('cms');
-        $q = trim($this->request->request("q"));
-        $id = trim($this->request->request("id/d"));
+        $q = trim((string)$this->request->request("q"));
+        $id = trim((string)$this->request->request("id/d"));
         $list = [];
-        if ($config['searchtype'] == 'xunsearch') {
-            // 全文检索组件（xunsearch）未安装，回退为标题模糊匹配
-            $result = ['docs' => \think\facade\Db::name('cms_archives')->where('title', 'like', "%{$q}%")->limit(10)->select()->toArray()];
-        } else {
-            $result = $this->model->where("title|keywords|description", "like", "%{$q}%")->where('id', '<>', $id)->limit(10)->order("id", "desc")->select();
-            foreach ($result as $index => $item) {
-                $item['image'] = $item['image'] ? $item['image'] : '/assets/addons/cms/img/noimage.png';
-                $list[] = ['id' => $item['id'], 'url' => $item['fullurl'], 'image' => cdnurl($item['image']), 'title' => $item['title'], 'create_date' => datetime($item['createtime']), 'status' => $item['status'], 'status_text' => $item['status_text'], 'deletetime' => $item['deletetime']];
-            }
+        $result = $this->model->where("title|keywords|description", "like", "%{$q}%")->where('id', '<>', $id)->limit(10)->order("id", "desc")->select();
+        foreach ($result as $item) {
+            $image = $item['image'] ?: '/assets/addons/cms/img/noimage.png';
+            $list[] = [
+                'id'          => $item['id'],
+                'url'         => $item['fullurl'],
+                'image'       => cdnurl($image),
+                'title'       => $item['title'],
+                'create_date' => datetime($item['createtime']),
+                'status'      => $item['status'],
+                'status_text' => $item['status_text'],
+                'deletetime'  => $item['deletetime']
+            ];
         }
         return json($list);
-    }
-
-    /**
-     * 获取栏目字段
-     */
-    public function get_channel_model_info()
-    {
-        $fields = [];
-        $model_id = 0;
-        $ids = $this->request->post("ids");
-        if ($ids) {
-            $model_ids = Channel::where('id', 'in', $ids)->column('model_id');
-            $model_ids = array_unique($model_ids);
-            if (count($model_ids) === 1) {
-                $model_id = reset($model_ids);
-                $model = Modelx::find($model_id);
-                if (!$model) {
-                    $this->error('未找到对应模型');
-                }
-                $fields = \app\admin\model\cms\Fields::getJsFieldsList('model', $model['id']);
-            }
-        }
-        $this->success("", null, ['fields' => $fields, 'model_id' => $model_id]);
     }
 }

@@ -14,7 +14,6 @@ use think\exception\PDOException;
  */
 class Comment extends Backend
 {
-
     /**
      * Comment模型对象
      */
@@ -25,7 +24,6 @@ class Comment extends Backend
     {
         parent::initialize();
         $this->model = new \app\admin\model\cms\Comment;
-        $this->view->assign("typeList", $this->model->getTypeList());
         $this->view->assign("statusList", $this->model->getStatusList());
     }
 
@@ -35,10 +33,8 @@ class Comment extends Backend
     public function index()
     {
         $this->relationSearch = true;
-        //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
-            //如果发送的来源是Selectpage，则转发到Selectpage
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
@@ -54,7 +50,7 @@ class Comment extends Backend
                 ->limit($offset, $limit)
                 ->select();
 
-            foreach ($list as $index => $item) {
+            foreach ($list as $item) {
                 // 兼容匿名评论（$item->user 可能为空）
                 $item->user && $item->user->visible(['id', 'username', 'nickname', 'avatar']);
                 $item->source = $item->source;
@@ -62,37 +58,33 @@ class Comment extends Backend
             $list = collection($list)->toArray();
             $this->result('', $list, $total);
         }
-        $this->assignconfig("typeList", $this->model->getTypeList());
         return $this->view->fetch();
     }
 
     public function recyclebin()
     {
-        //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
             $this->relationSearch = true;
             [$where, $sort, $order, $offset, $limit] = $this->buildparams(null, false);
             $total = $this->model
                 ->onlyTrashed()
-                ->with(['archives', 'spage', 'user'])
+                ->with(['archives', 'user'])
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->onlyTrashed()
-                ->with(['archives', 'spage', 'user'])
+                ->with(['archives', 'user'])
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
 
-            foreach ($list as $index => $item) {
-                // 兼容匿名评论（$item->user 可能为空）
+            foreach ($list as $item) {
                 $item->user && $item->user->visible(['id', 'username', 'nickname', 'avatar']);
-                $type = $item['type'] == 'page' ? 'spage' : $item['type'];
-                $item->url = $item->{$type} ? $item->{$type}->url : 'javascript:';
+                $item->url = $item->archives ? $item->archives->url : 'javascript:';
             }
             $list = collection($list)->toArray();
             $this->result('', $list, $total);
@@ -113,24 +105,23 @@ class Comment extends Backend
         if ($ids) {
             $this->model->where($pk, 'in', $ids);
         }
-        $config = get_addon_config('cms');
+        $config = get_cms_config();
         $list = $this->model->onlyTrashed()->select();
         if ($list) {
             $ids = [];
-            foreach ($list as $index => $item) {
-                if ($item['status'] == 'normal') {
+            foreach ($list as $item) {
+                if ($item['status'] == 'normal' && !empty($config['score']['postcomment'])) {
                     User::score($config['score']['postcomment'], $item['user_id'], '发表评论');
                 }
                 $ids[] = $item['id'];
             }
             $this->model->where('id', 'in', $ids);
             $this->model->restore('1=1');
-            foreach ($list as $index => $item) {
+            foreach ($list as $item) {
                 \app\admin\model\cms\Comment::refreshSourceComments($item['id']);
             }
             $this->success();
         }
         $this->error(__('No rows were updated'));
     }
-
 }

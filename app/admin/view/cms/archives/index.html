@@ -35,15 +35,11 @@
         var bdTable = layui.bdTable;
         var table = layui.table;
 
-        // 栏目与模型的筛选项来自后台配置
+        // 栏目筛选选项来自后台配置
         var channelSearch = {};
         (Config.channelList || []).forEach(function (item) {
             channelSearch[item.id] = item.text;
         });
-        var modelSearch = {};
-        {volist name="modelList" id="vo"}
-        modelSearch["{$vo.id}"] = "{$vo.name}";
-        {/volist}
 
         bdTable.api.init({
             table: table,
@@ -68,9 +64,8 @@
                 [
                     { type: "checkbox" },
                     { field: "id", title: "ID", width: 80, sort: true },
-                    { field: "channel_id", title: "{:__('Channel')}", width: 140, searchList: channelSearch, templet: function (d) { return channelSearch[d.channel_id] || d.channel_id; } },
-                    { field: "model_id", title: "{:__('Modelx')}", width: 120, hide: true, searchList: modelSearch },
-                    { field: "title", title: "{:__('Title')}", operate: "LIKE", minWidth: 220 },
+                    { field: "channel_id", title: "{:__('Channel')}", width: 150, searchList: channelSearch, templet: function (d) { return (d.channel && d.channel.name) || channelSearch[d.channel_id] || d.channel_id; } },
+                    { field: "title", title: "{:__('Title')}", operate: "LIKE", minWidth: 260 },
                     { field: "weigh", title: "{:__('Weigh')}", width: 90, sort: true, hide: true },
                     { field: "views", title: "{:__('Views')}", width: 90, hide: true },
                     { field: "comments", title: "{:__('Comments')}", width: 90, hide: true },

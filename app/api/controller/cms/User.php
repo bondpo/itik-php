@@ -34,9 +34,9 @@ class User extends Base
             'archives'  => (int)Db::name('cms_archives')->where('user_id', $userId)->whereNull('deletetime')->count(),
             'comments'  => (int)Db::name('cms_comment')->where('user_id', $userId)->whereNull('deletetime')->count(),
             'favorites' => (int)Db::name('cms_collection')->where('user_id', $userId)->count(),
-            'orders'    => (int)Db::name('cms_order')->where('user_id', $userId)->count(),
-            'paid'      => (int)Db::name('cms_order')->where('user_id', $userId)->where('status', 'paid')->count(),
-            'diyform'   => (int)Db::name('cms_message')->where('user_id', $userId)->count(),
+            'orders'    => (int)Db::name('app_order')->where('user_id', $userId)->count(),
+            'paid'      => (int)Db::name('app_order')->where('user_id', $userId)->where('status', 'paid')->count(),
+            'diyform'   => 0,
         ]);
     }
 
@@ -73,10 +73,8 @@ class User extends Base
 
         // 补全评论对象标题
         foreach ($list as $k => $r) {
-            $map = ['archives' => 'cms_archives', 'page' => 'cms_page', 'special' => 'cms_special'];
-            $table = $map[$r['type']] ?? null;
-            $list[$k]['target_title'] = $table
-                ? (string)Db::name($table)->where('id', (int)$r['aid'])->value('title')
+            $list[$k]['target_title'] = ($r['type'] === 'archives')
+                ? (string)Db::name('cms_archives')->where('id', (int)$r['aid'])->value('title')
                 : '';
         }
 
@@ -104,9 +102,7 @@ class User extends Base
         // 补全内容最新信息
         foreach ($rows as $k => $r) {
             $aid = (int)$r['aid'];
-            $map = ['archives' => 'cms_archives', 'page' => 'cms_page', 'special' => 'cms_special'];
-            $table = $map[$r['type']] ?? 'cms_archives';
-            $row = Db::name($table)->where('id', $aid)->field($this->fieldString($table, ['id','title','image','description']))->find();
+            $row = Db::name('cms_archives')->where('id', $aid)->field($this->fieldString('cms_archives', ['id','title','image','description']))->find();
             if ($row) {
                 $rows[$k]['title'] = $row['title'] ?? $rows[$k]['title'];
                 $rows[$k]['image'] = $row['image'] ?? ($rows[$k]['image'] ?? '');
@@ -130,7 +126,7 @@ class User extends Base
         if ($aid <= 0) {
             $this->fail('缺少内容 ID', self::CODE_PARAM_MISSING);
         }
-        if (!in_array($type, ['archives', 'page', 'special'], true)) {
+        if ($type !== 'archives') {
             $this->fail('收藏类型不合法', self::CODE_PARAM_INVALID);
         }
 
@@ -147,9 +143,7 @@ class User extends Base
             $this->success('已收藏', ['favorited' => true, 'repeated' => true]);
         }
 
-        $map = ['archives' => 'cms_archives', 'page' => 'cms_page', 'special' => 'cms_special'];
-        $table = $map[$type];
-        $row = Db::name($table)->where('id', $aid)->field($this->fieldString($table, ['id','title','image']))->find();
+        $row = Db::name('cms_archives')->where('id', $aid)->field($this->fieldString('cms_archives', ['id','title','image']))->find();
         if (!$row) {
             $this->fail('收藏对象不存在', self::CODE_NOT_FOUND);
         }

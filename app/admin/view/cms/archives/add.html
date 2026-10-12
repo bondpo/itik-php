@@ -13,8 +13,6 @@
         </div>
     </div>
 
-
-
     <div class="layui-form-item">
         <label class="layui-form-label">{:__('Title')}</label>
         <div class="layui-input-block">
@@ -76,9 +74,6 @@
         </div>
     </div>
 
-    {include file="cms/common/fields" /}
-    <div id="extend"></div>
-
     <div class="layui-form-item">
         <label class="layui-form-label">{:__('Seotitle')}</label>
         <div class="layui-input-block">
@@ -90,13 +85,6 @@
         <label class="layui-form-label">{:__('Keywords')}</label>
         <div class="layui-input-block">
             <input type="text" name="row[keywords]" value="" placeholder="{:__('Keywords')}" class="layui-input" />
-        </div>
-    </div>
-
-    <div class="layui-form-item">
-        <label class="layui-form-label">{:__('Price')}</label>
-        <div class="layui-input-block">
-            <input type="number" name="row[price]" value="0" class="layui-input" />
         </div>
     </div>
 
@@ -149,28 +137,8 @@
 </form>
 
 <script>
-    layui.use(["badou", "form"], function () {
-        var $ = layui.jquery;
+    layui.use(["badou"], function () {
         var bdForm = layui.bdForm;
-        var form = layui.form;
-
-        // 选择栏目后按所属模型动态加载自定义字段
-        form.on("select(channel-filter)", function () {});
-        $('select[name="row[channel_id]"]').on("change", function () {
-            var channelId = $(this).val();
-            if (!channelId) {
-                return $("#extend").html("");
-            }
-            $.post("{:url('cms.archives/get_fields_html')}", { channel_id: channelId }, function (ret) {
-                if (ret.code === 1 && ret.data && ret.data.html) {
-                    $("#extend").html(ret.data.html);
-                    form.render();
-                } else {
-                    $("#extend").html('<div class="layui-form-item"><div class="layui-input-block text-secondary">' + (ret.msg || "未获取到自定义字段") + "</div></div>");
-                }
-            });
-        });
-
         bdForm.api.bindevent($("form.layui-form"));
     });
 </script>

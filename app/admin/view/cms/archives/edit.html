@@ -1,6 +1,7 @@
 {layout name="layout/form" /}
 <form class="layui-form" method="post">
     {:token_field()}
+    {if isset($row)}<input type="hidden" name="row[id]" value="{$row.id}">{/if}
     <input type="hidden" name="row[style]" value="" />
 
     <div class="layui-form-item">
@@ -12,7 +13,6 @@
             </select>
         </div>
     </div>
-
 
     <div class="layui-form-item">
         <label class="layui-form-label">{:__('Title')}</label>
@@ -75,9 +75,6 @@
         </div>
     </div>
 
-    {include file="cms/common/fields" /}
-    <div id="extend"></div>
-
     <div class="layui-form-item">
         <label class="layui-form-label">{:__('Seotitle')}</label>
         <div class="layui-input-block">
@@ -89,13 +86,6 @@
         <label class="layui-form-label">{:__('Keywords')}</label>
         <div class="layui-input-block">
             <input type="text" name="row[keywords]" value="{$row.keywords|htmlentities}" placeholder="{:__('Keywords')}" class="layui-input" />
-        </div>
-    </div>
-
-    <div class="layui-form-item">
-        <label class="layui-form-label">{:__('Price')}</label>
-        <div class="layui-input-block">
-            <input type="number" name="row[price]" value="{$row.price|default=0}" class="layui-input" />
         </div>
     </div>
 
@@ -148,25 +138,8 @@
 </form>
 
 <script>
-    layui.use(["badou", "form"], function () {
-        var $ = layui.jquery;
+    layui.use(["badou"], function () {
         var bdForm = layui.bdForm;
-        var form = layui.form;
-
-        // 切换栏目后重新加载该模型的自定义字段
-        $('select[name="row[channel_id]"]').on("change", function () {
-            var channelId = $(this).val();
-            if (!channelId) {
-                return;
-            }
-            $.post("{:url('cms.archives/get_fields_html')}", { channel_id: channelId, archives_id: "{$row.id}" }, function (ret) {
-                if (ret.code === 1 && ret.data && ret.data.html) {
-                    $("#extend").html(ret.data.html);
-                    form.render();
-                }
-            });
-        });
-
         bdForm.api.bindevent($("form.layui-form"));
     });
 </script>

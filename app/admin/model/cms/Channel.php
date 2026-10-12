@@ -62,7 +62,7 @@ class Channel extends Model
         if (isset($data['type']) && isset($data['outlink']) && $data['type'] == 'link') {
             return $this->getAttr('outlink');
         }
-        return addon_url('cms/channel/index', $vars, static::$config['urlsuffix'], $domain);
+        return cms_url('cms/channel/index', $vars, static::$config['urlsuffix'] ?? '', $domain);
     }
 
     public function getOutlinkAttr($value, $data)
@@ -74,7 +74,7 @@ class Channel extends Model
 
     protected function initializeEvents()
     {
-        $config = static::$config = get_addon_config('cms');
+        $config = static::$config = get_cms_config();
         self::beforeInsert(function ($row) {
             if ($row->getData('type') == 'link') {
                 $row->model_id = 0;
@@ -162,10 +162,6 @@ class Channel extends Model
                     'vip'        => $row['vip'],
                 ];
                 db('cms_channel')->where('id', 'in', $childIds)->update($data);
-            }
-            //同步单页内容到单页
-            if (isset($row['pagecontent']) && $row['linkdata']) {
-                Db::name("cms_page")->where('id', $row['linkdata']['source_id'] ?? 0)->update(['content' => $row['pagecontent']]);
             }
         });
     }
