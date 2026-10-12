@@ -80,15 +80,15 @@
                     <span class="layui-badge layui-badge-rim">v{$row.version|default='1'}</span>
                 </div>
                 <div class="article-meta">
-                    <span class="meta-item"><i class="fa fa-user"></i> 作者: {$author.nickname|default=($author.username|default='ID: ' . $row.author_id)}</span>
+                    <span class="meta-item"><i class="fa fa-user"></i> 作者: {$authorName}</span>
                     {if !empty($project)}
                     <span class="meta-item"><i class="fa fa-cubes"></i> 项目: {$project.name}</span>
                     {/if}
                     <span class="meta-item"><i class="fa fa-folder-open"></i> 分类: {$row.category_l1|default='无'}{if !empty($row.category_l2)} / {$row.category_l2}{/if}</span>
                     <span class="meta-item"><i class="fa fa-eye"></i> 浏览: {$row.views|default=0}</span>
-                    <span class="meta-item"><i class="fa fa-clock-o"></i> 提交: {if !empty($row.create_time)}{:date('Y-m-d H:i:s', $row.create_time)}{else}-{/if}</span>
-                    {if !empty($row.published_at)}
-                    <span class="meta-item"><i class="fa fa-check-circle"></i> 发布: {:date('Y-m-d H:i:s', $row.published_at)}</span>
+                    <span class="meta-item"><i class="fa fa-clock-o"></i> 提交: {$createTimeText}</span>
+                    {if !empty($publishedAtText)}
+                    <span class="meta-item"><i class="fa fa-check-circle"></i> 发布: {$publishedAtText}</span>
                     {/if}
                 </div>
             </div>
@@ -103,12 +103,12 @@
                 <div class="{if !empty($row.cover)}layui-col-md9 layui-col-sm8{else}layui-col-md12{/if}">
                     <blockquote class="layui-elem-quote layui-quote-nm" style="margin-bottom: 0;">
                         <strong>内容摘要：</strong> {$row.summary|default='暂无摘要说明'}
-                        {if !empty($row.tags)}
+                        {if !empty($tagList)}
                         <div style="margin-top: 8px;">
                             <strong>标签：</strong>
-                            {foreach :explode(',', $row['tags']) as $t}
+                            {volist name="tagList" id="t"}
                             <span class="layui-badge layui-bg-blue" style="margin-right: 4px;">{$t}</span>
-                            {/foreach}
+                            {/volist}
                         </div>
                         {/if}
                     </blockquote>
@@ -144,12 +144,12 @@
                     <i class="layui-icon layui-timeline-axis {if $rv.result=='normal'}layui-icon-ok-circle layui-font-green{else}layui-icon-close-fill layui-font-red{/if}"></i>
                     <div class="layui-timeline-content layui-text">
                         <h4 class="layui-timeline-title">
-                            {:date('Y-m-d H:i:s', $rv.create_time)}
+                            {$rv.create_time_text}
                             <span class="layui-badge {if $rv.result=='normal'}layui-bg-green{else}layui-bg-red{/if}">
                                 {if $rv.result=='normal'}审核通过{else}已驳回{/if}
                             </span>
                             <span style="font-size: 12px; color: #6b7280; font-weight: normal;">
-                                审核人: {$rv.reviewer_nickname|default=($rv.reviewer_name|default='管理员(ID:' . $rv.reviewer_id . ')')}
+                                审核人: {$rv.display_reviewer}
                             </span>
                         </h4>
                         <div class="timeline-item-box {if $rv.result!='normal'}rejected{/if}">

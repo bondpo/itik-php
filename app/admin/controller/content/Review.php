@@ -158,12 +158,16 @@ class Review extends Backend
         // 作者信息
         $author = Db::name('user')->where('id', (int)$row['author_id'])
             ->field('id,username,nickname,avatar,email,wallet_address')->find();
+        $authorName = 'ID: ' . $row['author_id'];
+        if ($author) {
+            $authorName = !empty($author['nickname']) ? $author['nickname'] : (!empty($author['username']) ? $author['username'] : ('ID: ' . $row['author_id']));
+        }
 
         // 关联项目
         $project = null;
         if (!empty($row['project_id'])) {
             $project = Db::name('app_project')->where('id', (int)$row['project_id'])
-                ->field('id,name,slug,logo,summary')->find();
+                ->field('id,name,subtitle,cover,summary')->find();
         }
 
         // 审核历史记录
@@ -176,10 +180,44 @@ class Review extends Backend
             ->field('r.*, a.username as reviewer_name, a.nickname as reviewer_nickname')
             ->select()->toArray();
 
+        foreach ($reviews as &$rv) {
+            $rv['display_reviewer'] = !empty($rv['reviewer_nickname'])
+                ? $rv['reviewer_nickname']
+                : (!empty($rv['reviewer_name']) ? $rv['reviewer_name'] : ('管理员(ID:' . $rv['reviewer_id'] . ')'));
+            $rvTime = $rv['create_time'] ?? null;
+            $rv['create_time_text'] = !empty($rvTime)
+                ? (is_numeric($rvTime) ? date('Y-m-d H:i:s', (int)$rvTime) : (string)$rvTime)
+                : '-';
+        }
+        unset($rv);
+
+        $tagList = [];
+        if (!empty($row['tags'])) {
+            $tagList = array_values(array_filter(array_map('trim', explode(',', (string)$row['tags']))));
+        }
+
+        // 安全格式化时间显示
+        $createTimeVal = $row['create_time'] ?? null;
+        $createTimeText = !empty($createTimeVal)
+            ? (is_numeric($createTimeVal) ? date('Y-m-d H:i:s', (int)$createTimeVal) : (string)$createTimeVal)
+            : '-';
+
+        $publishedAtVal = $row['published_at'] ?? null;
+        $publishedAtText = '';
+        if (!empty($publishedAtVal) && is_numeric($publishedAtVal) && (int)$publishedAtVal > 0) {
+            $publishedAtText = date('Y-m-d H:i:s', (int)$publishedAtVal);
+        } elseif (!empty($publishedAtVal) && !is_numeric($publishedAtVal)) {
+            $publishedAtText = (string)$publishedAtVal;
+        }
+
         $this->view->assign('row', $row);
         $this->view->assign('author', $author);
+        $this->view->assign('authorName', $authorName);
         $this->view->assign('project', $project);
         $this->view->assign('reviews', $reviews);
+        $this->view->assign('tagList', $tagList);
+        $this->view->assign('createTimeText', $createTimeText);
+        $this->view->assign('publishedAtText', $publishedAtText);
         return $this->view->fetch();
     }
 }
