@@ -19,6 +19,8 @@ class Project extends Backend
     {
         parent::initialize();
         $this->model = new \app\admin\model\app\Project();
+        $categoryTree = \app\admin\model\app\ProjectCategory::getTree(false);
+        $this->view->assign('categoryTree', $categoryTree);
     }
 
     public function index()
@@ -30,7 +32,7 @@ class Project extends Backend
             }
             [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $list = $this->model
-                ->with(['owner'])
+                ->with(['owner', 'category'])
                 ->where($where)
                 ->order($sort, $order)
                 ->paginate($limit);
@@ -52,6 +54,30 @@ class Project extends Backend
             'rejected' => '认证驳回',
         ]);
 
+        return $this->view->fetch();
+    }
+
+    /**
+     * 项目详情查看 (弹窗子页面)
+     */
+    public function detail()
+    {
+        $id = (int)($this->request->param('ids') ?: $this->request->param('id'));
+        $row = $this->model
+            ->with(['owner', 'category', 'timelines'])
+            ->where('id', $id)
+            ->find();
+        if (!$row) {
+            $this->error('项目不存在');
+        }
+
+        $materials = Db::name('app_project_material')
+            ->where('project_id', $id)
+            ->order('create_time', 'desc')
+            ->select();
+
+        $this->view->assign('row', $row);
+        $this->view->assign('materials', $materials);
         return $this->view->fetch();
     }
 

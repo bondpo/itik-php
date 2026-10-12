@@ -1,0 +1,78 @@
+{layout name="layout/form" /}
+<form class="layui-form" method="post">
+    {:token_field()}
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">所属项目</label>
+        <div class="layui-input-block">
+            <select name="row[project_id]" lay-verify="required">
+                <option value="">请选择所属项目</option>
+                {foreach $projectList as $p}
+                <option value="{$p.id}" {if $row.project_id == $p.id}selected{/if}>{$p.name} (ID: {$p.id})</option>
+                {/foreach}
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">事件标题</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[title]" value="{$row.title|default=''}" placeholder="例如：主网上线 / 完成种子轮融资 / 发布 2.0 路线图" autocomplete="off" class="layui-input" lay-verify="required" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">事件标签</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[tag]" value="{$row.tag|default='里程碑'}" placeholder="例如：里程碑 / 技术发布 / 生态合作 / 融资历程" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">事件发生日期</label>
+        <div class="layui-input-block">
+            <input type="date" name="row[event_time]" value="{$row.event_time|date='Y-m-d'}" autocomplete="off" class="layui-input" lay-verify="required" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">事件概述</label>
+        <div class="layui-input-block">
+            <textarea name="row[summary]" placeholder="简明概括该里程碑事件的核心成果与亮点" class="layui-textarea">{$row.summary|default=''}</textarea>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">官方公告链接</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[link_url]" value="{$row.link_url|default=''}" placeholder="https://..." autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">详细图文说明</label>
+        <div class="layui-input-block">
+            <textarea name="row[content]" placeholder="详细记录或说明 (支持 HTML 富文本)" class="layui-textarea" style="height:120px;">{$row.content|default=''}</textarea>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">排序权重</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[weigh]" value="{$row.weigh|default=0}" placeholder="数字越大越靠前" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">状态</label>
+        <div class="layui-input-block">
+            <input type="radio" name="row[status]" value="normal" title="正常" {if $row.status == 'normal'}checked{/if} />
+            <input type="radio" name="row[status]" value="hidden" title="隐藏" {if $row.status == 'hidden'}checked{/if} />
+        </div>
+    </div>
+
+    <div class="layui-form-item text-center">
+        <button type="submit" class="layui-btn layui-btn-normal" lay-submit>立即保存</button>
+        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+    </div>
+</form>

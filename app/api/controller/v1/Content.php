@@ -182,8 +182,9 @@ class Content extends Base
         }
 
         $now = time();
+        $isDraft = (bool)$this->request->post('is_draft', false);
         $data['author_id']    = $this->userId();
-        $data['status']       = 'pending';  // 发布即进入审核
+        $data['status']       = $isDraft ? 'draft' : 'pending';  // 支持草稿或立即审核
         $data['version']      = 1;
         $data['create_time']  = $now;
         $data['update_time']  = $now;

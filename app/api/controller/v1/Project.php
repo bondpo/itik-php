@@ -6,15 +6,19 @@
 
 namespace app\api\controller\v1;
 
+use app\admin\model\app\Project as ProjectModel;
+use app\admin\model\app\ProjectCategory;
+use app\admin\model\app\ProjectTimeline;
 use think\facade\Db;
 
 /**
  * 项目接口
  *
  * 路由：
- *   GET  /api/v1/projects                    项目列表（公开，受地区策略过滤）
- *   GET  /api/v1/projects/detail             项目详情
- *   POST /api/v1/projects                    创建项目（OWNER + 有效订阅）
+ *   GET  /api/v1/projects/categories         项目赛道分类列表（支持树形层级与项目数统计）
+ *   GET  /api/v1/projects                    项目列表（公开，支持 category_id 筛选，关联分类）
+ *   GET  /api/v1/projects/detail             项目详情（关联分类与时间轴）
+ *   POST /api/v1/projects                    创建项目（OWNER + 有效订阅，关联 category_id）
  *   POST /api/v1/projects/update             编辑项目（所属项目方/员工子权限）
  *   POST /api/v1/projects/submit             提交审核
  *   GET  /api/v1/projects/materials          项目资料列表
@@ -22,10 +26,14 @@ use think\facade\Db;
  *   GET  /api/v1/projects/members            项目团队/社区长列表
  *   POST /api/v1/projects/members/bind       绑定社区长（001 号推荐官）
  *   GET  /api/v1/projects/stats              项目数据看板
+ *   GET  /api/v1/projects/timelines          项目发展历程与里程碑时间轴
+ *   POST /api/v1/projects/timelines          项目方发布里程碑节点
+ *   POST /api/v1/projects/timelines/update   项目方编辑里程碑节点
+ *   POST /api/v1/projects/timelines/delete   项目方删除里程碑节点
  */
 class Project extends Base
 {
-    protected $noNeedLogin = ['index', 'detail'];
+    protected $noNeedLogin = ['index', 'detail', 'categories', 'timelines'];
     protected $noNeedRight = '*';
 
     /** 允许的资料分类与类型（白名单） */
@@ -33,15 +41,77 @@ class Project extends Base
     protected const MATERIAL_TYPES = ['license', 'address', 'business_link', 'video', 'ppt', 'doc', 'whitepaper', 'image', 'other'];
 
     /**
+     * 项目分类列表（公开）
+     * 支持树形层级 (tree=1, 默认) 或平铺列表 (tree=0)
+     */
+    public function categories()
+    {
+        $tree = (int)$this->request->param('tree', 1);
+        $status = trim((string)$this->request->param('status', 'normal'));
+
+        if ($tree === 1) {
+            $list = ProjectCategory::getTree($status === 'normal');
+        } else {
+            $query = ProjectCategory::order('weigh', 'desc')->order('id', 'asc');
+            if ($status !== '') {
+                $query->where('status', $status);
+            }
+            $list = $query->select()->toArray();
+        }
+
+        // 统计各分类下的公开项目数
+        $projectCountMap = Db::name('app_project')
+            ->where('status', 'normal')
+            ->where('category_id', '>', 0)
+            ->group('category_id')
+            ->column('count(*)', 'category_id');
+
+        $this->attachProjectCounts($list, $projectCountMap);
+
+        $this->success('', [
+            'list' => $list,
+            'total' => count($list),
+        ]);
+    }
+
+    /**
+     * 递归填充分类下的项目数
+     */
+    protected function attachProjectCounts(array &$categories, array $countMap): int
+    {
+        $sum = 0;
+        foreach ($categories as &$cat) {
+            $catId = (int)$cat['id'];
+            $directCount = (int)($countMap[$catId] ?? 0);
+            $childrenCount = 0;
+            if (!empty($cat['children']) && is_array($cat['children'])) {
+                $childrenCount = $this->attachProjectCounts($cat['children'], $countMap);
+            }
+            $cat['project_count'] = $directCount + $childrenCount;
+            $sum += $cat['project_count'];
+        }
+        unset($cat);
+        return $sum;
+    }
+
+    /**
      * 项目列表（公开）
-     * 仅返回审核通过且未下架的项目；地区策略会在后续阶段接入中间件，此处先按 risk_level 过滤。
+     * 仅返回审核通过且未下架的项目；支持按 category_id、关键词、地区等过滤，关联分类输出。
      */
     public function index()
     {
         [$page, $limit] = $this->pageParams();
         [$orderby, $orderway] = $this->orderParams(['id', 'sort_weight', 'views', 'follows', 'create_time', 'publish_time'], 'sort_weight');
 
-        $query = Db::name('app_project')->where('status', 'normal');
+        $query = ProjectModel::where('status', 'normal');
+
+        // 关联分类筛选（若为父分类，级联查询其子分类）
+        $categoryId = (int)$this->request->param('category_id', 0);
+        if ($categoryId > 0) {
+            $subCategoryIds = ProjectCategory::where('pid', $categoryId)->column('id');
+            $allCategoryIds = array_merge([$categoryId], $subCategoryIds);
+            $query->whereIn('category_id', $allCategoryIds);
+        }
 
         $keyword = trim((string)$this->request->param('keyword', ''));
         if ($keyword !== '') {
@@ -61,11 +131,15 @@ class Project extends Base
         }
 
         $total = (clone $query)->count();
-        $list = $query->order($orderby, $orderway)
+        $list = $query->with(['category' => function ($q) {
+                $q->field('id,pid,name,slug,icon');
+            }])
+            ->order($orderby, $orderway)
             ->order('id', 'desc')
             ->page($page, $limit)
-            ->field('id,name,subtitle,cover,category_l1,category_l2,category_l3,region,tags,certified,views,follows,sort_weight,create_time')
-            ->select();
+            ->field('id,name,subtitle,cover,category_id,category_l1,category_l2,category_l3,region,tags,certified,views,follows,sort_weight,create_time')
+            ->select()
+            ->toArray();
 
         // 列表仅暴露公开字段（不含 owner_user_id 等敏感信息）
         $this->success('', $this->pageResult($list, $total, $page, $limit));
@@ -80,10 +154,14 @@ class Project extends Base
         if ($id <= 0) {
             $this->fail('缺少项目 ID', self::CODE_PARAM_MISSING);
         }
-        $project = Db::name('app_project')->where('id', $id)->find();
-        if (!$project) {
+        $projectModel = ProjectModel::with(['category' => function ($q) {
+            $q->field('id,pid,name,slug,icon,description');
+        }])->where('id', $id)->find();
+
+        if (!$projectModel) {
             $this->fail('项目不存在', self::CODE_NOT_FOUND);
         }
+        $project = $projectModel->toArray();
 
         // 非公开项目仅作者/团队成员/管理员可见
         if ($project['status'] !== 'normal') {
@@ -97,7 +175,7 @@ class Project extends Base
             }
         }
 
-        // 浏览量自增（简单计数，后续可改异步）
+        // 浏览量自增
         Db::name('app_project')->where('id', $id)->inc('views')->update();
 
         $project['views'] = (int)$project['views'] + 1;
@@ -112,6 +190,13 @@ class Project extends Base
             ->field('id,user_id,serial_no,title')
             ->order('serial_no', 'asc')
             ->select();
+        $project['timelines'] = Db::name('app_project_timeline')
+            ->where('project_id', $id)
+            ->where('status', 'normal')
+            ->order('event_time', 'desc')
+            ->order('id', 'desc')
+            ->select()
+            ->toArray();
 
         $this->success('', [
             'project'           => $project,
@@ -378,7 +463,156 @@ class Project extends Base
             'pending_materials' => (int)Db::name('app_project_material')->where('project_id', $projectId)->where('review_status', 'pending')->count(),
             'leaders'    => (int)Db::name('app_project_member')->where('project_id', $projectId)->where('role', 'leader')->count(),
             'contents'   => (int)Db::name('app_content')->where('project_id', $projectId)->count(),
+            'timelines'  => (int)Db::name('app_project_timeline')->where('project_id', $projectId)->count(),
         ]);
+    }
+
+    /**
+     * 查询项目时间轴里程碑列表（公开）
+     */
+    public function timelines()
+    {
+        $projectId = (int)$this->request->param('project_id', 0);
+        if ($projectId <= 0) {
+            $this->fail('缺少项目 ID', self::CODE_PARAM_MISSING);
+        }
+
+        $list = Db::name('app_project_timeline')
+            ->where('project_id', $projectId)
+            ->where('status', 'normal')
+            ->order('event_time', 'desc')
+            ->order('weigh', 'desc')
+            ->order('id', 'desc')
+            ->select();
+
+        $items = [];
+        foreach ($list as $item) {
+            $item['event_date'] = $item['event_time'] > 0 ? date('Y-m-d', $item['event_time']) : '';
+            $items[] = $item;
+        }
+
+        $this->success('', [
+            'project_id' => $projectId,
+            'list'       => $items,
+            'total'      => count($items),
+        ]);
+    }
+
+    /**
+     * 项目方发布发展时间轴里程碑
+     */
+    public function addTimeline()
+    {
+        $projectId = (int)$this->request->post('project_id', 0);
+        $project = $this->findOwnedProject($projectId, false);
+
+        $title = trim((string)$this->request->post('title', ''));
+        if ($title === '') {
+            $this->fail('请填写里程碑事件标题', self::CODE_PARAM_MISSING);
+        }
+
+        $eventTimeStr = $this->request->post('event_time', '');
+        if ($eventTimeStr !== '' && !is_numeric($eventTimeStr)) {
+            $eventTime = strtotime($eventTimeStr) ?: time();
+        } elseif (is_numeric($eventTimeStr) && (int)$eventTimeStr > 0) {
+            $eventTime = (int)$eventTimeStr;
+        } else {
+            $eventTime = time();
+        }
+
+        $tag = trim((string)$this->request->post('tag', '里程碑'));
+        $summary = trim((string)$this->request->post('summary', ''));
+        $content = (string)$this->request->post('content', '');
+        $linkUrl = trim((string)$this->request->post('link_url', ''));
+        $weigh = (int)$this->request->post('weigh', 0);
+
+        $now = time();
+        $id = Db::name('app_project_timeline')->insertGetId([
+            'project_id'  => $projectId,
+            'user_id'     => $this->userId(),
+            'title'       => $title,
+            'tag'         => $tag ?: '里程碑',
+            'event_time'  => $eventTime,
+            'summary'     => $summary,
+            'content'     => $content,
+            'link_url'    => $linkUrl,
+            'weigh'       => $weigh,
+            'status'      => 'normal',
+            'create_time' => $now,
+            'update_time' => $now,
+        ]);
+
+        $this->success('里程碑节点发布成功', [
+            'id'         => $id,
+            'project_id' => $projectId,
+            'title'      => $title,
+            'event_date' => date('Y-m-d', $eventTime),
+        ]);
+    }
+
+    /**
+     * 项目方编辑时间轴节点
+     */
+    public function updateTimeline()
+    {
+        $id = (int)$this->request->post('id', 0);
+        if ($id <= 0) {
+            $this->fail('缺少时间轴 ID', self::CODE_PARAM_MISSING);
+        }
+
+        $timeline = Db::name('app_project_timeline')->where('id', $id)->find();
+        if (!$timeline) {
+            $this->fail('时间轴记录不存在', self::CODE_NOT_FOUND);
+        }
+
+        // 权限校验
+        $this->findOwnedProject((int)$timeline['project_id'], false);
+
+        $data = [];
+        foreach (['title', 'tag', 'summary', 'content', 'link_url'] as $field) {
+            $val = $this->request->post($field, null);
+            if ($val !== null) {
+                $data[$field] = trim((string)$val);
+            }
+        }
+        $eventTimeStr = $this->request->post('event_time', null);
+        if ($eventTimeStr !== null) {
+            $data['event_time'] = !is_numeric($eventTimeStr) ? (strtotime($eventTimeStr) ?: time()) : (int)$eventTimeStr;
+        }
+        $weigh = $this->request->post('weigh', null);
+        if ($weigh !== null) {
+            $data['weigh'] = (int)$weigh;
+        }
+
+        if (empty($data)) {
+            $this->fail('没有需要更新的字段', self::CODE_PARAM_MISSING);
+        }
+        $data['update_time'] = time();
+
+        Db::name('app_project_timeline')->where('id', $id)->update($data);
+        $this->success('时间轴节点更新成功', ['id' => $id]);
+    }
+
+    /**
+     * 项目方删除时间轴节点
+     */
+    public function deleteTimeline()
+    {
+        $id = (int)$this->request->post('id', 0);
+        if ($id <= 0) {
+            $this->fail('缺少时间轴 ID', self::CODE_PARAM_MISSING);
+        }
+
+        $timeline = Db::name('app_project_timeline')->where('id', $id)->find();
+        if (!$timeline) {
+            $this->fail('时间轴记录不存在', self::CODE_NOT_FOUND);
+        }
+
+        // 权限校验
+        $this->findOwnedProject((int)$timeline['project_id'], false);
+
+        Db::name('app_project_timeline')->where('id', $id)->delete();
+        $this->success('时间轴节点已删除');
     }
 
     /* ==================== 内部方法 ==================== */
@@ -397,6 +631,29 @@ class Project extends Base
             $v = $isCreate ? $this->request->post($f, null) : $this->request->post($f, null);
             if ($v !== null) {
                 $data[$f] = $isCreate ? (string)$v : (string)$v;
+            }
+        }
+        $categoryId = $this->request->post('category_id', null);
+        if ($categoryId !== null) {
+            $catId = (int)$categoryId;
+            if ($catId > 0) {
+                $category = ProjectCategory::where('id', $catId)->where('status', 'normal')->find();
+                if (!$category) {
+                    $this->fail('所选项目分类不存在或已禁用', self::CODE_PARAM_INVALID);
+                }
+                $data['category_id'] = $catId;
+                // 若未单独传分类文本，自动冗余名称
+                if (empty($data['category_l1']) && $category->pid == 0) {
+                    $data['category_l1'] = $category->name;
+                } elseif (empty($data['category_l2']) && $category->pid > 0) {
+                    $parentCat = ProjectCategory::where('id', $category->pid)->value('name');
+                    if ($parentCat && empty($data['category_l1'])) {
+                        $data['category_l1'] = $parentCat;
+                    }
+                    $data['category_l2'] = $category->name;
+                }
+            } else {
+                $data['category_id'] = 0;
             }
         }
         if (isset($data['name'])) {

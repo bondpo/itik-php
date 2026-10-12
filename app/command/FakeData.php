@@ -53,17 +53,27 @@ class FakeData extends Command
             $output->writeln(sprintf('      已生成 %d 条钱包与邮箱身份关联凭证', $identityCount));
 
             // 3. 订单与订阅数据
-            $output->writeln('<comment>[4/6] 生成商业订单与订阅状态数据...</comment>');
+            $output->writeln('<comment>[4/7] 生成商业订单与订阅状态数据...</comment>');
             [$orderCount, $subCount] = $this->seedOrdersAndSubscriptions($createdUsers);
             $output->writeln(sprintf('      已生成 %d 笔订单（涵盖各支付状态），%d 条订阅（涵盖各订阅生命周期）', $orderCount, $subCount));
 
-            // 4. 项目广场数据
-            $output->writeln('<comment>[5/6] 生成项目广场测试数据 (bd_app_project)...</comment>');
-            $projectCount = $this->seedProjects($createdUsers);
-            $output->writeln(sprintf('      已生成 %d 个测试项目（涵盖各审核状态与认证标识）', $projectCount));
+            // 4. 项目分类数据
+            $output->writeln('<comment>[5/7] 生成项目赛道分类数据 (bd_app_project_category)...</comment>');
+            $categoryMap = $this->seedProjectCategories();
+            $output->writeln(sprintf('      已生成 %d 个项目分类（涵盖一级与二级细分赛道）', count($categoryMap)));
 
-            // 5. CMS 单页、专题与评论数据
-            $output->writeln('<comment>[6/6] 生成 CMS 单页、专题与互动评论数据...</comment>');
+            // 5. 项目广场数据
+            $output->writeln('<comment>[6/8] 生成项目广场测试数据 (bd_app_project)...</comment>');
+            $projectCount = $this->seedProjects($createdUsers, $categoryMap);
+            $output->writeln(sprintf('      已生成 %d 个测试项目（已关联分类、审核状态与认证标识）', $projectCount));
+
+            // 6. 项目时间轴与里程碑数据
+            $output->writeln('<comment>[7/8] 生成项目发展时间轴里程碑 (bd_app_project_timeline)...</comment>');
+            $timelineCount = $this->seedProjectTimelines($createdUsers);
+            $output->writeln(sprintf('      已为各项目生成 %d 条发展历程节点（包含主网上线、融资、重大版本等）', $timelineCount));
+
+            // 7. CMS 单页、专题与评论数据
+            $output->writeln('<comment>[8/8] 生成 CMS 单页、专题与互动评论数据...</comment>');
             [$pageCount, $specialCount, $commentCount] = $this->seedCmsData($createdUsers);
             $output->writeln(sprintf('      已生成 %d 篇单页，%d 个专题，%d 条评论', $pageCount, $specialCount, $commentCount));
 
@@ -101,6 +111,8 @@ class FakeData extends Command
             Db::name('user')->whereIn('id', $testUserIds)->delete();
         }
 
+        Db::name('app_project_category')->where('id', '>', 0)->delete();
+        Db::name('app_project_timeline')->where('id', '>', 0)->delete();
         Db::name('cms_page')->whereLike('diyname', 'fake_%')->delete();
         Db::name('cms_special')->whereLike('diyname', 'fake_%')->delete();
         Db::name('cms_comment')->whereLike('content', '%[测试评论]%')->delete();
@@ -126,7 +138,7 @@ class FakeData extends Command
                 'nickname'       => 'Vitalik.eth',
                 'email'          => 'vitalik@itiklink.com',
                 'mobile'         => '13800000001',
-                'wallet_address' => '0xd8da6bf26964af9d7eed9e03e53415d37aa96045',
+                'wallet_address' => '0x380d7f00d4bb7870cad919837269636c8420d3bd',
                 'group_id'       => $groupOwner,
                 'role'           => 'OWNER',
                 'money'          => 28888.88,
@@ -152,7 +164,7 @@ class FakeData extends Command
                 'nickname'       => 'Alice (DAO Leader)',
                 'email'          => 'alice@itiklink.com',
                 'mobile'         => '13800000003',
-                'wallet_address' => '0x1db3439a222c519ab44bb1144fc28167b4fa6ee6',
+                'wallet_address' => '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
                 'group_id'       => $groupLeader,
                 'role'           => 'LEADER',
                 'money'          => 5600.00,
@@ -178,7 +190,7 @@ class FakeData extends Command
                 'nickname'       => 'Charlie (VIP 会员)',
                 'email'          => 'charlie@itiklink.com',
                 'mobile'         => '13800000005',
-                'wallet_address' => '0x90f79bf6eb2c4f870365e785982e1f101e93b906',
+                'wallet_address' => '0x5005fad715afc474ad5a232e3eee28858b083b1e',
                 'group_id'       => $groupMember,
                 'role'           => 'MEMBER',
                 'money'          => 800.00,
@@ -191,7 +203,7 @@ class FakeData extends Command
                 'nickname'       => 'David 链上套利者',
                 'email'          => 'david@itiklink.com',
                 'mobile'         => '13800000006',
-                'wallet_address' => '0x15d34aaf54267db7d7c367839aaf71a00a2c6a65',
+                'wallet_address' => '0x1db3439a222c519ab44bb1144fc28167b4fa6ee6',
                 'group_id'       => $groupMember,
                 'role'           => 'MEMBER',
                 'money'          => 450.00,
@@ -201,10 +213,10 @@ class FakeData extends Command
             ],
             [
                 'username'       => 'test_eva_visitor',
-                'nickname'       => 'Eva 0x9999...a1b2',
+                'nickname'       => 'Eva (游客用户)',
                 'email'          => 'eva@itiklink.com',
                 'mobile'         => '13800000007',
-                'wallet_address' => '0x999999cf1046e68e36e1aa2e0e07105eddd8a1b2',
+                'wallet_address' => '0xf66d8330d1c9dc19d58e4d1113e9120c26f2dc75',
                 'group_id'       => $groupVisitor,
                 'role'           => 'VISITOR',
                 'money'          => 0.00,
@@ -214,10 +226,10 @@ class FakeData extends Command
             ],
             [
                 'username'       => 'test_frank_web3',
-                'nickname'       => 'Frank 0x7099...79c8',
+                'nickname'       => 'Frank 0x9999...a1b2',
                 'email'          => 'frank@itiklink.com',
                 'mobile'         => '13800000008',
-                'wallet_address' => '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
+                'wallet_address' => '0x999999cf1046e68e36e1aa2e0e07105eddd8a1b2',
                 'group_id'       => $groupVisitor,
                 'role'           => 'VISITOR',
                 'money'          => 0.00,
@@ -515,9 +527,132 @@ class FakeData extends Command
     }
 
     /**
+     * 生成项目分类假数据
+     */
+    protected function seedProjectCategories(): array
+    {
+        $now = time();
+        $categories = [
+            // 1. DeFi
+            [
+                'name'        => 'DeFi 金融',
+                'slug'        => 'defi',
+                'icon'        => '💰',
+                'description' => '去中心化金融协议，涵盖交易、借贷、收益聚合与衍生品',
+                'weigh'       => 100,
+                'children'    => [
+                    ['name' => '去中心化交易 (DEX)', 'slug' => 'defi-dex', 'icon' => '🔄', 'description' => 'AMM 自动化做市商与订单簿交易协议', 'weigh' => 90],
+                    ['name' => '借贷协议 (Lending)', 'slug' => 'defi-lending', 'icon' => '🏦', 'description' => '超额抵押与闪电贷去中心化借贷', 'weigh' => 80],
+                    ['name' => '收益聚合 (Yield)', 'slug' => 'defi-yield', 'icon' => '📈', 'description' => '自动化收益耕作与流动性质押', 'weigh' => 70],
+                ]
+            ],
+            // 2. Layer 2 & 扩容
+            [
+                'name'        => 'Layer 2 扩容',
+                'slug'        => 'layer2',
+                'icon'        => '⚡',
+                'description' => '以太坊高性能二层扩容网络与侧链解决方案',
+                'weigh'       => 90,
+                'children'    => [
+                    ['name' => 'ZK-Rollup (零知识证明)', 'slug' => 'l2-zk', 'icon' => '🛡️', 'description' => '基于 zk-SNARKs/STARKs 的超高 TPS 扩容', 'weigh' => 90],
+                    ['name' => 'Optimistic Rollup', 'slug' => 'l2-op', 'icon' => '🚀', 'description' => '基于欺诈证明的成熟通用计算二层网络', 'weigh' => 80],
+                ]
+            ],
+            // 3. AI + Web3
+            [
+                'name'        => 'AI + Web3',
+                'slug'        => 'ai-web3',
+                'icon'        => '🤖',
+                'description' => '人工智能与链上智能合约、去中心化算力结合',
+                'weigh'       => 80,
+                'children'    => [
+                    ['name' => 'AI Agents (智能体)', 'slug' => 'ai-agents', 'icon' => '🧠', 'description' => '自主链上交互与决策自治 Agent', 'weigh' => 90],
+                    ['name' => '链上数据分析 (Analytics)', 'slug' => 'ai-analytics', 'icon' => '📊', 'description' => '大数据与机器学习链上行为预警', 'weigh' => 80],
+                ]
+            ],
+            // 4. Infrastructure
+            [
+                'name'        => '底层基础设施',
+                'slug'        => 'infrastructure',
+                'icon'        => '🏗️',
+                'description' => '去中心化网络底座，包含预言机、跨链桥、去中心化存储',
+                'weigh'       => 70,
+                'children'    => [
+                    ['name' => '跨链互操作 (Cross-Chain)', 'slug' => 'infra-bridge', 'icon' => '🌉', 'description' => '免信任多链状态中继与跨链资产转移', 'weigh' => 90],
+                    ['name' => 'DePIN (分布式硬件网络)', 'slug' => 'depin', 'icon' => '📡', 'description' => '去中心化物理基础设施与边缘硬件', 'weigh' => 80],
+                ]
+            ],
+            // 5. 身份与社交 (SocialFi & DID)
+            [
+                'name'        => '社交与身份 (Social & DID)',
+                'slug'        => 'social-did',
+                'icon'        => '🌐',
+                'description' => '去中心化身份识别、信誉系统与抗审查链上社交',
+                'weigh'       => 60,
+                'children'    => [
+                    ['name' => '去中心化身份 (DID & SBT)', 'slug' => 'did', 'icon' => '🪪', 'description' => '自主可控的链上身份凭证与防女巫网络', 'weigh' => 90],
+                ]
+            ],
+            // 6. GameFi & 元宇宙
+            [
+                'name'        => 'GameFi 游戏生态',
+                'slug'        => 'gamefi',
+                'icon'        => '🎮',
+                'description' => '链上游戏、电子竞技与元宇宙公会资产管理',
+                'weigh'       => 50,
+                'children'    => [
+                    ['name' => '游戏公会与 DAO', 'slug' => 'gamefi-dao', 'icon' => '⚔️', 'description' => '公会国库管理与 NFT 资产分账租赁', 'weigh' => 90],
+                ]
+            ],
+            // 7. RWA 真实世界资产
+            [
+                'name'        => 'RWA 真实资产',
+                'slug'        => 'rwa',
+                'icon'        => '🏛️',
+                'description' => '绿色碳资产、房地产、国债与大宗商品链上代币化',
+                'weigh'       => 40,
+                'children'    => []
+            ],
+        ];
+
+        $slugToId = [];
+        foreach ($categories as $cat) {
+            $parentId = Db::name('app_project_category')->insertGetId([
+                'pid'         => 0,
+                'name'        => $cat['name'],
+                'slug'        => $cat['slug'],
+                'icon'        => $cat['icon'],
+                'description' => $cat['description'],
+                'weigh'       => $cat['weigh'],
+                'status'      => 'normal',
+                'create_time' => $now,
+                'update_time' => $now,
+            ]);
+            $slugToId[$cat['slug']] = (int)$parentId;
+
+            foreach ($cat['children'] as $sub) {
+                $subId = Db::name('app_project_category')->insertGetId([
+                    'pid'         => $parentId,
+                    'name'        => $sub['name'],
+                    'slug'        => $sub['slug'],
+                    'icon'        => $sub['icon'],
+                    'description' => $sub['description'],
+                    'weigh'       => $sub['weigh'],
+                    'status'      => 'normal',
+                    'create_time' => $now,
+                    'update_time' => $now,
+                ]);
+                $slugToId[$sub['slug']] = (int)$subId;
+            }
+        }
+
+        return $slugToId;
+    }
+
+    /**
      * 生成项目广场测试数据
      */
-    protected function seedProjects(array $users): int
+    protected function seedProjects(array $users, array $categoryMap = []): int
     {
         $now = time();
         $ownerId1 = $users[0]['id'] ?? 1;
@@ -527,8 +662,9 @@ class FakeData extends Command
             [
                 'name'          => 'UniLend Protocol (去中心化借贷协议)',
                 'subtitle'      => '支持全资产抵押与跨链闪电借贷的高性能流动性协议',
-                'category_l1'   => 'DeFi',
-                'category_l2'   => 'Lending',
+                'cat_slug'      => 'defi-lending',
+                'category_l1'   => 'DeFi 金融',
+                'category_l2'   => '借贷协议 (Lending)',
                 'category_l3'   => 'CrossChain',
                 'region'        => '全球/北美',
                 'tags'          => 'DeFi,借贷,跨链,以太坊',
@@ -542,8 +678,9 @@ class FakeData extends Command
             [
                 'name'          => 'ZK-Shield Bridge (零知识证明隐私跨链桥)',
                 'subtitle'      => '下一代多链隐私状态证明与轻节点免信任资产中继',
-                'category_l1'   => 'Infrastructure',
-                'category_l2'   => 'Layer2',
+                'cat_slug'      => 'infra-bridge',
+                'category_l1'   => '底层基础设施',
+                'category_l2'   => '跨链互操作 (Cross-Chain)',
                 'category_l3'   => 'ZK-Rollup',
                 'region'        => '欧洲/瑞士',
                 'tags'          => 'ZK,隐私,跨链桥,Layer2',
@@ -557,8 +694,9 @@ class FakeData extends Command
             [
                 'name'          => 'NeuroGraph AI (链上大数据智能分析预测平台)',
                 'subtitle'      => '利用大语言模型与知识图谱对鲸鱼钱包动向实时预警',
-                'category_l1'   => 'AI+Web3',
-                'category_l2'   => 'Analytics',
+                'cat_slug'      => 'ai-analytics',
+                'category_l1'   => 'AI + Web3',
+                'category_l2'   => '链上数据分析 (Analytics)',
                 'category_l3'   => 'Predictive',
                 'region'        => '亚太/新加坡',
                 'tags'          => 'AI,链上数据,大数据,预警',
@@ -572,8 +710,9 @@ class FakeData extends Command
             [
                 'name'          => 'MetaDID (去中心化多链身份凭证协议)',
                 'subtitle'      => '基于 EIP-4361 与 SBT 构建的无感社交信誉与防女巫身份网络',
-                'category_l1'   => 'Identity',
-                'category_l2'   => 'DID',
+                'cat_slug'      => 'did',
+                'category_l1'   => '社交与身份 (Social & DID)',
+                'category_l2'   => '去中心化身份 (DID & SBT)',
                 'category_l3'   => 'SBT',
                 'region'        => '全球',
                 'tags'          => 'DID,身份凭证,Web3,SBT',
@@ -587,8 +726,9 @@ class FakeData extends Command
             [
                 'name'          => 'ByteTrust DePIN (分布式算力共享网络)',
                 'subtitle'      => '聚合全球边缘闲置 GPU 算力为 AI 训练提供低成本算力租赁',
-                'category_l1'   => 'DePIN',
-                'category_l2'   => 'Compute',
+                'cat_slug'      => 'depin',
+                'category_l1'   => '底层基础设施',
+                'category_l2'   => 'DePIN (分布式硬件网络)',
                 'category_l3'   => 'GPU Cloud',
                 'region'        => '北美',
                 'tags'          => 'DePIN,算力,GPU,AI',
@@ -602,7 +742,8 @@ class FakeData extends Command
             [
                 'name'          => 'GreenCarbon RWA (链上绿色碳资产聚合协议)',
                 'subtitle'      => '实物碳汇资产上链交易，赋能跨国企业碳中和结算',
-                'category_l1'   => 'RWA',
+                'cat_slug'      => 'rwa',
+                'category_l1'   => 'RWA 真实资产',
                 'category_l2'   => 'Carbon',
                 'category_l3'   => 'GreenFinance',
                 'region'        => '欧洲',
@@ -617,8 +758,9 @@ class FakeData extends Command
             [
                 'name'          => 'CyberGuild DAO (元宇宙电竞公会资产管理平台)',
                 'subtitle'      => '自动化链上分账与 GameFi 租借智能合约管理金库',
-                'category_l1'   => 'GameFi',
-                'category_l2'   => 'DAO',
+                'cat_slug'      => 'gamefi-dao',
+                'category_l1'   => 'GameFi 游戏生态',
+                'category_l2'   => '游戏公会与 DAO',
                 'category_l3'   => 'Esports',
                 'region'        => '东南亚',
                 'tags'          => 'DAO,GameFi,电竞,NFT',
@@ -632,8 +774,9 @@ class FakeData extends Command
             [
                 'name'          => 'FlashSwap DEX (极速流动性聚合交易协议)',
                 'subtitle'      => '结合 PMM 算法与零滑点闪兑的高资本效率去中心化交易所',
-                'category_l1'   => 'DeFi',
-                'category_l2'   => 'DEX',
+                'cat_slug'      => 'defi-dex',
+                'category_l1'   => 'DeFi 金融',
+                'category_l2'   => '去中心化交易 (DEX)',
                 'category_l3'   => 'AMM',
                 'region'        => '全球',
                 'tags'          => 'DEX,去中心化交易,闪兑,流动性',
@@ -648,9 +791,14 @@ class FakeData extends Command
 
         $count = 0;
         foreach ($mockProjects as $p) {
+            $catId = $categoryMap[$p['cat_slug']] ?? 1;
+
             $existing = Db::name('app_project')->where('name', $p['name'])->find();
             if ($existing) {
                 Db::name('app_project')->where('id', $existing['id'])->update([
+                    'category_id'   => $catId,
+                    'category_l1'   => $p['category_l1'],
+                    'category_l2'   => $p['category_l2'],
                     'status'        => $p['status'],
                     'verify_status' => $p['verify_status'],
                     'certified'     => $p['certified'],
@@ -661,6 +809,7 @@ class FakeData extends Command
             } else {
                 Db::name('app_project')->insert([
                     'owner_user_id'   => $p['owner_id'],
+                    'category_id'     => $catId,
                     'name'            => $p['name'],
                     'subtitle'        => $p['subtitle'],
                     'cover'           => '/assets/img/project_default.png',
@@ -833,5 +982,88 @@ class FakeData extends Command
         }
 
         return [$pageCount, $specialCount, $commentCount];
+    }
+
+    /**
+     * 生成项目发展时间轴与里程碑数据
+     */
+    protected function seedProjectTimelines(array $users): int
+    {
+        $projects = Db::name('app_project')->select()->toArray();
+        if (empty($projects)) {
+            return 0;
+        }
+
+        $now = time();
+        $timelineTemplates = [
+            [
+                'title'   => '项目立项与白皮书 1.0 正式发布',
+                'tag'     => '里程碑',
+                'offset'  => 86400 * 360,
+                'summary' => '团队正式确立去中心化架构蓝图，公开首版白皮书与技术架构设计说明。',
+                'content' => '<p>由核心研发团队共同撰写的首版白皮书正式开源，确立了系统的经济模型与免信任协议基石。</p>',
+                'link'    => 'https://github.com/ethereum/wiki',
+            ],
+            [
+                'title'   => '完成种子轮与战略轮 600 万美元融资',
+                'tag'     => '融资历程',
+                'offset'  => 86400 * 270,
+                'summary' => '由顶级 Web3 基金领投，获得 600 万美元战略注资，重点用于核心协议研发与生态开发者激励。',
+                'content' => '<p>本轮融资将加速底层算法优化、安全审计及全球社区拓展，为测试网发布提供坚实后盾。</p>',
+                'link'    => 'https://mirror.xyz',
+            ],
+            [
+                'title'   => 'Alpha 测试网正式上线并开启公测',
+                'tag'     => '技术发布',
+                'offset'  => 86400 * 180,
+                'summary' => '首个面向社区的公共测试网部署完成，超过 50,000 名独立链上地址参与交互测试。',
+                'content' => '<p>测试网期间网络峰值 TPS 突破 2,800，完成压力测试与多轮极限吞吐量验证。</p>',
+                'link'    => 'https://etherscan.io',
+            ],
+            [
+                'title'   => '智能合约通过 CertiK 与 OpenZeppelin 双重安全审计',
+                'tag'     => '安全审计',
+                'offset'  => 86400 * 90,
+                'summary' => '经权威安全机构多轮静态分析与形式化验证，所有核心业务逻辑合约零高危漏洞，正式出具审计报告。',
+                'content' => '<p>安全是 Web3 的立身之本，审计报告全文本已链上存证并向全球社区完全公开。</p>',
+                'link'    => 'https://certik.com',
+            ],
+            [
+                'title'   => '主网 1.0 正式上线与生态发展计划启动',
+                'tag'     => '里程碑',
+                'offset'  => 86400 * 20,
+                'summary' => '主网创世区块正式生成，开放质押、流动性做市与跨链桥梁，首批生态 DApp 全面接入。',
+                'content' => '<p>标志着项目正式步入成熟商用阶段，全球社区长、开发者与投资者可无缝体验高效服务。</p>',
+                'link'    => 'https://itikecosystem.io',
+            ],
+        ];
+
+        $totalInserted = 0;
+        foreach ($projects as $proj) {
+            $projId = (int)$proj['id'];
+            $ownerId = (int)$proj['owner_user_id'];
+
+            // 为每个项目随机挑选 3~4 个时间轴节点
+            $chosenNodes = array_slice($timelineTemplates, 0, rand(3, 5));
+            foreach ($chosenNodes as $idx => $node) {
+                Db::name('app_project_timeline')->insert([
+                    'project_id'  => $projId,
+                    'user_id'     => $ownerId,
+                    'title'       => $node['title'],
+                    'tag'         => $node['tag'],
+                    'event_time'  => $now - $node['offset'],
+                    'summary'     => $node['summary'],
+                    'content'     => $node['content'],
+                    'link_url'    => $node['link'],
+                    'weigh'       => 100 - $idx * 10,
+                    'status'      => 'normal',
+                    'create_time' => $now - $node['offset'] + 3600,
+                    'update_time' => $now,
+                ]);
+                $totalInserted++;
+            }
+        }
+
+        return $totalInserted;
     }
 }

@@ -55,20 +55,134 @@
                 [
                     { type: "checkbox", width: 50, fixed: "left" },
                     { field: "id", title: "ID", width: 70, sort: true, fixed: "left" },
-                    { field: "name", title: "项目名称", minWidth: 160, operate: 'LIKE' },
+                    { field: "name", title: "项目名称", minWidth: 180, operate: 'LIKE', templet: function(d) {
+                        return '<a href="javascript:;" class="btn-view-detail" data-id="' + d.id + '" data-name="' + d.name + '" style="color:#1E9FFF;font-weight:600;cursor:pointer;"><i class="fa fa-cube"></i> ' + d.name + '</a>';
+                    }},
                     { field: "owner.nickname", title: "项目方", minWidth: 120, operate: false },
+                    { field: "category.name", title: "关联分类", minWidth: 140, operate: false, templet: function (d) {
+                        if (d.category && d.category.name) {
+                            return "<span class=\"layui-badge layui-bg-blue\">" + (d.category.icon ? d.category.icon + ' ' : '') + d.category.name + "</span>";
+                        }
+                        return "<span class=\"layui-badge layui-bg-gray\">未分类</span>";
+                    }},
                     { field: "category_l1", title: "一级栏目", minWidth: 100, operate: 'LIKE' },
                     { field: "category_l2", title: "二级栏目", minWidth: 100, operate: 'LIKE' },
-                    { field: "category_l3", title: "三级栏目", minWidth: 100, operate: 'LIKE' },
                     { field: "status", title: "状态", width: 90, align: "center", searchList: { draft: '草稿', pending: '待审核', normal: '已通过', rejected: '已驳回', hidden: '已下架', offline: '已下线' }, custom: { draft: 'default', pending: 'orange', normal: 'green', rejected: 'red', hidden: 'default', offline: 'default' }, templet: bdTable.api.formatter.status },
                     { field: "verify_status", title: "认证状态", width: 100, align: "center", searchList: { none: '未认证', pending: '认证中', normal: '已认证', rejected: '认证驳回' }, custom: { none: 'default', pending: 'orange', normal: 'green', rejected: 'red' }, templet: bdTable.api.formatter.status },
                     { field: "certified", title: "认证标识", width: 95, align: "center", searchList: { 1: "已认证", 0: "未认证" }, templet: function (d) { return d.certified == 1 ? "<span class=\"layui-badge layui-bg-green\">已认证</span>" : "<span class=\"layui-badge layui-bg-gray\">未认证</span>"; }, operate: false },
                     { field: "views", title: "浏览", width: 80, align: "center", operate: 'BETWEEN', sortable: true },
                     { field: "create_time_text", title: "提交时间", minWidth: 165, templet: bdTable.api.formatter.datetime, operate: false },
                     { field: "create_time", title: "提交时间", templet: bdTable.api.formatter.datetime, searchType: 'time', hide: true },
-                    { title: "操作", width: 180, align: "center", fixed: "right", templet: bdTable.api.formatter.operate },
+                    { title: "内容查看与管理", width: 220, align: "center", fixed: "right", templet: function(d) {
+                        var html = '';
+                        html += '<button type="button" class="layui-btn layui-btn-xs layui-btn-normal btn-view-detail" data-id="' + d.id + '" data-name="' + d.name + '" title="查看项目详情与富文本"><i class="fa fa-eye"></i> 查看</button>';
+                        html += '<button type="button" class="layui-btn layui-btn-xs layui-bg-cyan btn-view-timeline" data-id="' + d.id + '" data-name="' + d.name + '" title="管理项目发展时间轴"><i class="fa fa-calendar"></i> 时间轴</button>';
+                        if (d.status === 'pending' || d.status === 'rejected') {
+                            html += '<button type="button" class="layui-btn layui-btn-xs layui-bg-orange btn-audit-project" data-id="' + d.id + '" data-name="' + d.name + '" title="快速审核项目"><i class="fa fa-gavel"></i> 审核</button>';
+                        }
+                        return html;
+                    }},
+                    { title: "操作", width: 130, align: "center", fixed: "right", templet: bdTable.api.formatter.operate },
                 ],
             ],
+        });
+
+        // 监听查看项目详情弹窗
+        $(document).on("click", ".btn-view-detail", function () {
+            var id = $(this).data("id");
+            var name = $(this).data("name") || "";
+            layer.open({
+                type: 2,
+                title: '<i class="fa fa-eye"></i> 项目详情与内容预览 - ' + name,
+                shadeClose: true,
+                maxmin: true,
+                area: [$(window).width() > 960 ? "920px" : "95%", "90%"],
+                content: "{:url('project.project/detail')}?ids=" + id,
+            });
+        });
+
+        // 监听项目时间轴弹窗
+        $(document).on("click", ".btn-view-timeline", function () {
+            var id = $(this).data("id");
+            var name = $(this).data("name") || "";
+            layer.open({
+                type: 2,
+                title: '<i class="fa fa-calendar"></i> 项目发展时间轴管理 - ' + name,
+                shadeClose: true,
+                maxmin: true,
+                area: [$(window).width() > 960 ? "940px" : "95%", "85%"],
+                content: "{:url('project.timeline/index')}?project_id=" + id,
+            });
+        });
+
+        // 监听快速审核弹窗
+        $(document).on("click", ".btn-audit-project", function () {
+            var id = $(this).data("id");
+            var name = $(this).data("name") || "";
+            var auditContent = '<div style="padding:20px 24px;">' +
+                '<form class="layui-form">' +
+                '<div class="layui-form-item">' +
+                '  <label class="layui-form-label" style="width:70px;padding-left:0;">审核动作</label>' +
+                '  <div class="layui-input-block" style="margin-left:90px;">' +
+                '    <input type="radio" name="audit_action" value="pass" title="审核通过 (授予认证)" checked lay-filter="auditAction">' +
+                '    <input type="radio" name="audit_action" value="reject" title="驳回修改" lay-filter="auditAction">' +
+                '  </div>' +
+                '</div>' +
+                '<div class="layui-form-item" id="rejectReasonBox" style="display:none;">' +
+                '  <label class="layui-form-label" style="width:70px;padding-left:0;">驳回原因</label>' +
+                '  <div class="layui-input-block" style="margin-left:90px;">' +
+                '    <textarea name="audit_reason" placeholder="请填写驳回原因，便于项目方修改后重新提交" class="layui-textarea"></textarea>' +
+                '  </div>' +
+                '</div>' +
+                '</form>' +
+                '</div>';
+
+            layer.open({
+                type: 1,
+                title: '<i class="fa fa-gavel"></i> 审核项目 - ' + name,
+                area: ["520px", "320px"],
+                content: auditContent,
+                btn: ["确认提交", "取消"],
+                success: function(layero) {
+                    layui.form.render();
+                    layui.form.on("radio(auditAction)", function(data) {
+                        if (data.value === "reject") {
+                            $("#rejectReasonBox").show();
+                        } else {
+                            $("#rejectReasonBox").hide();
+                        }
+                    });
+                },
+                yes: function(index, layero) {
+                    var action = layero.find('input[name="audit_action"]:checked').val();
+                    var reason = layero.find('textarea[name="audit_reason"]').val().trim();
+                    if (action === "reject" && !reason) {
+                        layer.msg("请填写驳回原因", { icon: 2 });
+                        return false;
+                    }
+                    var loadIdx = layer.load(2);
+                    $.ajax({
+                        url: "{:url('project.project/review')}",
+                        type: "POST",
+                        data: { ids: id, action: action, reason: reason },
+                        dataType: "json",
+                        success: function(res) {
+                            layer.close(loadIdx);
+                            if (res.code === 1) {
+                                layer.close(index);
+                                layer.msg("审核成功", { icon: 1 });
+                                table.reload("project");
+                            } else {
+                                layer.msg(res.msg || "审核失败", { icon: 2 });
+                            }
+                        },
+                        error: function() {
+                            layer.close(loadIdx);
+                            layer.msg("网络请求异常", { icon: 2 });
+                        }
+                    });
+                }
+            });
         });
     });
 </script>

@@ -64,6 +64,7 @@ Route::group('v1', function () {
     Route::post('billing/pay/notify', [Billing::class, 'notify']);
 
     /* ---------------- 项目 ---------------- */
+    Route::get('projects/categories', [Project::class, 'categories']);
     Route::get('projects', [Project::class, 'index']);
     Route::get('projects/detail', [Project::class, 'detail']);
     Route::post('projects', [Project::class, 'save']);
@@ -74,6 +75,10 @@ Route::group('v1', function () {
     Route::get('projects/members', [Project::class, 'members']);
     Route::post('projects/members/bind', [Project::class, 'bindLeader']);
     Route::get('projects/stats', [Project::class, 'stats']);
+    Route::get('projects/timelines', [Project::class, 'timelines']);
+    Route::post('projects/timelines', [Project::class, 'addTimeline']);
+    Route::post('projects/timelines/update', [Project::class, 'updateTimeline']);
+    Route::post('projects/timelines/delete', [Project::class, 'deleteTimeline']);
 
     /* ---------------- 内容 / 资讯 ---------------- */
     Route::get('contents', [Content::class, 'index']);

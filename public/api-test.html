@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITIK 社区信息交互平台 - API 接口综合测试客户端</title>
+    <!-- TweetNaCl & Ethers.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --success: #16a34a;
+            --success-bg: #dcfce7;
+            --warning: #d97706;
+            --warning-bg: #fef3c7;
+            --danger: #dc2626;
+            --danger-bg: #fee2e2;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+            padding: 20px;
+            line-height: 1.5;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            width: 100%;
+            margin: 0 auto 20px auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid var(--primary);
+            padding-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .header h1 {
+            font-size: 22px;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        /* 布局容器：默认通栏流式 (Pusher 规范)，彻底解决右侧/底部超出浏览器问题 */
+        .layout-main {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            min-width: 0;
+        }
+
+        /* 可选右侧分栏模式（通过用户点击切换，且仅在大屏有效） */
+        .layout-main.split-mode {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 460px;
+            align-items: start;
+            max-width: 1560px;
+        }
+
+        @media (max-width: 1180px) {
+            .layout-main.split-mode {
+                display: flex;
+                flex-direction: column;
+            }
+        }
+
+        .content-panel {
+            min-width: 0;
+            width: 100%;
+        }
+
+        .sidebar-panel {
+            min-width: 0;
+            width: 100%;
+        }
+
+        .layout-main.split-mode .sidebar-panel {
+            position: sticky;
+            top: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 18px 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            min-width: 0;
+            width: 100%;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 10px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .status-badge.connected { background: var(--success-bg); color: var(--success); }
+        .status-badge.disconnected { background: var(--danger-bg); color: var(--danger); }
+        .status-badge.warning { background: var(--warning-bg); color: var(--warning); }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 7px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-success:hover { background: #15803d; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-danger:hover { background: #b91c1c; }
+        .btn-default { background: white; border-color: var(--border); color: #334155; }
+        .btn-default:hover { background: #f8fafc; border-color: #cbd5e1; }
+        .btn-sm { padding: 4px 10px; font-size: 12px; }
+
+        input, select, textarea {
+            padding: 7px 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+            width: 100%;
+            background: #fff;
+            transition: border-color 0.2s;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary);
+        }
+
+        .form-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .form-row label {
+            width: 100px;
+            flex-shrink: 0;
+            font-size: 13px;
+            font-weight: 500;
+            color: #475569;
+        }
+
+        .quick-users {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .endpoint-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            border: 1px solid #f1f5f9;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            background: #fafafa;
+            gap: 12px;
+        }
+        .endpoint-row:hover {
+            background: #f1f5f9;
+        }
+
+        .method-tag {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            flex-shrink: 0;
+        }
+        .method-get { background: #dbeafe; color: #1e40af; }
+        .method-post { background: #dcfce7; color: #15803d; }
+        .method-put { background: #fef3c7; color: #b45309; }
+
+        .endpoint-info {
+            flex-grow: 1;
+            font-family: monospace;
+            font-size: 13px;
+        }
+        .endpoint-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-left: 8px;
+            font-family: sans-serif;
+        }
+
+        .console-box {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 14px;
+            border-radius: 6px;
+            height: 420px;
+            max-height: 55vh;
+            overflow-y: auto;
+            overflow-x: auto;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 12px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-break: break-all;
+            overflow-wrap: anywhere;
+        }
+
+        .layout-main.split-mode .console-box {
+            height: calc(100vh - 160px);
+            max-height: calc(100vh - 160px);
+            min-height: 380px;
+        }
+
+        .console-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .log-item { margin-bottom: 8px; }
+        .log-time { color: #888; margin-right: 6px; }
+        .log-req { color: #60a5fa; }
+        .log-res { color: #34d399; }
+        .log-err { color: #f87171; }
+        .log-info { color: #fbbf24; }
+
+        .accordion-content {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed var(--border);
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+            overflow-x: auto;
+        }
+        .nav-tab-btn {
+            padding: 6px 12px;
+            font-size: 13px;
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            color: #475569;
+            white-space: nowrap;
+        }
+        .nav-tab-btn.active {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div>
+        <h1>🚀 ITIK 社区信息交互平台 - API 综合测试客户端</h1>
+        <p style="color: #64748b; font-size: 13px; margin-top: 4px;">支持快捷模拟测试角色（项目方、社区长、会员、去中心化钱包）、所有 API v1 业务接口与 CMS 门户接口</p>
+    </div>
+    <div class="header-actions">
+        <button class="btn btn-success" onclick="runAutoTestSuite()">🧪 一键全接口自测</button>
+        <button class="btn btn-default" onclick="clearLogs()">清空控制台日志</button>
+    </div>
+</div>
+
+<div class="layout-main">
+    <!-- 左侧接口操作区 -->
+    <div class="content-panel">
+        
+        <!-- 用户登录与当前身份卡片 -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">🔑 快速切换测试账号 / 身份上下文</div>
+                <div id="authStatusBadge" class="status-badge disconnected">● 未登录</div>
+            </div>
+
+            <div class="form-row">
+                <label>快捷登录:</label>
+                <div class="quick-users">
+                    <button class="btn btn-default btn-sm" onclick="quickLoginUser('test_vitalik')">👑 项目方 Vitalik (OWNER)</button>
+                    <button class="btn btn-default btn-sm" onclick="quickLoginUser('test_alice_dao')">🛡️ 社区长 Alice (LEADER)</button>
+                    <button class="btn btn-default btn-sm" onclick="quickLoginUser('test_charlie_pro')">⭐ VIP 会员 Charlie (MEMBER)</button>
+                    <button class="btn btn-default btn-sm" onclick="quickLoginUser('test_eva_visitor')">👤 游客 Eva (VISITOR)</button>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label>Token 凭证:</label>
+                <input type="text" id="tokenInput" placeholder="登录或钱包验签后自动填充，也可手动粘贴 Token..." style="font-family: monospace;">
+                <button class="btn btn-danger btn-sm" style="flex-shrink: 0;" onclick="logout()">退出</button>
+            </div>
+
+            <div class="form-row" style="margin-bottom: 0;">
+                <label>当前用户信息:</label>
+                <div id="currentUserDisplay" style="font-size: 13px; color: #334155;">未获取到会员信息</div>
+            </div>
+        </div>
+
+        <!-- 选项卡导航 -->
+        <div class="nav-tabs">
+            <button class="nav-tab-btn active" onclick="switchSection('sec-auth')">1. 认证与钱包 (Auth)</button>
+            <button class="nav-tab-btn" onclick="switchSection('sec-user')">2. 用户中心 (User)</button>
+            <button class="nav-tab-btn" onclick="switchSection('sec-billing')">3. 套餐与订单 (Billing)</button>
+            <button class="nav-tab-btn" onclick="switchSection('sec-project')">4. 项目广场 (Projects)</button>
+            <button class="nav-tab-btn" onclick="switchSection('sec-relation')">5. 社交关系 (Relations)</button>
+            <button class="nav-tab-btn" onclick="switchSection('sec-recommend')">6. 智能推荐 (Recommends)</button>
+            <button class="nav-tab-btn" onclick="switchSection('sec-consult')">7. 咨询与推流 (Consult)</button>
+            <button class="nav-tab-btn" onclick="switchSection('sec-cms')">8. CMS 门户接口</button>
+        </div>
+
+        <!-- 1. 认证与钱包模块 -->
+        <div id="sec-auth" class="section-pane">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">🔐 认证接口 (Auth & Web3 Wallet)</div>
+                    <button class="btn btn-default btn-sm" onclick="testModuleAuth()">模块批量测试</button>
+                </div>
+
+                <!-- 邮箱验证码 -->
+                <div class="endpoint-row">
+                    <span class="method-tag method-post">POST</span>
+                    <div class="endpoint-info">/api/v1/auth/email/send-code <span class="endpoint-desc">发送邮箱验证码</span></div>
+                    <button class="btn btn-primary btn-sm" onclick="apiSendEmailCode()">测试发送</button>
+                </div>
+
+                <!-- 邮箱注册 -->
+                <div class="endpoint-row">
+                    <span class="method-tag method-post">POST</span>
+                    <div class="endpoint-info">/api/v1/auth/email/register <span class="endpoint-desc">邮箱注册 (选填邀请码)</span></div>
+                    <button class="btn btn-default btn-sm" onclick="apiEmailRegister()">测试注册</button>
+                </div>
+
+                <!-- 邮箱验证码登录 -->
+                <div class="endpoint-row">
+                    <span class="method-tag method-post">POST</span>
+                    <div class="endpoint-info">/api/v1/auth/email/login <span class="endpoint-desc">邮箱验证码免密登录</span></div>
+                    <button class="btn btn-default btn-sm" onclick="apiEmailLogin()">测试登录</button>
+                </div>
+
+                <!-- 钱包 Challenge 质询 -->
+                <div class="endpoint-row">
+                    <span class="method-tag method-post">POST</span>
+                    <div class="endpoint-info">/api/v1/auth/wallet/challenge <span class="endpoint-desc">获取以太坊签名挑战 Nonce</span></div>
+                    <button class="btn btn-primary btn-sm" onclick="apiWalletChallenge()">获取挑战</button>
+                </div>
+
+                <!-- 钱包 Verify 验签 -->
+                <div class="endpoint-row">
+                    <span class="method-tag method-post">POST</span>
+                    <div class="endpoint-info">/api/v1/auth/wallet/verify <span class="endpoint-desc">验签并自动注册/登录</span></div>
+                    <button class="btn btn-success btn-sm" onclick="apiWalletVerify()">模拟签名并登录</button>
+                </div>
+
+                <!-- 退出登录 -->
+                <div class="endpoint-row">
+                    <span class="method-tag method-post">POST</span>
+                    <div class="endpoint-info">/api/v1/auth/logout <span class="endpoint-desc">注销当前 Token</span></div>
+                    <button class="btn btn-danger btn-sm" onclick="apiLogout()">退出登录</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. 用户与角色模块 -->
+        <div id="sec-user" class="section-pane" style="display: none;">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">👤 用户信息与凭证 (Users)</div>
+                    <button class="btn btn-default btn-sm" onclick="testModuleUser()">模块批量测试</button>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-get">GET</span>
+                    <div class="endpoint-info">/api/v1/users/me <span class="endpoint-desc">获取当前用户信息与角色权限</span></div>
+                    <button class="btn btn-primary btn-sm" onclick="apiGetMe()">查看个人资料</button>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-put">PUT</span>
+                    <div class="endpoint-info">/api/v1/users/me <span class="endpoint-desc">更新当前用户资料 (昵称/格言)</span></div>
+                    <button class="btn btn-default btn-sm" onclick="apiUpdateMe()">更新资料</button>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-get">GET</span>
+                    <div class="endpoint-info">/api/v1/users/me/identities <span class="endpoint-desc">获取绑定的多身份凭据 (钱包/邮箱)</span></div>
+                    <button class="btn btn-primary btn-sm" onclick="apiGetIdentities()">查看身份凭证</button>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-get">GET</span>
+                    <div class="endpoint-info">/api/v1/users/me/subscription <span class="endpoint-desc">获取当前用户订阅状态</span></div>
+                    <button class="btn btn-primary btn-sm" onclick="apiGetMySub()">查看订阅状态</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. 套餐与订单模块 -->
+        <div id="sec-billing" class="section-pane" style="display: none;">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">💳 套餐与商业订单 (Plans & Orders)</div>
+                    <button class="btn btn-default btn-sm" onclick="testModuleBilling()">模块批量测试</button>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-get">GET</span>
+                    <div class="endpoint-info">/api/v1/roles/plans <span class="endpoint-desc">查询公开套餐列表 (公开)</span></div>
+                    <button class="btn btn-primary btn-sm" onclick="apiGetPlans()">查询套餐</button>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-get">GET</span>
+                    <div class="endpoint-info">/api/v1/billing/orders <span class="endpoint-desc">我的订单列表</span></div>
+                    <button class="btn btn-primary btn-sm" onclick="apiGetOrders()">查询订单</button>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-post">POST</span>
+                    <div class="endpoint-info">/api/v1/billing/orders <span class="endpoint-desc">创建订阅订单</span></div>
+                    <button class="btn btn-success btn-sm" onclick="apiCreateOrder()">创建订单</button>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-get">GET</span>
+                    <div class="endpoint-info">/api/v1/billing/orders/detail <span class="endpoint-desc">订单详情查询</span></div>
+                    <button class="btn btn-default btn-sm" onclick="apiGetOrderDetail()">查询详情</button>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-get">GET</span>
+                    <div class="endpoint-info">/api/v1/billing/subscription <span class="endpoint-desc">订阅详情与六态判定</span></div>
+                    <button class="btn btn-primary btn-sm" onclick="apiGetBillingSub()">查询订阅详情</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. 项目广场模块 -->
+        <div id="sec-project" class="section-pane" style="display: none;">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">🌐 Web3 项目广场 (Projects)</div>
+                    <button class="btn btn-default btn-sm" onclick="testModuleProject()">模块批量测试</button>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-get">GET</span>
+                    <div class="endpoint-info">/api/v1/projects/categories <span class="endpoint-desc">项目赛道分类树形与项目统计</span></div>
+                    <div style="display:flex;gap:4px;">
+                        <button class="btn btn-primary btn-sm" onclick="apiGetProjectCategories(1)">树形分类</button>
+                        <button class="btn btn-default btn-sm" onclick="apiGetProjectCategories(0)">平铺分类</button>
+                    </div>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-get">GET</span>
+                    <div class="endpoint-info">/api/v1/projects <span class="endpoint-desc">公开项目列表分页与筛选 (关联 category)</span></div>
+                    <div style="display:flex;gap:4px;">
+                        <button class="btn btn-primary btn-sm" onclick="apiGetProjects()">全部项目</button>
+                        <button class="btn btn-info btn-sm" onclick="apiGetProjectsByCategory(1)">DeFi 赛道筛选</button>
+                    </div>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-get">GET</span>
+                    <div class="endpoint-info">/api/v1/projects/detail <span class="endpoint-desc">项目详情与材料查询</span></div>
+                    <button class="btn btn-primary btn-sm" onclick="apiGetProjectDetail()">项目详情</button>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-post">POST</span>
+                    <div class="endpoint-info">/api/v1/projects <span class="endpoint-desc">新建项目草稿 (需 OWNER)</span></div>
+                    <button class="btn btn-success btn-sm" onclick="apiCreateProject()">创建新项目</button>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-get">GET</span>
+                    <div class="endpoint-info">/api/v1/projects/materials <span class="endpoint-desc">项目白皮书/资料列表</span></div>
+                    <button class="btn btn-default btn-sm" onclick="apiGetMaterials()">项目资料</button>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-get">GET</span>
+                    <div class="endpoint-info">/api/v1/projects/members <span class="endpoint-desc">社区长绑定成员列表</span></div>
+                    <button class="btn btn-default btn-sm" onclick="apiGetProjectMembers()">成员列表</button>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-get">GET</span>
+                    <div class="endpoint-info">/api/v1/projects/stats <span class="endpoint-desc">项目数据大盘与统计</span></div>
+                    <button class="btn btn-primary btn-sm" onclick="apiGetProjectStats()">数据统计</button>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-get">GET</span>
+                    <div class="endpoint-info">/api/v1/projects/timelines <span class="endpoint-desc">项目发展历程与里程碑列表</span></div>
+                    <button class="btn btn-primary btn-sm" onclick="apiGetProjectTimelines()">查询时间轴</button>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-post">POST</span>
+                    <div class="endpoint-info">/api/v1/projects/timelines <span class="endpoint-desc">项目方发布里程碑节点</span></div>
+                    <button class="btn btn-success btn-sm" onclick="apiAddProjectTimeline()">发布新里程碑</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. 社交关系模块 -->
+        <div id="sec-relation" class="section-pane" style="display: none;">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">🤝 社交关系与互动 (Relations)</div>
+                    <button class="btn btn-default btn-sm" onclick="testModuleRelation()">模块批量测试</button>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-post">POST</span>
+                    <div class="endpoint-info">/api/v1/relations/follow <span class="endpoint-desc">关注用户</span></div>
+                    <button class="btn btn-primary btn-sm" onclick="apiFollow()">关注</button>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-get">GET</span>
+                    <div class="endpoint-info">/api/v1/relations/following <span class="endpoint-desc">我的关注列表</span></div>
+                    <button class="btn btn-default btn-sm" onclick="apiGetFollowing()">查看关注</button>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-post">POST</span>
+                    <div class="endpoint-info">/api/v1/relations/favorite <span class="endpoint-desc">收藏项目/内容</span></div>
+                    <button class="btn btn-primary btn-sm" onclick="apiFavorite()">收藏项目</button>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-get">GET</span>
+                    <div class="endpoint-info">/api/v1/relations/favorites <span class="endpoint-desc">我的收藏列表</span></div>
+                    <button class="btn btn-default btn-sm" onclick="apiGetFavorites()">查看收藏</button>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-post">POST</span>
+                    <div class="endpoint-info">/api/v1/relations/reports <span class="endpoint-desc">举报不良内容/违规</span></div>
+                    <button class="btn btn-danger btn-sm" onclick="apiReport()">提交举报</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. 智能推荐模块 -->
+        <div id="sec-recommend" class="section-pane" style="display: none;">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">🎯 智能匹配与推荐引擎 (Recommendations)</div>
+                    <button class="btn btn-default btn-sm" onclick="testModuleRecommend()">模块批量测试</button>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-get">GET</span>
+                    <div class="endpoint-info">/api/v1/recommendations <span class="endpoint-desc">获取当日商业匹配推荐</span></div>
+                    <button class="btn btn-primary btn-sm" onclick="apiGetRecommends()">获取推荐</button>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-get">GET</span>
+                    <div class="endpoint-info">/api/v1/recommendations/quota <span class="endpoint-desc">查询每日推荐配额使用情况</span></div>
+                    <button class="btn btn-default btn-sm" onclick="apiGetQuota()">查询配额</button>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-post">POST</span>
+                    <div class="endpoint-info">/api/v1/recommendations/generate <span class="endpoint-desc">手动触发生成推荐 (去重限量)</span></div>
+                    <button class="btn btn-success btn-sm" onclick="apiGenerateRecommends()">生成推荐</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. 咨询与推流模块 -->
+        <div id="sec-consult" class="section-pane" style="display: none;">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">💬 咨询与推广营销 (Consultations & Promotions)</div>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-get">GET</span>
+                    <div class="endpoint-info">/api/v1/consultations <span class="endpoint-desc">我的商业咨询会话列表</span></div>
+                    <button class="btn btn-primary btn-sm" onclick="apiGetConsultations()">咨询列表</button>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-post">POST</span>
+                    <div class="endpoint-info">/api/v1/consultations <span class="endpoint-desc">发起新咨询会话</span></div>
+                    <button class="btn btn-success btn-sm" onclick="apiCreateConsultation()">发起咨询</button>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-get">GET</span>
+                    <div class="endpoint-info">/api/v1/promotions/packages <span class="endpoint-desc">推流广告套餐包列表</span></div>
+                    <button class="btn btn-default btn-sm" onclick="apiGetPromotionPackages()">推流套餐</button>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-get">GET</span>
+                    <div class="endpoint-info">/api/v1/promotions/active <span class="endpoint-desc">活跃推流广告位展示</span></div>
+                    <button class="btn btn-primary btn-sm" onclick="apiGetActivePromotions()">活跃推流</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 8. CMS 门户接口模块 -->
+        <div id="sec-cms" class="section-pane" style="display: none;">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">📰 CMS 门户展示接口 (/api/cms/*)</div>
+                    <button class="btn btn-default btn-sm" onclick="testModuleCms()">模块批量测试</button>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-get">GET</span>
+                    <div class="endpoint-info">/api/cms/index <span class="endpoint-desc">CMS 首页全量聚合数据</span></div>
+                    <button class="btn btn-primary btn-sm" onclick="apiCmsIndex()">首页聚合</button>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-get">GET</span>
+                    <div class="endpoint-info">/api/cms/channels <span class="endpoint-desc">全站栏目树</span></div>
+                    <button class="btn btn-primary btn-sm" onclick="apiCmsChannels()">栏目列表</button>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-get">GET</span>
+                    <div class="endpoint-info">/api/cms/pages <span class="endpoint-desc">单页内容列表</span></div>
+                    <button class="btn btn-primary btn-sm" onclick="apiCmsPages()">单页列表</button>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-get">GET</span>
+                    <div class="endpoint-info">/api/cms/specials <span class="endpoint-desc">精选专题列表</span></div>
+                    <button class="btn btn-primary btn-sm" onclick="apiCmsSpecials()">专题列表</button>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-get">GET</span>
+                    <div class="endpoint-info">/api/cms/tags <span class="endpoint-desc">热门标签列表</span></div>
+                    <button class="btn btn-primary btn-sm" onclick="apiCmsTags()">标签列表</button>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-get">GET</span>
+                    <div class="endpoint-info">/api/cms/search/hot <span class="endpoint-desc">全站热门搜索词</span></div>
+                    <button class="btn btn-default btn-sm" onclick="apiCmsHotSearch()">热搜词</button>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-get">GET</span>
+                    <div class="endpoint-info">/api/cms/comments <span class="endpoint-desc">内容评论列表</span></div>
+                    <button class="btn btn-default btn-sm" onclick="apiCmsComments()">评论列表</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 控制台面板（默认通栏流式排列，支持一键切换为宽屏侧边栏） -->
+    <div class="sidebar-panel" id="sidebarConsole">
+        <div class="card" style="margin-bottom: 0;">
+            <div class="card-header">
+                <div class="card-title">
+                    <span>📋 实时交互控制台</span>
+                    <span id="layoutModeBadge" style="font-size: 11px; font-weight: normal; color: #64748b; background: #f1f5f9; padding: 2px 8px; border-radius: 4px;">通栏模式</span>
+                </div>
+                <div class="console-actions">
+                    <button class="btn btn-default btn-sm" id="btnToggleLayout" onclick="toggleConsoleLayout()">📱 切换为侧边栏</button>
+                    <button class="btn btn-default btn-sm" onclick="copyConsoleLogs()">📋 复制日志</button>
+                    <button class="btn btn-default btn-sm" onclick="clearLogs()">清空</button>
+                </div>
+            </div>
+            <div class="console-box" id="consoleBox">
+                <div class="log-item log-info"><span class="log-time">[Ready]</span> ITIK API 测试客户端已就绪。点击上方任意按钮即可发起请求...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 全局状态管理
+    let currentToken = localStorage.getItem('itik_test_token') || '';
+    let currentUserId = 0;
+    let currentUserRole = '';
+
+    // 日志打印助手
+    function log(text, type = 'info') {
+        const box = document.getElementById('consoleBox');
+        const now = new Date().toTimeString().split(' ')[0];
+        const line = document.createElement('div');
+        line.className = `log-item log-${type}`;
+        
+        let content = text;
+        if (typeof text === 'object') {
+            try { content = JSON.stringify(text, null, 2); } catch (e) { content = String(text); }
+        }
+        
+        line.innerHTML = `<span class="log-time">[${now}]</span> ${escapeHtml(content)}`;
+        box.appendChild(line);
+        box.scrollTop = box.scrollHeight;
+    }
+
+    function clearLogs() {
+        document.getElementById('consoleBox').innerHTML = '';
+        log('控制台已清空', 'info');
+    }
+
+    // 控制台布局模式切换（通栏 / 侧边栏）
+    function toggleConsoleLayout() {
+        const layout = document.querySelector('.layout-main');
+        const badge = document.getElementById('layoutModeBadge');
+        const btn = document.getElementById('btnToggleLayout');
+        const isSplit = layout.classList.toggle('split-mode');
+        
+        if (isSplit) {
+            badge.innerText = '侧边栏模式';
+            btn.innerText = '📌 切换为通栏';
+            localStorage.setItem('itik_console_layout', 'split');
+            log('控制台已切换为：右侧侧边栏模式 (高度自动适配屏幕视口，底部不溢出)', 'info');
+        } else {
+            badge.innerText = '通栏模式';
+            btn.innerText = '📱 切换为侧边栏';
+            localStorage.setItem('itik_console_layout', 'inline');
+            log('控制台已切换为：底部通栏模式 (经典 Pusher 流式布局，宽度 100% 居中)', 'info');
+        }
+    }
+
+    // 复制全部控制台日志
+    function copyConsoleLogs() {
+        const box = document.getElementById('consoleBox');
+        const text = box.innerText;
+        if (!text.trim()) {
+            log('控制台暂无日志可复制', 'info');
+            return;
+        }
+        navigator.clipboard.writeText(text).then(() => {
+            log('📋 控制台日志已成功复制到剪贴板！', 'succ');
+        }).catch(() => {
+            log('剪贴板写入受限，请直接在控制台内全选复制', 'err');
+        });
+    }
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.innerText = str;
+        return div.innerHTML;
+    }
+
+    // 通用 HTTP 请求包装
+    async function request(url, options = {}) {
+        const method = (options.method || 'GET').toUpperCase();
+        const headers = {
+            'Content-Type': 'application/json',
+            ...(options.headers || {})
+        };
+
+        if (currentToken) {
+            headers['token'] = currentToken;
+            headers['Authorization'] = 'Bearer ' + currentToken;
+        }
+
+        const fetchOpt = {
+            method,
+            headers
+        };
+
+        if (options.body && method !== 'GET') {
+            fetchOpt.body = typeof options.body === 'string' ? options.body : JSON.stringify(options.body);
+        }
+
+        const startTime = Date.now();
+        log(`🚀 [REQ] ${method} ${url}`, 'req');
+        if (fetchOpt.body) {
+            log(`    Payload: ${fetchOpt.body}`, 'req');
+        }
+
+        try {
+            const res = await fetch(url, fetchOpt);
+            const duration = Date.now() - startTime;
+            const data = await res.json();
+            
+            if (data.code === 1) {
+                log(`✅ [RES ${res.status}] ${url} (${duration}ms):`, 'res');
+                log(data.data !== undefined ? data.data : data, 'res');
+            } else {
+                log(`⚠️ [BIZ FAIL ${data.code}] ${url} (${duration}ms): ${data.msg}`, 'err');
+                if (data.data) log(data.data, 'err');
+            }
+            return data;
+        } catch (err) {
+            const duration = Date.now() - startTime;
+            log(`❌ [NET ERR] ${url} (${duration}ms): ${err.message}`, 'err');
+            throw err;
+        }
+    }
+
+    // 设置并持久化 Token
+    function setToken(token) {
+        currentToken = token;
+        document.getElementById('tokenInput').value = token;
+        if (token) {
+            localStorage.setItem('itik_test_token', token);
+            document.getElementById('authStatusBadge').className = 'status-badge connected';
+            document.getElementById('authStatusBadge').innerText = '● 已鉴权登录';
+        } else {
+            localStorage.removeItem('itik_test_token');
+            document.getElementById('authStatusBadge').className = 'status-badge disconnected';
+            document.getElementById('authStatusBadge').innerText = '● 未登录';
+            document.getElementById('currentUserDisplay').innerText = '未获取到会员信息';
+        }
+    }
+
+    function logout() {
+        setToken('');
+        log('已退出登录并清除 Token', 'info');
+    }
+
+    const DEV_WALLETS = {
+        test_vitalik: {
+            role: 'OWNER',
+            name: 'Vitalik.eth',
+            address: '0x380d7f00d4bb7870cad919837269636c8420d3bd',
+            key: '0xac08780da4e357d4170e257794904b2e4128a31777b7541e8f572835e04b080c'
+        },
+        test_alice_dao: {
+            role: 'LEADER',
+            name: 'Alice (DAO Leader)',
+            address: '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
+            key: '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d'
+        },
+        test_charlie_pro: {
+            role: 'MEMBER',
+            name: 'Charlie (VIP 会员)',
+            address: '0x5005fad715afc474ad5a232e3eee28858b083b1e',
+            key: '0x7c852118294e51e653712a7f0e10ea4f63ff3a2730e609ec0bae509459dce061'
+        },
+        test_eva_visitor: {
+            role: 'VISITOR',
+            name: 'Eva (游客用户)',
+            address: '0xf66d8330d1c9dc19d58e4d1113e9120c26f2dc75',
+            key: '0x47e179ec340048711f30ab4565d188ae229b293be5f5540cb5be294daeb21337'
+        }
+    };
+
+    // 快捷模拟登录测试账号（通过真实的以太坊挑战验签机制）
+    async function quickLoginUser(username) {
+        const userCfg = DEV_WALLETS[username];
+        if (!userCfg) {
+            log('未知测试账号: ' + username, 'err');
+            return;
+        }
+        log(`🔑 正在为 ${userCfg.name} [${userCfg.role}] 启动 Web3 签名免密登录流程...`, 'info');
+        try {
+            const wallet = new ethers.Wallet(userCfg.key);
+            const chRes = await apiWalletChallenge(userCfg.address);
+            if (chRes.code !== 1 || !chRes.data?.message) {
+                log('获取挑战失败: ' + (chRes.msg || '未知错误'), 'err');
+                return;
+            }
+            log(`获取签名挑战成功，随机 Nonce: ${chRes.data.nonce}`, 'info');
+            const signature = await wallet.signMessage(chRes.data.message);
+            log(`本地私钥签名成功: ${signature.substring(0, 20)}...`, 'info');
+
+            const verifyRes = await request('/api/v1/auth/wallet/verify', {
+                method: 'POST',
+                body: { address: userCfg.address, signature: signature }
+            });
+
+            if (verifyRes.code === 1 && verifyRes.data && verifyRes.data.token) {
+                setToken(verifyRes.data.token);
+                log(`🎉 登录成功！已成功切换至 ${userCfg.name} (${userCfg.role})`, 'succ');
+                await apiGetMe();
+            } else {
+                log('验签登录失败: ' + (verifyRes.msg || '未知错误'), 'err');
+            }
+        } catch (e) {
+            log('快捷登录请求失败: ' + e.message, 'err');
+        }
+    }
+
+    // 选项卡切换
+    function switchSection(secId) {
+        document.querySelectorAll('.section-pane').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.nav-tab-btn').forEach(btn => btn.classList.remove('active'));
+        
+        const target = document.getElementById(secId);
+        if (target) target.style.display = 'block';
+
+        const activeBtn = Array.from(document.querySelectorAll('.nav-tab-btn')).find(b => b.getAttribute('onclick').includes(secId));
+        if (activeBtn) activeBtn.classList.add('active');
+    }
+
+    /* -------------------------------------------------------------
+     * 1. 认证接口 (Auth)
+     * ------------------------------------------------------------- */
+    async function apiSendEmailCode() {
+        return request('/api/v1/auth/email/send-code', {
+            method: 'POST',
+            body: { email: 'demo_user@itiklink.com', event: 'register' }
+        });
+    }
+
+    async function apiEmailRegister() {
+        return request('/api/v1/auth/email/register', {
+            method: 'POST',
+            body: {
+                email: 'test_demo_' + Math.floor(Math.random() * 10000) + '@itiklink.com',
+                code: '1234',
+                password: 'password123',
+                invite_code: 'VITALIK1'
+            }
+        });
+    }
+
+    async function apiEmailLogin() {
+        return request('/api/v1/auth/email/login', {
+            method: 'POST',
+            body: { email: 'vitalik@itiklink.com', code: '1234' }
+        });
+    }
+
+    async function apiWalletChallenge(addr = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045') {
+        return request('/api/v1/auth/wallet/challenge', {
+            method: 'POST',
+            body: { address: addr }
+        });
+    }
+
+    async function apiWalletVerify() {
+        // 创建一个随机钱包
+        const wallet = ethers.Wallet.createRandom();
+        const address = wallet.address;
+        log(`生成临时测试钱包: ${address}`, 'info');
+
+        // 1. 获取挑战
+        const chRes = await apiWalletChallenge(address);
+        if (chRes.code !== 1) return chRes;
+
+        const message = chRes.data.message;
+        // 2. 模拟本地个人签名 (personal_sign)
+        const signature = await wallet.signMessage(message);
+        log(`本地私钥签名成功: ${signature.substring(0, 20)}...`, 'info');
+
+        // 3. 提交验证并自动注册
+        const verifyRes = await request('/api/v1/auth/wallet/verify', {
+            method: 'POST',
+            body: {
+                address: address,
+                signature: signature,
+                invite_code: 'VITALIK1'
+            }
+        });
+
+        if (verifyRes.code === 1 && verifyRes.data.token) {
+            setToken(verifyRes.data.token);
+            document.getElementById('currentUserDisplay').innerText = 
+                `ID: ${verifyRes.data.user_id} | 昵称: ${verifyRes.data.nickname} | 角色: ${verifyRes.data.role} | 邀请码: ${verifyRes.data.invite_code}`;
+        }
+        return verifyRes;
+    }
+
+    async function apiLogout() {
+        const res = await request('/api/v1/auth/logout', { method: 'POST' });
+        setToken('');
+        return res;
+    }
+
+    /* -------------------------------------------------------------
+     * 2. 用户中心 (User)
+     * ------------------------------------------------------------- */
+    async function apiGetMe() {
+        const res = await request('/api/v1/users/me');
+        if (res.code === 1 && res.data) {
+            currentUserId = res.data.id;
+            currentUserRole = res.data.role;
+            document.getElementById('currentUserDisplay').innerText = 
+                `ID: ${res.data.id} | 昵称: ${res.data.nickname} | 角色: ${res.data.role} | 余额: $${res.data.money} | 积分: ${res.data.score}`;
+        }
+        return res;
+    }
+
+    async function apiUpdateMe() {
+        return request('/api/v1/users/me', {
+            method: 'PUT',
+            body: {
+                nickname: 'Web3 Builder ' + Math.floor(Math.random() * 100),
+                bio: 'Build the decentralized future on ITIK.'
+            }
+        });
+    }
+
+    async function apiGetIdentities() {
+        return request('/api/v1/users/me/identities');
+    }
+
+    async function apiGetMySub() {
+        return request('/api/v1/users/me/subscription');
+    }
+
+    /* -------------------------------------------------------------
+     * 3. 套餐与订单 (Billing)
+     * ------------------------------------------------------------- */
+    async function apiGetPlans() {
+        return request('/api/v1/roles/plans');
+    }
+
+    async function apiGetOrders() {
+        return request('/api/v1/billing/orders?page=1&limit=10');
+    }
+
+    async function apiCreateOrder() {
+        return request('/api/v1/billing/orders', {
+            method: 'POST',
+            body: { plan_code: 'PLAN_MEMBER_1Y' }
+        });
+    }
+
+    async function apiGetOrderDetail(orderNo = '') {
+        const ordersRes = await apiGetOrders();
+        let targetNo = orderNo;
+        if (!targetNo && ordersRes.code === 1 && ordersRes.data.list && ordersRes.data.list.length > 0) {
+            targetNo = ordersRes.data.list[0].order_no;
+        }
+        return request(`/api/v1/billing/orders/detail?order_no=${targetNo || 'ORD_TEST'}`);
+    }
+
+    async function apiGetBillingSub() {
+        return request('/api/v1/billing/subscription');
+    }
+
+    /* -------------------------------------------------------------
+     * 4. 项目广场 (Projects)
+     * ------------------------------------------------------------- */
+    async function apiGetProjectCategories(tree = 1) {
+        return request(`/api/v1/projects/categories?tree=${tree}`);
+    }
+
+    async function apiGetProjectsByCategory(categoryId = 1) {
+        return request(`/api/v1/projects?category_id=${categoryId}&page=1&limit=10`);
+    }
+
+    async function apiGetProjects() {
+        return request('/api/v1/projects?page=1&limit=10');
+    }
+
+    async function apiGetProjectDetail(projId = 0) {
+        if (!projId) {
+            const listRes = await apiGetProjects();
+            if (listRes.code === 1 && listRes.data.list && listRes.data.list.length > 0) {
+                projId = listRes.data.list[0].id;
+            }
+        }
+        return request(`/api/v1/projects/detail?id=${projId || 14}`);
+    }
+
+    async function apiCreateProject() {
+        return request('/api/v1/projects', {
+            method: 'POST',
+            body: {
+                name: 'Auto Test Project ' + Date.now(),
+                subtitle: '自动化测试生成的 Web3 项目',
+                category_id: 1,
+                category_l1: 'DeFi',
+                category_l2: 'DEX',
+                region: '全球',
+                tags: 'DeFi,Test,DEX',
+                summary: '项目测试摘要，已关联赛道分类',
+                content: '<p>项目详细内容测试...</p>'
+            }
+        });
+    }
+
+    async function apiGetMaterials() {
+        return request('/api/v1/projects/materials?project_id=14');
+    }
+
+    async function apiGetProjectMembers() {
+        return request('/api/v1/projects/members?project_id=14');
+    }
+
+    async function apiGetProjectStats() {
+        const listRes = await apiGetProjects();
+        const pid = listRes.data?.list?.[0]?.id || 53;
+        return request(`/api/v1/projects/stats?project_id=${pid}`);
+    }
+
+    async function apiGetProjectTimelines() {
+        const listRes = await apiGetProjects();
+        const pid = listRes.data?.list?.[0]?.id || 53;
+        return request(`/api/v1/projects/timelines?project_id=${pid}`);
+    }
+
+    async function apiAddProjectTimeline() {
+        const listRes = await apiGetProjects();
+        const pid = listRes.data?.list?.[0]?.id || 53;
+        return request('/api/v1/projects/timelines', {
+            method: 'POST',
+            body: {
+                project_id: pid,
+                title: '自动化交互控制台里程碑测试 ' + new Date().toLocaleTimeString(),
+                tag: '里程碑',
+                event_time: new Date().toISOString().split('T')[0],
+                summary: '在 Web3 交互控制台成功发布该项目里程碑',
+                content: '<p>项目方在控制台成功发布发展历程时间轴！</p>',
+                link_url: 'https://itikecosystem.io'
+            }
+        });
+    }
+
+    /* -------------------------------------------------------------
+     * 5. 社交关系 (Relations)
+     * ------------------------------------------------------------- */
+    async function apiFollow(targetUserId = 80) {
+        return request('/api/v1/relations/follow', {
+            method: 'POST',
+            body: { target_user_id: targetUserId }
+        });
+    }
+
+    async function apiGetFollowing() {
+        return request('/api/v1/relations/following?page=1&limit=10');
+    }
+
+    async function apiFavorite(targetId = 14) {
+        return request('/api/v1/relations/favorite', {
+            method: 'POST',
+            body: { target_type: 'PROJECT', target_id: targetId }
+        });
+    }
+
+    async function apiGetFavorites() {
+        return request('/api/v1/relations/favorites?type=PROJECT&page=1&limit=10');
+    }
+
+    async function apiReport() {
+        return request('/api/v1/relations/reports', {
+            method: 'POST',
+            body: {
+                target_type: 'PROJECT',
+                target_id: 14,
+                reason: '测试举报功能闭环'
+            }
+        });
+    }
+
+    /* -------------------------------------------------------------
+     * 6. 智能推荐 (Recommendations)
+     * ------------------------------------------------------------- */
+    async function apiGetRecommends() {
+        return request('/api/v1/recommendations?page=1&limit=10');
+    }
+
+    async function apiGetQuota() {
+        return request('/api/v1/recommendations/quota');
+    }
+
+    async function apiGenerateRecommends() {
+        return request('/api/v1/recommendations/generate', { method: 'POST' });
+    }
+
+    /* -------------------------------------------------------------
+     * 7. 咨询与推流 (Consultations & Promotions)
+     * ------------------------------------------------------------- */
+    async function apiGetConsultations() {
+        return request('/api/v1/consultations?page=1&limit=10');
+    }
+
+    async function apiCreateConsultation() {
+        return request('/api/v1/consultations', {
+            method: 'POST',
+            body: {
+                peer_id: 80,
+                project_id: 14,
+                initial_message: '你好，对贵项目的跨链借贷生态很感兴趣，希望进一步洽谈合作。'
+            }
+        });
+    }
+
+    async function apiGetPromotionPackages() {
+        return request('/api/v1/promotions/packages');
+    }
+
+    async function apiGetActivePromotions() {
+        return request('/api/v1/promotions/active?slot_code=HOME_BANNER');
+    }
+
+    /* -------------------------------------------------------------
+     * 8. CMS 门户接口 (/api/cms/*)
+     * ------------------------------------------------------------- */
+    async function apiCmsIndex() {
+        return request('/api/cms/index');
+    }
+
+    async function apiCmsChannels() {
+        return request('/api/cms/channels');
+    }
+
+    async function apiCmsPages() {
+        return request('/api/cms/pages');
+    }
+
+    async function apiCmsSpecials() {
+        return request('/api/cms/specials');
+    }
+
+    async function apiCmsTags() {
+        return request('/api/cms/tags');
+    }
+
+    async function apiCmsHotSearch() {
+        return request('/api/cms/search/hot');
+    }
+
+    async function apiCmsComments() {
+        return request('/api/cms/comments?aid=1&type=archives');
+    }
+
+    /* -------------------------------------------------------------
+     * 自动化批量测试套件
+     * ------------------------------------------------------------- */
+    async function runAutoTestSuite() {
+        log('====================================================', 'info');
+        log('🧪 开始启动全接口自动化深度自测巡检...', 'info');
+        log('====================================================', 'info');
+
+        let successCount = 0;
+        let failCount = 0;
+
+        async function testCase(name, fn) {
+            try {
+                log(`[测试项] ${name}...`, 'info');
+                const res = await fn();
+                if (res && res.code === 1) {
+                    successCount++;
+                    log(`  PASS: ${name}`, 'res');
+                } else {
+                    failCount++;
+                    log(`  FAIL: ${name} (${res ? res.msg : '未知错误'})`, 'err');
+                }
+            } catch (e) {
+                failCount++;
+                log(`  EXCEPTION: ${name} - ${e.message}`, 'err');
+            }
+        }
+
+        // 1. 公开与 CMS 接口
+        await testCase('CMS 首页聚合 (/api/cms/index)', apiCmsIndex);
+        await testCase('CMS 全站栏目树 (/api/cms/channels)', apiCmsChannels);
+        await testCase('CMS 单页列表 (/api/cms/pages)', apiCmsPages);
+        await testCase('CMS 专题精选 (/api/cms/specials)', apiCmsSpecials);
+        await testCase('CMS 标签列表 (/api/cms/tags)', apiCmsTags);
+        await testCase('CMS 热搜词 (/api/cms/search/hot)', apiCmsHotSearch);
+        await testCase('公开套餐列表 (/api/v1/roles/plans)', apiGetPlans);
+        await testCase('项目赛道分类树形列表 (/api/v1/projects/categories?tree=1)', () => apiGetProjectCategories(1));
+        await testCase('项目赛道分类平铺列表 (/api/v1/projects/categories?tree=0)', () => apiGetProjectCategories(0));
+        await testCase('公开项目广场 (/api/v1/projects)', apiGetProjects);
+        await testCase('按分类筛选项目 (/api/v1/projects?category_id=1)', () => apiGetProjectsByCategory(1));
+        await testCase('项目详情与材料 (/api/v1/projects/detail)', () => apiGetProjectDetail());
+        await testCase('项目发展时间轴 (/api/v1/projects/timelines)', apiGetProjectTimelines);
+        await testCase('发布时间轴里程碑 (/api/v1/projects/timelines)', apiAddProjectTimeline);
+
+        // 2. Web3 钱包挑战与签名登录闭环
+        await testCase('获取钱包挑战 (/api/v1/auth/wallet/challenge)', () => apiWalletChallenge());
+        await testCase('钱包签名模拟登录与自动注册 (/api/v1/auth/wallet/verify)', apiWalletVerify);
+
+        // 3. 用户鉴权相关
+        await testCase('获取当前用户资料 (/api/v1/users/me)', apiGetMe);
+        await testCase('修改用户资料 (/api/v1/users/me)', apiUpdateMe);
+        await testCase('获取用户多重身份凭据 (/api/v1/users/me/identities)', apiGetIdentities);
+        await testCase('查询我的订阅状态 (/api/v1/users/me/subscription)', apiGetMySub);
+
+        // 4. 商业与订单
+        await testCase('查询我的订单 (/api/v1/billing/orders)', apiGetOrders);
+        await testCase('创建订阅订单 (/api/v1/billing/orders)', apiCreateOrder);
+        await testCase('查询订阅详情 (/api/v1/billing/subscription)', apiGetBillingSub);
+
+        // 5. 社交互动与推荐
+        await testCase('关注用户 (/api/v1/relations/follow)', () => apiFollow(80));
+        await testCase('查询关注列表 (/api/v1/relations/following)', apiGetFollowing);
+        await testCase('收藏项目 (/api/v1/relations/favorite)', () => apiFavorite(14));
+        await testCase('查询收藏列表 (/api/v1/relations/favorites)', apiGetFavorites);
+        await testCase('推荐每日配额查询 (/api/v1/recommendations/quota)', apiGetQuota);
+        await testCase('查询推流广告包 (/api/v1/promotions/packages)', apiGetPromotionPackages);
+
+        log('====================================================', 'info');
+        log(`🎉 自测巡检完成！通过: ${successCount} 项，失败: ${failCount} 项`, successCount > 0 && failCount === 0 ? 'res' : 'info');
+        log('====================================================', 'info');
+    }
+
+    // 各模块批量测试委托
+    async function testModuleAuth() {
+        log('--- 开始测试 认证模块 ---', 'info');
+        await apiWalletChallenge();
+        await apiWalletVerify();
+    }
+
+    async function testModuleUser() {
+        log('--- 开始测试 用户中心 ---', 'info');
+        await apiGetMe();
+        await apiUpdateMe();
+        await apiGetIdentities();
+        await apiGetMySub();
+    }
+
+    async function testModuleBilling() {
+        log('--- 开始测试 套餐与订单 ---', 'info');
+        await apiGetPlans();
+        await apiGetOrders();
+        await apiGetBillingSub();
+    }
+
+    async function testModuleProject() {
+        log('--- 开始测试 项目广场与赛道分类 ---', 'info');
+        await apiGetProjectCategories(1);
+        await apiGetProjects();
+        await apiGetProjectsByCategory(1);
+        await apiGetProjectDetail();
+        await apiGetMaterials();
+        await apiGetProjectTimelines();
+        await apiAddProjectTimeline();
+    }
+
+    async function testModuleRelation() {
+        log('--- 开始测试 社交关系 ---', 'info');
+        await apiFollow(80);
+        await apiGetFollowing();
+        await apiGetFavorites();
+    }
+
+    async function testModuleRecommend() {
+        log('--- 开始测试 智能推荐 ---', 'info');
+        await apiGetQuota();
+        await apiGetRecommends();
+    }
+
+    async function testModuleCms() {
+        log('--- 开始测试 CMS 门户接口 ---', 'info');
+        await apiCmsIndex();
+        await apiCmsChannels();
+        await apiCmsPages();
+        await apiCmsSpecials();
+        await apiCmsTags();
+    }
+
+    // 页面初始化
+    document.addEventListener('DOMContentLoaded', () => {
+        // 读取控制台布局偏好（默认通栏，若用户保存过侧边栏且屏幕够大则生效）
+        if (localStorage.getItem('itik_console_layout') === 'split' && window.innerWidth >= 1200) {
+            document.querySelector('.layout-main').classList.add('split-mode');
+            const badge = document.getElementById('layoutModeBadge');
+            const btn = document.getElementById('btnToggleLayout');
+            if (badge) badge.innerText = '侧边栏模式';
+            if (btn) btn.innerText = '📌 切换为通栏';
+        }
+
+        if (currentToken) {
+            setToken(currentToken);
+            apiGetMe().catch(() => {});
+        }
+    });
+</script>
+</body>
+</html>

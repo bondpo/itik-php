@@ -31,23 +31,33 @@
     </div>
 
     <div class="layui-form-item">
-        <label class="layui-form-label">一级分类</label>
+        <label class="layui-form-label">所属项目分类</label>
+        <div class="layui-input-block">
+            <select name="row[category_id]">
+                <option value="0">请选择项目分类 (可选)</option>
+                {foreach $categoryTree as $cat}
+                <option value="{$cat.id}">{$cat.icon|default=''} {$cat.name}</option>
+                {if !empty($cat.children)}
+                    {foreach $cat.children as $sub}
+                    <option value="{$sub.id}">&nbsp;&nbsp;&nbsp;&nbsp;├─ {$sub.icon|default=''} {$sub.name}</option>
+                    {/foreach}
+                {/if}
+                {/foreach}
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">一级分类 (文本冗余)</label>
         <div class="layui-input-block">
             <input type="text" name="row[category_l1]" value="" placeholder="一级分类" autocomplete="off" class="layui-input" />
         </div>
     </div>
 
     <div class="layui-form-item">
-        <label class="layui-form-label">二级分类</label>
+        <label class="layui-form-label">二级分类 (文本冗余)</label>
         <div class="layui-input-block">
             <input type="text" name="row[category_l2]" value="" placeholder="二级分类" autocomplete="off" class="layui-input" />
-        </div>
-    </div>
-
-    <div class="layui-form-item">
-        <label class="layui-form-label">三级分类</label>
-        <div class="layui-input-block">
-            <input type="text" name="row[category_l3]" value="" placeholder="三级分类" autocomplete="off" class="layui-input" />
         </div>
     </div>
 

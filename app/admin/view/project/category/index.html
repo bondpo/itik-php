@@ -1,0 +1,80 @@
+{layout name="layout/default" /}
+
+<!-- 表格 -->
+<div class="layui-card">
+    <div class="layui-card-body">
+        <table class="layui-hide" id="category" data-operate-edit="{:$auth->check('project.category/edit')}" data-operate-del="{:$auth->check('project.category/del')}"></table>
+    </div>
+</div>
+
+<script type="text/html" id="toolbar">
+    <a href="javascript:;" lay-event="refresh" class="layui-btn btn-refresh layui-bg-black"><i class="fa fa-refresh"></i></a>
+    <button class="layui-btn layui-bg-green {:$auth->check('project.category/add')?'':'hide'}" lay-event="add"><i class="fa fa-plus"></i> {:__('Add')}</button>
+    <button class="layui-btn layui-bg-blue btn-disabled disabled {:$auth->check('project.category/edit')?'':'hide'}" lay-event="edit"><i class="fa fa-pencil"></i> {:__('Edit')}</button>
+    <button class="layui-btn layui-bg-red btn-disabled disabled {:$auth->check('project.category/del')?'':'hide'}" lay-event="del"><i class="fa fa-trash"></i> {:__('Del')}</button>
+</script>
+
+<!-- 自定义表格与状态适配样式 -->
+<style>
+    .layui-table th {
+        white-space: nowrap !important;
+    }
+    .layui-table-cell {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+</style>
+
+<script>
+    layui.use(["badou", "table"], function () {
+        var bdTable = layui.bdTable;
+        var table = layui.table;
+
+        bdTable.api.init({
+            table: table,
+            extend: {
+                index_url: "project.category/index" + location.search,
+                add_url: "project.category/add",
+                edit_url: "project.category/edit",
+                del_url: "project.category/del",
+                multi_url: "project.category/multi",
+                table: "app_project_category",
+            },
+        });
+
+        bdTable.render({
+            elem: "#category",
+            url: "{:url('project.category/index')}",
+            pk: "id",
+            even: true,
+            toolbar: "#toolbar",
+            page: false,
+            cellMinWidth: 100,
+            cols: [
+                [
+                    { type: "checkbox", width: 50, fixed: "left" },
+                    { field: "id", title: "ID", width: 70, sort: true, fixed: "left" },
+                    { field: "name", title: "分类名称", minWidth: 200, templet: function(d) {
+                        var prefix = d.pid > 0 ? '&nbsp;&nbsp;&nbsp;&nbsp;├─ ' : '<b>';
+                        var suffix = d.pid > 0 ? '' : '</b>';
+                        var icon = d.icon ? '<span style="margin-right:4px;">' + d.icon + '</span>' : '';
+                        return prefix + icon + d.name + suffix;
+                    }},
+                    { field: "parent_name", title: "所属层级", width: 150, templet: function(d) {
+                        return d.pid == 0 ? '<span class="layui-badge layui-bg-blue">顶级分类</span>' : '<span class="layui-badge layui-bg-gray">' + d.parent_name + '</span>';
+                    }},
+                    { field: "slug", title: "英文标识 (Slug)", minWidth: 140 },
+                    { field: "description", title: "赛道简介", minWidth: 260 },
+                    { field: "project_count", title: "关联项目数", width: 110, align: "center", sort: true, templet: function(d) {
+                        return d.project_count > 0 ? '<span class="layui-badge layui-bg-green">' + d.project_count + ' 个</span>' : '<span class="layui-badge-rim">0</span>';
+                    }},
+                    { field: "weigh", title: "权重排序", width: 95, align: "center", sort: true },
+                    { field: "status", title: "状态", width: 90, align: "center", searchList: { normal: '正常', hidden: '停用' }, custom: { normal: 'green', hidden: 'default' }, templet: bdTable.api.formatter.status },
+                    { field: "create_time_text", title: "创建时间", minWidth: 165, templet: bdTable.api.formatter.datetime, operate: false },
+                    { title: "操作", width: 140, align: "center", fixed: "right", templet: bdTable.api.formatter.operate },
+                ],
+            ],
+        });
+    });
+</script>

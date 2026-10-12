@@ -31,4 +31,19 @@ class Project extends Model
     {
         return $this->belongsTo(\app\admin\model\User::class, 'owner_user_id', 'id');
     }
+
+    /** 所属项目分类 */
+    public function category()
+    {
+        return $this->belongsTo(ProjectCategory::class, 'category_id', 'id');
+    }
+
+    /** 项目时间轴与发展里程碑 */
+    public function timelines()
+    {
+        return $this->hasMany(ProjectTimeline::class, 'project_id', 'id')
+            ->where('status', 'normal')
+            ->order('event_time', 'desc')
+            ->order('id', 'desc');
+    }
 }

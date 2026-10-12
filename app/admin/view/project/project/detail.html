@@ -1,0 +1,348 @@
+{layout name="layout/form" /}
+
+<style>
+    .project-detail-container {
+        padding: 16px 24px;
+        background: #fbfbfb;
+    }
+    .detail-hero-card {
+        background: #fff;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        display: flex;
+        gap: 20px;
+        align-items: flex-start;
+        margin-bottom: 20px;
+    }
+    .project-cover {
+        width: 140px;
+        height: 140px;
+        border-radius: 8px;
+        object-fit: cover;
+        border: 1px solid #eee;
+        background: #f8f8f8;
+        flex-shrink: 0;
+    }
+    .project-header-info {
+        flex: 1;
+    }
+    .project-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 6px;
+    }
+    .project-subtitle {
+        font-size: 13px;
+        color: #666;
+        margin-bottom: 12px;
+        line-height: 1.5;
+    }
+    .badge-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+    .meta-stat-bar {
+        display: flex;
+        gap: 24px;
+        font-size: 13px;
+        color: #777;
+        border-top: 1px dashed #eee;
+        padding-top: 10px;
+    }
+    .meta-stat-item b {
+        color: #222;
+        margin-left: 4px;
+    }
+    .section-card {
+        background: #fff;
+        border-radius: 8px;
+        padding: 18px 20px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        margin-bottom: 16px;
+    }
+    .section-header {
+        font-size: 15px;
+        font-weight: 600;
+        color: #333;
+        border-left: 4px solid #1E9FFF;
+        padding-left: 10px;
+        margin-bottom: 14px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .summary-box {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 12px 16px;
+        color: #334155;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+    .content-box {
+        background: #fff;
+        border: 1px solid #edf2f7;
+        border-radius: 6px;
+        padding: 16px;
+        color: #2d3748;
+        line-height: 1.7;
+        min-height: 100px;
+    }
+    .tag-chip {
+        display: inline-block;
+        background: #edf2f7;
+        color: #4a5568;
+        border-radius: 12px;
+        padding: 3px 10px;
+        font-size: 12px;
+        margin-right: 6px;
+        margin-bottom: 6px;
+    }
+    /* 时间轴列表样式 */
+    .timeline-stream {
+        position: relative;
+        padding-left: 24px;
+        margin-top: 12px;
+    }
+    .timeline-stream::before {
+        content: '';
+        position: absolute;
+        top: 6px;
+        bottom: 6px;
+        left: 8px;
+        width: 2px;
+        background: #e2e8f0;
+    }
+    .timeline-node {
+        position: relative;
+        margin-bottom: 18px;
+    }
+    .timeline-dot {
+        position: absolute;
+        left: -20px;
+        top: 4px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #1E9FFF;
+        box-shadow: 0 0 0 3px rgba(30,159,255,0.2);
+    }
+    .timeline-header {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 4px;
+    }
+    .timeline-time {
+        font-size: 12px;
+        color: #94a3b8;
+        font-weight: 600;
+    }
+    .timeline-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1e293b;
+    }
+    .timeline-desc {
+        font-size: 13px;
+        color: #64748b;
+        line-height: 1.5;
+        background: #f8fafc;
+        border-radius: 6px;
+        padding: 8px 12px;
+        margin-top: 4px;
+    }
+</style>
+
+<div class="project-detail-container">
+    <!-- 头部信息卡片 -->
+    <div class="detail-hero-card">
+        {if !empty($row.cover)}
+        <img src="{$row.cover}" alt="{$row.name}" class="project-cover" onerror="this.src='/assets/img/none.png';" />
+        {else}
+        <div class="project-cover" style="display:flex;align-items:center;justify-content:center;color:#aaa;font-size:32px;">
+            <i class="fa fa-cubes"></i>
+        </div>
+        {/if}
+        <div class="project-header-info">
+            <div class="project-title">
+                {$row.name}
+                <span style="font-size:12px;color:#888;font-weight:normal;margin-left:8px;">(ID: {$row.id})</span>
+            </div>
+            <div class="project-subtitle">{$row.subtitle|default='暂无副标题'}</div>
+            
+            <div class="badge-group">
+                <!-- 关联分类 -->
+                {if !empty($row.category)}
+                <span class="layui-badge layui-bg-blue">{$row.category.icon|default=''} {$row.category.name}</span>
+                {/if}
+                {if !empty($row.category_l1)}
+                <span class="layui-badge layui-bg-cyan">{$row.category_l1}</span>
+                {/if}
+                {if !empty($row.category_l2)}
+                <span class="layui-badge-rim">{$row.category_l2}</span>
+                {/if}
+
+                <!-- 审核状态 -->
+                {if $row.status == 'normal'}
+                <span class="layui-badge layui-bg-green">已发布/通过</span>
+                {elseif $row.status == 'pending'}
+                <span class="layui-badge layui-bg-orange">待审核</span>
+                {elseif $row.status == 'rejected'}
+                <span class="layui-badge layui-bg-red">已驳回</span>
+                {else}
+                <span class="layui-badge layui-bg-gray">{$row.status}</span>
+                {/if}
+
+                <!-- 认证标识 -->
+                {if $row.certified == 1}
+                <span class="layui-badge layui-bg-green"><i class="fa fa-check-circle"></i> 官方认证</span>
+                {else}
+                <span class="layui-badge layui-bg-gray">未认证</span>
+                {/if}
+
+                <!-- 地区 -->
+                {if !empty($row.region)}
+                <span class="layui-badge layui-bg-purple"><i class="fa fa-globe"></i> {$row.region}</span>
+                {/if}
+            </div>
+
+            <div class="meta-stat-bar">
+                <div class="meta-stat-item">项目方: <b>{$row.owner.nickname|default='未关联'} (UID: {$row.owner_user_id})</b></div>
+                <div class="meta-stat-item">浏览量: <b>{$row.views|default=0}</b></div>
+                <div class="meta-stat-item">关注数: <b>{$row.follows|default=0}</b></div>
+                <div class="meta-stat-item">提交时间: <b>{$row.create_time|date='Y-m-d H:i'}</b></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 标签展示 -->
+    {if !empty($row.tags)}
+    <div class="section-card">
+        <div class="section-header">项目标签 (Tags)</div>
+        <div>
+            {foreach :explode(',', $row.tags) as $t}
+            <span class="tag-chip"><i class="fa fa-tag"></i> {$t}</span>
+            {/foreach}
+        </div>
+    </div>
+    {/if}
+
+    <!-- 项目摘要 -->
+    <div class="section-card">
+        <div class="section-header">项目摘要 (Summary)</div>
+        <div class="summary-box">
+            {$row.summary|default='暂无简短摘要'}
+        </div>
+    </div>
+
+    <!-- 详细介绍 (富文本) -->
+    <div class="section-card">
+        <div class="section-header">详细介绍内容 (Content)</div>
+        <div class="content-box">
+            {if !empty($row.content)}
+            {$row.content|raw}
+            {else}
+            <span style="color:#aaa;">暂无详细内容介绍</span>
+            {/if}
+        </div>
+    </div>
+
+    <!-- 发展历程与里程碑时间轴 -->
+    <div class="section-card">
+        <div class="section-header">
+            <span>发展历程与里程碑时间轴</span>
+            <span class="layui-badge layui-bg-blue">{:count($row.timelines)} 个里程碑节点</span>
+        </div>
+        {if !empty($row.timelines) && count($row.timelines) > 0}
+        <div class="timeline-stream">
+            {foreach $row.timelines as $tl}
+            <div class="timeline-node">
+                <div class="timeline-dot"></div>
+                <div class="timeline-header">
+                    <span class="timeline-time"><i class="fa fa-calendar"></i> {$tl.event_time|date='Y-m-d'}</span>
+                    <span class="timeline-title">{$tl.title}</span>
+                    <span class="layui-badge-rim">{$tl.tag|default='里程碑'}</span>
+                    {if !empty($tl.link_url)}
+                    <a href="{$tl.link_url}" target="_blank" style="color:#1E9FFF;font-size:12px;margin-left:8px;"><i class="fa fa-external-link"></i> 公告链接</a>
+                    {/if}
+                </div>
+                {if !empty($tl.summary)}
+                <div class="timeline-desc">{$tl.summary}</div>
+                {/if}
+            </div>
+            {/foreach}
+        </div>
+        {else}
+        <div style="color:#999;font-size:13px;padding:8px 0;">该项目尚未发布任何发展时间轴节点。</div>
+        {/if}
+    </div>
+
+    <!-- 资料库材料附件 -->
+    <div class="section-card">
+        <div class="section-header">
+            <span>资质材料与白皮书</span>
+            <span class="layui-badge layui-bg-cyan">{:count($materials)} 项资料</span>
+        </div>
+        {if !empty($materials) && count($materials) > 0}
+        <table class="layui-table" lay-size="sm">
+            <thead>
+                <tr>
+                    <th>标题</th>
+                    <th>分类</th>
+                    <th>类型</th>
+                    <th>版本</th>
+                    <th>状态</th>
+                    <th>文件地址/链接</th>
+                </tr>
+            </thead>
+            <tbody>
+                {foreach $materials as $mat}
+                <tr>
+                    <td><b>{$mat.title}</b></td>
+                    <td>{$mat.category}</td>
+                    <td><span class="layui-badge-rim">{$mat.type}</span></td>
+                    <td>{$mat.version|default='v1.0'}</td>
+                    <td>
+                        {if $mat.review_status == 'normal'}
+                        <span class="layui-badge layui-bg-green">已通过</span>
+                        {elseif $mat.review_status == 'pending'}
+                        <span class="layui-badge layui-bg-orange">待审核</span>
+                        {else}
+                        <span class="layui-badge layui-bg-red">驳回: {$mat.review_reason}</span>
+                        {/if}
+                    </td>
+                    <td>
+                        {if !empty($mat.storage_key)}
+                        <a href="{$mat.storage_key}" target="_blank" class="layui-btn layui-btn-xs layui-btn-normal"><i class="fa fa-eye"></i> 预览文件</a>
+                        {else}
+                        <span style="color:#bbb;">-</span>
+                        {/if}
+                    </td>
+                </tr>
+                {/foreach}
+            </tbody>
+        </table>
+        {else}
+        <div style="color:#999;font-size:13px;padding:8px 0;">该项目尚未上传任何资质或白皮书材料。</div>
+        {/if}
+    </div>
+
+    <!-- SEO 信息 -->
+    {if !empty($row.seo_title) || !empty($row.seo_keywords) || !empty($row.seo_description)}
+    <div class="section-card">
+        <div class="section-header">SEO 元数据</div>
+        <div style="font-size:13px;line-height:1.8;color:#555;">
+            {if !empty($row.seo_title)}<div><b>SEO Title:</b> {$row.seo_title}</div>{/if}
+            {if !empty($row.seo_keywords)}<div><b>SEO Keywords:</b> {$row.seo_keywords}</div>{/if}
+            {if !empty($row.seo_description)}<div><b>SEO Description:</b> {$row.seo_description}</div>{/if}
+        </div>
+    </div>
+    {/if}
+</div>

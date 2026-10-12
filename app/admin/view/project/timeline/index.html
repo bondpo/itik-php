@@ -1,0 +1,84 @@
+{layout name="layout/default" /}
+
+<!-- 表格 -->
+<div class="layui-card">
+    <div class="layui-card-body">
+        <table class="layui-hide" id="timeline" data-operate-edit="{:$auth->check('project.timeline/edit')}" data-operate-del="{:$auth->check('project.timeline/del')}"></table>
+    </div>
+</div>
+
+<script type="text/html" id="toolbar">
+    <a href="javascript:;" lay-event="refresh" class="layui-btn btn-refresh layui-bg-black"><i class="fa fa-refresh"></i></a>
+    <button class="layui-btn layui-bg-green {:$auth->check('project.timeline/add')?'':'hide'}" lay-event="add"><i class="fa fa-plus"></i> 发布里程碑</button>
+    <button class="layui-btn layui-bg-blue btn-disabled disabled {:$auth->check('project.timeline/edit')?'':'hide'}" lay-event="edit"><i class="fa fa-pencil"></i> {:__('Edit')}</button>
+    <button class="layui-btn layui-bg-red btn-disabled disabled {:$auth->check('project.timeline/del')?'':'hide'}" lay-event="del"><i class="fa fa-trash"></i> {:__('Del')}</button>
+</script>
+
+<style>
+    .layui-table th {
+        white-space: nowrap !important;
+    }
+    .layui-table-cell {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+</style>
+
+<script>
+    layui.use(["badou", "table"], function () {
+        var bdTable = layui.bdTable;
+        var table = layui.table;
+
+        var projectId = "{$projectId|default=0}";
+        var indexUrl = "project.timeline/index" + (projectId > 0 ? "?project_id=" + projectId : location.search);
+        var addUrl = "project.timeline/add" + (projectId > 0 ? "?project_id=" + projectId : "");
+
+        bdTable.api.init({
+            table: table,
+            extend: {
+                index_url: indexUrl,
+                add_url: addUrl,
+                edit_url: "project.timeline/edit",
+                del_url: "project.timeline/del",
+                multi_url: "project.timeline/multi",
+                table: "app_project_timeline",
+            },
+        });
+
+        bdTable.render({
+            elem: "#timeline",
+            url: "{:url('project.timeline/index')}" + (projectId > 0 ? "?project_id=" + projectId : ""),
+            pk: "id",
+            even: true,
+            toolbar: "#toolbar",
+            page: true,
+            cellMinWidth: 100,
+            cols: [
+                [
+                    { type: "checkbox", width: 50, fixed: "left" },
+                    { field: "id", title: "ID", width: 70, sort: true, fixed: "left" },
+                    { field: "project.name", title: "所属项目", minWidth: 160, operate: false, templet: function(d) {
+                        return d.project ? "<b>" + d.project.name + "</b>" : "<span style='color:#aaa;'>未知项目</span>";
+                    }},
+                    { field: "event_time_text", title: "里程碑日期", width: 120, align: "center", sort: true },
+                    { field: "title", title: "事件/里程碑标题", minWidth: 200, operate: 'LIKE' },
+                    { field: "tag", title: "标签分类", width: 110, align: "center", templet: function(d) {
+                        return "<span class=\"layui-badge-rim\">" + (d.tag || '里程碑') + "</span>";
+                    }},
+                    { field: "summary", title: "摘要概述", minWidth: 240, operate: 'LIKE' },
+                    { field: "link_url", title: "公告链接", minWidth: 140, templet: function(d) {
+                        if (d.link_url) {
+                            return "<a href='" + d.link_url + "' target='_blank' style='color:#1E9FFF;'><i class='fa fa-external-link'></i> 链接</a>";
+                        }
+                        return "<span style='color:#ccc;'>-</span>";
+                    }},
+                    { field: "weigh", title: "权重", width: 80, align: "center", sort: true },
+                    { field: "status", title: "状态", width: 85, align: "center", searchList: { normal: '正常', hidden: '隐藏' }, custom: { normal: 'green', hidden: 'default' }, templet: bdTable.api.formatter.status },
+                    { field: "create_time_text", title: "发布时间", minWidth: 160, templet: bdTable.api.formatter.datetime, operate: false },
+                    { title: "操作", width: 140, align: "center", fixed: "right", templet: bdTable.api.formatter.operate },
+                ],
+            ],
+        });
+    });
+</script>
