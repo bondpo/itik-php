@@ -21,6 +21,7 @@ use think\facade\Db;
  * @method static mixed getByMobile($str) 通过手机查询用户
  * @method static mixed getByEmail($str) 通过邮箱查询用户
  * @method static mixed getByInviteCode($str) 通过邀请码查询用户
+ * @method static mixed getByWalletAddress($str) 通过钱包地址查询用户
  * Class User
  * @package app\common\model
  * Author: Wusn <958342972@qq.com>
@@ -67,6 +68,20 @@ class User extends Model
     public function inviter()
     {
         return $this->belongsTo(self::class, 'inviter_id', 'id');
+    }
+
+    /**
+     * 通过钱包地址查询用户（自动转小写匹配）
+     * @param string $walletAddress 钱包地址
+     * @return static|null
+     */
+    public static function getByWalletAddress(string $walletAddress)
+    {
+        $walletAddress = strtolower(trim($walletAddress));
+        if ($walletAddress === '') {
+            return null;
+        }
+        return self::where('wallet_address', $walletAddress)->find();
     }
 
     public function getUrlAttr($value, $data)

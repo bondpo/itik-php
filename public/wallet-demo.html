@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>去中心化钱包授权登录与注册 - 前端对接示例</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0b10;
+            --bg-card: rgba(22, 24, 38, 0.75);
+            --bg-input: rgba(14, 16, 26, 0.8);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(99, 102, 241, 0.4);
+            --accent-primary: #6366f1;
+            --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+            --accent-glow: rgba(99, 102, 241, 0.25);
+            --success: #10b981;
+            --success-glow: rgba(16, 185, 129, 0.2);
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 40px 20px;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
+                radial-gradient(circle at 85% 85%, rgba(236, 72, 153, 0.1) 0%, transparent 40%);
+            background-attachment: fixed;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        header {
+            margin-bottom: 32px;
+            text-align: center;
+        }
+
+        .badge-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            color: #818cf8;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            background: linear-gradient(180deg, #ffffff 0%, #cbd5e1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        p.subtitle {
+            color: var(--text-secondary);
+            font-size: 15px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        @media (max-width: 868px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            border-color: var(--border-hover);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .wallet-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--warning);
+            box-shadow: 0 0 8px var(--warning);
+        }
+
+        .status-dot.connected {
+            background: var(--success);
+            box-shadow: 0 0 8px var(--success-glow);
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 14px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        input:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .input-hint {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 13px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--accent-gradient);
+            color: #ffffff;
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            opacity: 0.92;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        button:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        /* 状态与控制台 */
+        .info-pill {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            margin-bottom: 12px;
+            word-break: break-all;
+        }
+
+        .info-label {
+            color: var(--text-muted);
+            margin-right: 6px;
+        }
+
+        .console-box {
+            background: #06070a;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            height: 340px;
+            overflow-y: auto;
+            color: #cbd5e1;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .log-line {
+            margin-bottom: 6px;
+            line-height: 1.6;
+        }
+
+        .log-time {
+            color: var(--text-muted);
+            margin-right: 8px;
+        }
+
+        .log-success { color: #34d399; }
+        .log-info    { color: #60a5fa; }
+        .log-warn    { color: #fbbf24; }
+        .log-error   { color: #f87171; }
+
+        /* 代码预览区 */
+        .code-card {
+            margin-top: 24px;
+        }
+
+        .tab-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 12px;
+        }
+
+        .tab-btn {
+            background: transparent;
+            color: var(--text-secondary);
+            border: none;
+            padding: 6px 14px;
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .tab-btn.active {
+            color: #ffffff;
+            background: rgba(99, 102, 241, 0.2);
+            border: 1px solid rgba(99, 102, 241, 0.4);
+        }
+
+        pre {
+            background: #06070a;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: #e2e8f0;
+            line-height: 1.6;
+        }
+
+        .copy-btn {
+            float: right;
+            padding: 4px 10px;
+            font-size: 12px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .copy-btn:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.15);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="badge-tag">
+            <span>⚡ Web3 Authentication</span>
+        </div>
+        <h1>去中心化钱包授权登录与注册</h1>
+        <p class="subtitle">基于 EIP-4361 (SIWE) 与 personal_sign 标准，支持 MetaMask、OKX 等 EVM 钱包</p>
+    </header>
+
+    <div class="grid">
+        <!-- 操作面板 -->
+        <div class="card">
+            <div class="card-title">
+                <span>钱包交互</span>
+                <div class="wallet-status">
+                    <span class="status-dot" id="statusDot"></span>
+                    <span id="statusText">未连接钱包</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="addressInput">钱包账户地址 (Address)</label>
+                <input type="text" id="addressInput" placeholder="点击下方「连接钱包」自动读取..." readonly>
+            </div>
+
+            <div class="form-group">
+                <label for="inviteCodeInput">推荐人邀请码 (可选)</label>
+                <input type="text" id="inviteCodeInput" placeholder="选填，新用户自动注册时绑定推荐人">
+                <div class="input-hint">若为空且是新钱包，将自动完成注册并生成专属邀请码</div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn-primary" id="btnConnect" onclick="connectWallet()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7h-9M14 17H5M17 12H7"/></svg>
+                    连接钱包 (Connect Wallet)
+                </button>
+                <button class="btn-primary" id="btnLogin" onclick="loginWithWallet()" disabled>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
+                    一键签名登录/注册 (Sign In)
+                </button>
+                <button class="btn-secondary" id="btnLogout" onclick="logout()" style="display: none;">
+                    退出登录 (Logout)
+                </button>
+            </div>
+        </div>
+
+        <!-- 调试信息与状态 -->
+        <div class="card">
+            <div class="card-title">
+                <span>实时状态与控制台</span>
+                <button class="btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="clearLogs()">清空日志</button>
+            </div>
+
+            <div class="info-pill" id="tokenBox" style="display: none;">
+                <span class="info-label">JWT Token:</span>
+                <span id="tokenText" style="color: #38bdf8;"></span>
+            </div>
+
+            <div class="console-box" id="consoleBox">
+                <div class="log-line log-info"><span class="log-time">[Init]</span> 就绪。等待用户连接 Web3 钱包...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 前端参考代码 -->
+    <div class="card code-card">
+        <div class="card-title">
+            <span>前端集成参考代码</span>
+            <button class="copy-btn" onclick="copyCurrentCode()">复制代码</button>
+        </div>
+
+        <div class="tab-bar">
+            <button class="tab-btn active" onclick="switchTab('raw')">原生 JS (window.ethereum)</button>
+            <button class="tab-btn" onclick="switchTab('ethers')">Ethers.js (v6)</button>
+            <button class="tab-btn" onclick="switchTab('viem')">Viem / Wagmi</button>
+        </div>
+
+        <pre><code id="codeViewer"></code></pre>
+    </div>
+</div>
+
+<script>
+    let currentAddress = '';
+    let currentToken = '';
+
+    // 日志打印助手
+    function log(message, type = 'info') {
+        const box = document.getElementById('consoleBox');
+        const now = new Date().toTimeString().split(' ')[0];
+        const line = document.createElement('div');
+        line.className = `log-line log-${type}`;
+        line.innerHTML = `<span class="log-time">[${now}]</span> ${escapeHtml(message)}`;
+        box.appendChild(line);
+        box.scrollTop = box.scrollHeight;
+    }
+
+    function clearLogs() {
+        document.getElementById('consoleBox').innerHTML = '';
+        log('日志已清空', 'info');
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.innerText = typeof text === 'object' ? JSON.stringify(text, null, 2) : text;
+        return div.innerHTML;
+    }
+
+    // 1. 连接钱包
+    async function connectWallet() {
+        if (!window.ethereum) {
+            log('未检测到以太坊钱包扩展！请安装 MetaMask 或 OKX 钱包插件。', 'error');
+            alert('请先安装 MetaMask 或其他 Web3 钱包');
+            return;
+        }
+
+        try {
+            log('正在请求连接钱包...', 'info');
+            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+            if (!accounts || accounts.length === 0) {
+                throw new Error('用户未授权或钱包无可用账户');
+            }
+
+            currentAddress = accounts[0];
+            document.getElementById('addressInput').value = currentAddress;
+            document.getElementById('statusDot').className = 'status-dot connected';
+            document.getElementById('statusText').innerText = '已连接: ' + currentAddress.substring(0, 6) + '...' + currentAddress.substring(currentAddress.length - 4);
+            document.getElementById('btnLogin').disabled = false;
+
+            log(`钱包连接成功！账户: ${currentAddress}`, 'success');
+
+            // 监听切号
+            window.ethereum.on('accountsChanged', (newAccounts) => {
+                if (newAccounts.length === 0) {
+                    resetState();
+                } else {
+                    currentAddress = newAccounts[0];
+                    document.getElementById('addressInput').value = currentAddress;
+                    log(`账户已切换至: ${currentAddress}`, 'info');
+                }
+            });
+        } catch (err) {
+            log(`连接钱包失败: ${err.message}`, 'error');
+        }
+    }
+
+    // 2. 授权登录与注册全流程
+    async function loginWithWallet() {
+        if (!currentAddress) {
+            alert('请先连接钱包');
+            return;
+        }
+
+        const inviteCode = document.getElementById('inviteCodeInput').value.trim();
+        const btnLogin = document.getElementById('btnLogin');
+        btnLogin.disabled = true;
+
+        try {
+            // Step 1: 获取 Challenge (Nonce)
+            log('Step 1: 正在向服务器请求签名质询 (Challenge Nonce)...', 'info');
+            const challengeRes = await fetch('/api/v1/auth/wallet/challenge', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ address: currentAddress })
+            }).then(r => r.json());
+
+            if (challengeRes.code !== 1) {
+                throw new Error(challengeRes.msg || '获取签名挑战失败');
+            }
+
+            const { message, nonce } = challengeRes.data;
+            log(`成功获取质询！Nonce: ${nonce}`, 'success');
+            log(`待签名消息模板:\n${message}`, 'info');
+
+            // Step 2: 调起钱包进行 personal_sign
+            log('Step 2: 正在调起钱包请求用户授权签名 (personal_sign)...', 'info');
+            const signature = await window.ethereum.request({
+                method: 'personal_sign',
+                params: [message, currentAddress]
+            });
+
+            log(`签名成功！Signature (65字节):\n${signature}`, 'success');
+
+            // Step 3: 提交签名验证
+            log('Step 3: 正在向服务器提交签名完成认证与注册...', 'info');
+            const verifyPayload = {
+                address: currentAddress,
+                signature: signature
+            };
+            if (inviteCode) {
+                verifyPayload.invite_code = inviteCode;
+            }
+
+            const verifyRes = await fetch('/api/v1/auth/wallet/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(verifyPayload)
+            }).then(r => r.json());
+
+            if (verifyRes.code !== 1) {
+                throw new Error(verifyRes.msg || '签名验证失败');
+            }
+
+            const u = verifyRes.data;
+            currentToken = u.token;
+            localStorage.setItem('wallet_token', currentToken);
+
+            log(`🎉 ${verifyRes.msg}！`, 'success');
+            log(`用户信息:\n- User ID: ${u.user_id}\n- 用户名: ${u.username}\n- 昵称: ${u.nickname}\n- 角色: ${u.role}\n- 专属邀请码: ${u.invite_code}\n- 推荐人ID: ${u.inviter_id}\n- 是否首次注册: ${u.is_new_user ? '是 (已自动注册)' : '否 (已存在用户)'}`, 'success');
+
+            // 更新 UI
+            document.getElementById('tokenBox').style.display = 'block';
+            document.getElementById('tokenText').innerText = currentToken;
+            document.getElementById('btnLogout').style.display = 'block';
+
+        } catch (err) {
+            log(`认证失败: ${err.message}`, 'error');
+            alert(err.message || '操作取消');
+        } finally {
+            btnLogin.disabled = false;
+        }
+    }
+
+    // 退出登录
+    function logout() {
+        currentToken = '';
+        localStorage.removeItem('wallet_token');
+        document.getElementById('tokenBox').style.display = 'none';
+        document.getElementById('tokenText').innerText = '';
+        document.getElementById('btnLogout').style.display = 'none';
+        log('已退出登录并清除本地 Token', 'info');
+    }
+
+    function resetState() {
+        currentAddress = '';
+        document.getElementById('addressInput').value = '';
+        document.getElementById('statusDot').className = 'status-dot';
+        document.getElementById('statusText').innerText = '未连接钱包';
+        document.getElementById('btnLogin').disabled = true;
+        logout();
+    }
+
+    // 代码模板
+    const codeSnippets = {
+        raw: `// 方式一：原生 JavaScript (基于 window.ethereum)
+async function loginWithWallet(inviteCode = '') {
+  if (!window.ethereum) throw new Error('请安装 MetaMask 或 Web3 钱包');
+
+  // 1. 获取地址
+  const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+  const address = accounts[0];
+
+  // 2. 请求服务端获取 Challenge
+  const challengeRes = await fetch('/api/v1/auth/wallet/challenge', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ address })
+  }).then(r => r.json());
+
+  if (challengeRes.code !== 1) throw new Error(challengeRes.msg);
+  const { message } = challengeRes.data;
+
+  // 3. 调起钱包签名
+  const signature = await window.ethereum.request({
+    method: 'personal_sign',
+    params: [message, address]
+  });
+
+  // 4. 提交签名验证（自动注册或登录）
+  const verifyRes = await fetch('/api/v1/auth/wallet/verify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      address,
+      signature,
+      invite_code: inviteCode // 选填
+    })
+  }).then(r => r.json());
+
+  if (verifyRes.code !== 1) throw new Error(verifyRes.msg);
+
+  // 5. 保存登录凭证
+  localStorage.setItem('token', verifyRes.data.token);
+  return verifyRes.data;
+}`,
+        ethers: `// 方式二：使用 Ethers.js (v6)
+import { BrowserProvider } from 'ethers';
+
+async function loginWithEthers(inviteCode = '') {
+  if (!window.ethereum) throw new Error('未安装 Web3 钱包');
+
+  const provider = new BrowserProvider(window.ethereum);
+  const signer = await provider.getSigner();
+  const address = await signer.getAddress();
+
+  // 1. 获取 Challenge
+  const challengeRes = await axios.post('/api/v1/auth/wallet/challenge', { address });
+  const message = challengeRes.data.data.message;
+
+  // 2. 签署消息
+  const signature = await signer.signMessage(message);
+
+  // 3. 验证登录
+  const verifyRes = await axios.post('/api/v1/auth/wallet/verify', {
+    address,
+    signature,
+    invite_code: inviteCode
+  });
+
+  const { token, user_id, is_new_user } = verifyRes.data.data;
+  localStorage.setItem('token', token);
+  return verifyRes.data.data;
+}`,
+        viem: `// 方式三：使用 Viem
+import { createWalletClient, custom } from 'viem';
+import { mainnet } from 'viem/chains';
+
+async function loginWithViem(inviteCode = '') {
+  const client = createWalletClient({
+    chain: mainnet,
+    transport: custom(window.ethereum)
+  });
+
+  const [address] = await client.requestAddresses();
+
+  // 1. 获取 Challenge
+  const challenge = await fetch('/api/v1/auth/wallet/challenge', {
+    method: 'POST',
+    body: JSON.stringify({ address })
+  }).then(r => r.json());
+
+  // 2. 签名
+  const signature = await client.signMessage({
+    account: address,
+    message: challenge.data.message
+  });
+
+  // 3. 验证
+  const res = await fetch('/api/v1/auth/wallet/verify', {
+    method: 'POST',
+    body: JSON.stringify({ address, signature, invite_code: inviteCode })
+  }).then(r => r.json());
+
+  return res.data;
+}`
+    };
+
+    let activeTab = 'raw';
+    function switchTab(tab) {
+        activeTab = tab;
+        document.querySelectorAll('.tab-btn').forEach((btn, index) => {
+            btn.classList.toggle('active', ['raw', 'ethers', 'viem'][index] === tab);
+        });
+        document.getElementById('codeViewer').innerText = codeSnippets[tab];
+    }
+
+    function copyCurrentCode() {
+        navigator.clipboard.writeText(codeSnippets[activeTab]);
+        alert('代码已复制到剪贴板！');
+    }
+
+    // 页面加载默认展示 raw 代码
+    switchTab('raw');
+</script>
+</body>
+</html>

@@ -55,6 +55,10 @@
 					{field: 'mobile', title: __('Mobile'), operate: 'LIKE'},
 					{field: 'invite_code', title: '邀请码', width: 110, operate: 'LIKE'},
 					{field: 'inviter.username', title: '推荐人', minWidth: 120, operate: false, templet: function(d) { return d.inviter ? (d.inviter.nickname || d.inviter.username) + ' (ID:' + d.inviter.id + ')' : '<span style="color:#999;">-</span>'; }},
+					{field: 'wallet_address', title: '钱包地址', minWidth: 160, operate: 'LIKE', templet: function(d) {
+						if (!d.wallet_address) return '<span style="color:#999;">未绑定</span>';
+						return '<span title="' + d.wallet_address + '" style="font-family:monospace;font-size:12px;">' + d.wallet_address.substring(0, 6) + '...' + d.wallet_address.substring(d.wallet_address.length - 4) + '</span>';
+					}},
 					{field: 'avatar', title: __('Avatar'), templet: bdTable.api.formatter.image, operate: false},
 					{field: 'level', title: __('Level'), operate: 'BETWEEN', sortable: true},
 					{field: 'gender', title: __('Gender'), visible: false, searchList: {1: __('Male'), 0: __('Female')}},

@@ -8,6 +8,8 @@ namespace app\api\controller\v1;
 
 use think\facade\Db;
 use app\common\library\Ems;
+use app\common\library\Wallet;
+use app\common\model\User as UserModel;
 
 /**
  * 认证接口
@@ -200,19 +202,135 @@ class Auth extends Base
     }
 
     /**
-     * 钱包登录 —— 创建签名挑战（预留）
-     * 说明：按既定决策后置实现，此处返回明确的未启用状态，避免前端误判。
+     * 钱包登录 —— 获取签名挑战（Nonce / Message）
      */
     public function walletChallenge()
     {
-        $this->fail('钱包登录暂未开放，敬请期待', self::CODE_STATE_INVALID);
+        $address = (string)$this->request->post('address', '');
+        if (!$address || !Wallet::validateAddress($address)) {
+            $this->fail('钱包地址格式错误', self::CODE_PARAM_INVALID);
+        }
+
+        $challenge = Wallet::createChallenge($address);
+        if (!$challenge) {
+            $this->fail(Wallet::getError() ?: '生成签名挑战失败', self::CODE_SERVER_ERROR);
+        }
+
+        $this->success('挑战生成成功', $challenge);
     }
 
     /**
-     * 钱包登录 —— 校验签名（预留）
+     * 钱包登录与注册 —— 校验签名
+     * 流程：
+     * 1. 验证以太坊 personal_sign 签名；
+     * 2. 若钱包地址已存在用户：直接登录签发 Token；
+     * 3. 若钱包地址尚未注册：自动注册用户，绑定推荐人（选填 invite_code），分配专属邀请码并签发 Token。
      */
     public function walletVerify()
     {
-        $this->fail('钱包登录暂未开放，敬请期待', self::CODE_STATE_INVALID);
+        $address    = (string)$this->request->post('address', '');
+        $signature  = (string)$this->request->post('signature', '');
+        $inviteCode = trim((string)$this->request->post('invite_code', ''));
+
+        if (!$address || !Wallet::validateAddress($address)) {
+            $this->fail('钱包地址格式错误', self::CODE_PARAM_INVALID);
+        }
+        if (!$signature) {
+            $this->fail('签名内容不能为空', self::CODE_PARAM_MISSING);
+        }
+
+        $walletAddress = Wallet::formatAddress($address);
+
+        // 验签（若成功会自动消费 Nonce 防重放）
+        if (!Wallet::verifySignature($walletAddress, $signature)) {
+            $this->fail(Wallet::getError() ?: '钱包签名验证失败', self::CODE_UNAUTHORIZED);
+        }
+
+        // 查询用户是否已注册
+        $user = UserModel::getByWalletAddress($walletAddress);
+        if (!$user) {
+            // 兼容查询 identity 表
+            $identity = Db::name('app_identity')
+                ->where('type', 'wallet')
+                ->where('identifier', $walletAddress)
+                ->find();
+            if ($identity) {
+                $user = UserModel::find((int)$identity['user_id']);
+                if ($user && empty($user->wallet_address)) {
+                    $user->wallet_address = $walletAddress;
+                    $user->save();
+                }
+            }
+        }
+
+        $isNewUser = false;
+        if ($user) {
+            // 账号状态校验
+            if ($user->status !== 'normal') {
+                $this->fail('账号已被锁定，请联系客服', self::CODE_FORBIDDEN);
+            }
+            $userId = (int)$user->id;
+            // 直接登录
+            $this->auth->direct($userId);
+        } else {
+            // 自动注册逻辑
+            $isNewUser = true;
+
+            // 生成唯一的用户名：w_ + 钱包地址后8位
+            $baseName = 'w_' . substr($walletAddress, -8);
+            $username = $baseName;
+            if (UserModel::getByUsername($username)) {
+                $username = $baseName . '_' . mt_rand(100, 999);
+            }
+
+            // 默认昵称：前6位...后4位，如 0x1234...abcd
+            $nickname = substr($walletAddress, 0, 6) . '...' . substr($walletAddress, -4);
+            $visitorGroupId = (int)(Db::name('user_group')->where('rules', self::ROLE_VISITOR)->value('id') ?: 0);
+            $randomPassword = bin2hex(random_bytes(10));
+
+            $extend = [
+                'nickname'       => $nickname,
+                'group_id'       => $visitorGroupId,
+                'wallet_address' => $walletAddress,
+            ];
+            if ($inviteCode !== '') {
+                $extend['invite_code'] = $inviteCode;
+            }
+
+            $ret = $this->auth->register($username, $randomPassword, '', '', $extend);
+            if (!$ret) {
+                $this->fail((string)$this->auth->getError() ?: '钱包注册失败', self::CODE_BIZ_FAIL);
+            }
+
+            $userId = (int)$this->auth->id;
+
+            // 写入身份关联凭证
+            try {
+                Db::name('app_identity')->insert([
+                    'user_id'     => $userId,
+                    'type'        => 'wallet',
+                    'identifier'  => $walletAddress,
+                    'verified_at' => time(),
+                    'create_time' => time(),
+                    'update_time' => time(),
+                ]);
+            } catch (\Throwable $e) {
+                // 忽略重复异常
+            }
+
+            $user = $this->auth->getUser();
+        }
+
+        $this->success($isNewUser ? '钱包注册并登录成功' : '钱包登录成功', [
+            'user_id'        => $userId,
+            'username'       => (string)$user->username,
+            'nickname'       => (string)$user->nickname,
+            'wallet_address' => (string)$user->wallet_address,
+            'invite_code'    => (string)$user->invite_code,
+            'inviter_id'     => (int)$user->inviter_id,
+            'is_new_user'    => $isNewUser,
+            'role'           => $this->resolveRole($userId),
+            'token'          => $this->auth->getToken(),
+        ]);
     }
 }
