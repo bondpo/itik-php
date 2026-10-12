@@ -42,7 +42,8 @@
     "godruoyi/php-snowflake": "^2.2",
     "fastknife/ajcaptcha": "^2.1",
     "topthink/think-swoole": "^4.2",
-    "firebase/php-jwt": "^7.2"
+    "firebase/php-jwt": "^7.2",
+    "resend/resend-php": "^1.16"
   },
   "require-dev": {
     "symfony/var-dumper": "^5.4",

@@ -3,13 +3,13 @@
 namespace app\common\library;
 
 use think\facade\Log;
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\RequestException;
-use GuzzleHttp\Exception\TransferException;
+use Resend as ResendClient;
+use Throwable;
 
 /**
- * Resend 邮件接口服务类
- * 官方接口文档: https://resend.com/docs/api-reference/emails/send-email
+ * Resend 邮件服务类
+ * 基于官方 SDK resend/resend-php 实现
+ * 文档: https://resend.com/docs/send-with-php
  */
 class Resend
 {
@@ -17,7 +17,7 @@ class Resend
      * 发送邮件
      *
      * @param array $params 参数列表，支持:
-     *   - from: 发件人（如 "ITIK <service@itiklink.com>"），未传则读取配置
+     *   - from: 发件人（如 "ITIK <service@itiklink.com>"），未传则读取系统配置
      *   - to: 收件人（邮箱字符串或邮箱数组）
      *   - subject: 邮件主题
      *   - html: HTML邮件内容
@@ -83,44 +83,23 @@ class Resend
             $payload['reply_to'] = $params['reply_to'];
         }
 
-        $apiUrl = config('resend.api_url', 'https://api.resend.com/emails');
-
         try {
-            $client = new Client([
-                'timeout' => 30,
-                'headers' => [
-                    'Authorization' => 'Bearer ' . $apiKey,
-                    'Content-Type'  => 'application/json',
-                    'User-Agent'    => 'Resend-PHP/1.0',
-                ],
-            ]);
+            // 调用官方 SDK
+            $resend = ResendClient::client($apiKey);
+            $result = $resend->emails->send($payload);
 
-            $response = $client->post($apiUrl, [
-                'json' => $payload,
-            ]);
-
-            $content = (string)$response->getBody();
-            $result = json_decode($content, true) ?: [];
-
-            if (empty($result['id'])) {
-                throw new \RuntimeException('Resend 响应异常: ' . $content);
+            $emailId = $result->id ?? ($result['id'] ?? '');
+            if (!$emailId) {
+                throw new \RuntimeException('Resend 返回缺少邮件 ID');
             }
 
-            return $result;
-        } catch (RequestException $e) {
+            return [
+                'id' => (string)$emailId,
+            ];
+        } catch (Throwable $e) {
             $errorMsg = $e->getMessage();
-            if ($e->hasResponse()) {
-                $body = (string)$e->getResponse()->getBody();
-                $errJson = json_decode($body, true);
-                if (isset($errJson['message'])) {
-                    $errorMsg = $errJson['message'];
-                }
-            }
             Log::error('Resend 邮件发送失败: ' . $errorMsg);
             throw new \RuntimeException('Resend 邮件发送失败: ' . $errorMsg, 0, $e);
-        } catch (TransferException $e) {
-            Log::error('Resend 网络请求异常: ' . $e->getMessage());
-            throw new \RuntimeException('Resend 网络请求异常: ' . $e->getMessage(), 0, $e);
         }
     }
 
