@@ -8,5 +8,6 @@ return [
         'crud' => 'app\\admin\\command\\Crud',
         'subscription:expire' => 'app\\command\\SubscriptionExpire',
         'recommend:generate' => 'app\\command\\RecommendGenerate',
+        'seed:fake' => 'app\\command\\FakeData',
     ],
 ];
