@@ -49,7 +49,6 @@ class Channel extends Backend
 
         $this->view->assign("modelList", $this->modelList);
         $this->view->assign("channelList", $this->channelList);
-        $this->view->assign("typeList", ChannelModel::getTypeList());
         $this->assignconfig("flagList", $this->model->getFlagList());
         $this->view->assign("flagList", $this->model->getFlagList());
         $this->view->assign("statusList", ChannelModel::getStatusList());
@@ -114,6 +113,7 @@ class Channel extends Backend
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
+                $params['type'] = $params['type'] ?? 'list';
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
                 }
@@ -171,7 +171,7 @@ class Channel extends Backend
         $fields = \app\common\library\cms\Service::getCustomFields('channel', 0, $channel);
 
         $childrenIds = $this->tree->getChildrenIds($channel['id'], true);
-        $hasArchives = \app\admin\model\cms\Archives::withTrashed()->where('channel_id', $channel['id'])->whereOr('FIND_IN_SET(:id, `channel_ids`)', ['id' => $channel['id']])->count();
+        $hasArchives = \app\admin\model\cms\Archives::withTrashed()->where('channel_id', $channel['id'])->count();
         $this->view->assign('hasArchives', $hasArchives);
         $this->view->assign('fields', $fields);
         $this->view->assign('values', $channel);

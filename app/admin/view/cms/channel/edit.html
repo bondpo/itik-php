@@ -2,15 +2,7 @@
 <form class="layui-form" method="post">
     {:token_field()}
 
-    <div class="layui-form-item">
-        <label class="layui-form-label">{:__('Type')}</label>
-        <div class="layui-input-block">
-            <input type="radio" name="row[type]" value="channel" title="channel" {if $row.type=='channel'}checked{/if} />
-            <input type="radio" name="row[type]" value="page" title="page" {if $row.type=='page'}checked{/if} />
-            <input type="radio" name="row[type]" value="link" title="link" {if $row.type=='link'}checked{/if} />
-            <input type="radio" name="row[type]" value="list" title="list" {if $row.type=='list'}checked{/if} />
-        </div>
-    </div>
+
     <div class="layui-form-item">
         <label class="layui-form-label">{:__('Model_id')}</label>
         <div class="layui-input-block">

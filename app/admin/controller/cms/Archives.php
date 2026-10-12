@@ -168,13 +168,6 @@ class Archives extends Backend
                 ->limit($offset, $limit)
                 ->select();
 
-            addtion($list, [
-                [
-                    'field'   => 'channel_ids',
-                    'display' => 'channel_ids',
-                    'model'   => Channel::class,
-                ],
-            ]);
             \app\admin\model\cms\SpiderLog::render($list, 'archives');
             $this->result('', $list, $total);
         }
@@ -250,9 +243,7 @@ class Archives extends Backend
         $disabledIds = array_diff($disabledIds, [$row['channel_id']]);
         $tree = Tree::instance()->init($all, 'parent_id');
         $channelOptions = $tree->getTree(0, "<option model='@model_id' value=@id @selected @disabled>@spacer@name</option>", $row['channel_id'], $disabledIds);
-        $secondChannelOptions = $tree->getTree(0, "<option model='@model_id' value=@id @selected @disabled>@spacer@name</option>", explode(',', $row['channel_ids']), $disabledIds);
         $this->view->assign('channelOptions', $channelOptions);
-        $this->view->assign('secondChannelOptions', $secondChannelOptions);
         $this->view->assign("row", $row);
         // 自定义字段来自内容所属模型
         $fields = [];
@@ -346,9 +337,9 @@ class Archives extends Backend
                     User::score($config['score']['postarchives'], $item['user_id'], '发布文章');
                 }
                 $ids[] = $item['id'];
-                $refreshIds = array_merge([$item['channel_id']], explode(',', $item['channel_ids']));
-                $refreshIds = array_filter(array_unique($refreshIds));
+                $refreshIds[] = $item['channel_id'];
             }
+            $refreshIds = array_filter(array_unique($refreshIds));
             // think-orm 4 的模型 restore 依赖 softDelete 默认值，这里直接清空删除标记
             \think\facade\Db::name('cms_archives')->where($pk, 'in', $ids)->update(['deletetime' => null]);
             Channel::refreshItems($refreshIds);

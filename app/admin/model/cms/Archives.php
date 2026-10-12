@@ -174,17 +174,10 @@ class Archives extends Model
                     \think\facade\Event::trigger("baidupush", $urls);
                 }
             }
-            if (isset($changedData['channel_id']) || isset($changedData['channel_ids'])) {
-                //有更新栏目和副栏目需要刷新统计数据
-                $refreshIds = [];
+            if (isset($changedData['channel_id'])) {
+                //有更新栏目需要刷新统计数据
                 $originData = $row->getOriginData();
-                if (isset($changedData['channel_id'])) {
-                    $refreshIds = array_merge($refreshIds, [$originData['channel_id'] ?? 0, $changedData['channel_id']]);
-                }
-                if (isset($changedData['channel_ids'])) {
-                    $refreshIds = array_merge($refreshIds, explode(',', $originData['channel_ids'] ?? ''), explode(',', $changedData['channel_ids']));
-                }
-                $refreshIds = array_filter(array_unique($refreshIds));
+                $refreshIds = array_filter(array_unique([$originData['channel_id'] ?? 0, $changedData['channel_id']]));
                 Channel::refreshItems($refreshIds);
             }
             if ($config['searchtype'] == 'xunsearch') {
@@ -207,8 +200,7 @@ class Archives extends Model
             Comment::deleteByType('archives', $row['id'], !$data);
 
             //刷新统计数据
-            $refreshIds = array_merge([$row['channel_id']], explode(',', $row['channel_ids']));
-            $refreshIds = array_filter(array_unique($refreshIds));
+            $refreshIds = array_filter(array_unique([$row['channel_id']]));
             Channel::refreshItems($refreshIds);
         });
     }

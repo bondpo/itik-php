@@ -81,7 +81,7 @@ class Archives extends Base
 
         // 内容字段白名单输出（剔除模板/内部字段）
         $content = $this->pick($row, $this->onlyExisting('cms_archives', [
-            'id','channel_id','channel_ids','model_id','special_ids','title','flag','image','images','seotitle','keywords',
+            'id','channel_id','model_id','title','flag','image','images','seotitle','keywords',
             'description','content','tags','price','outlink','weigh','views','likes','dislikes','comments','diyname',
             'publishtime','createtime','updatetime','memo',
         ]));
