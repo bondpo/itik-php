@@ -32,6 +32,18 @@
     </button>
 </script>
 
+<!-- 表格自定义适配样式：防止表头标题换行挤压、与排序图标重叠 -->
+<style>
+    .layui-table th {
+        white-space: nowrap !important;
+    }
+    .layui-table-cell {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+</style>
+
 <script>
     layui.use(["badou", "table"], function () {
         var bdTable = layui.bdTable;
@@ -54,30 +66,33 @@
             even: true,
             toolbar: "#toolbar",
             page: true,
+            cellMinWidth: 100,
             cols: [
                 [
-                    { type: "checkbox" },
-                    { field: "id", title: "ID", width: 80, sort: true },
-                    { field: "name", title: __("Name"), operate: "LIKE" },
-                    { field: "nums", title: __("Nums"), width: 100, sort: true },
+                    { type: "checkbox", width: 50, fixed: "left" },
+                    { field: "id", title: "ID", width: 70, sort: true, fixed: "left" },
+                    { field: "name", title: __("Name"), minWidth: 150, operate: "LIKE" },
+                    { field: "nums", title: __("Nums"), width: 100, align: "center", sort: true },
                     { field: "seotitle", title: __("Seotitle"), operate: "LIKE", hide: true },
                     {
                         field: "autolink",
                         title: __("Autolink"),
                         width: 110,
+                        align: "center",
                         searchList: { "1": __("Yes"), "0": __("No") },
                         templet: bdTable.api.formatter.switch,
                     },
-                    { field: "views", title: __("Views"), width: 100, hide: true },
+                    { field: "views", title: __("Views"), width: 100, align: "center", hide: true },
                     {
                         field: "status",
                         title: __("Status"),
                         width: 100,
+                        align: "center",
                         searchList: { normal: __("Normal"), hidden: __("Hidden") },
                         templet: bdTable.api.formatter.status,
                     },
                     { field: "createtime", title: __("Createtime"), templet: bdTable.api.formatter.datetime, hide: true },
-                    { title: __("Operate"), width: 130, align: "center", templet: bdTable.api.formatter.operate },
+                    { title: __("Operate"), width: 130, align: "center", fixed: "right", templet: bdTable.api.formatter.operate },
                 ],
             ],
         });

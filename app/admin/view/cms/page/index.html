@@ -30,6 +30,18 @@
     </button>
 </script>
 
+<!-- 表格自定义适配样式：防止表头标题换行挤压、与排序图标重叠 -->
+<style>
+    .layui-table th {
+        white-space: nowrap !important;
+    }
+    .layui-table-cell {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+</style>
+
 <script>
     layui.use(["badou", "table"], function () {
         var bdTable = layui.bdTable;
@@ -52,31 +64,32 @@
             even: true,
             toolbar: "#toolbar",
             page: true,
+            cellMinWidth: 100,
             cols: [
                 [
-                    { type: "checkbox" },
-                    { field: "id", title: "ID", width: 80, sort: true },
-                    { field: "category_id", title: "{:__('Category_id')}", operate: 'LIKE' },
-                    { field: "admin_id", title: "{:__('Admin_id')}", operate: 'LIKE' },
-                    { field: "type", title: "{:__('Type')}", operate: 'LIKE' },
-                    { field: "title", title: "{:__('Title')}", operate: 'LIKE' },
-                    { field: "seotitle", title: "{:__('Seotitle')}", operate: 'LIKE' },
-                    { field: "keywords", title: "{:__('Keywords')}", operate: 'LIKE' },
-                    { field: "description", title: "{:__('Description')}", operate: 'LIKE' },
-                    { field: "flag", title: "{:__('Flag')}", operate: 'LIKE' },
-                    { field: "image", title: "{:__('Image')}", operate: 'LIKE' },
+                    { type: "checkbox", width: 50, fixed: "left" },
+                    { field: "id", title: "ID", width: 70, sort: true, fixed: "left" },
+                    { field: "title", title: "{:__('Title')}", minWidth: 180, operate: 'LIKE' },
+                    { field: "type", title: "{:__('Type')}", width: 90, align: "center", operate: 'LIKE' },
+                    { field: "category_id", title: "{:__('Category_id')}", width: 90, align: "center", operate: '=' },
+                    { field: "admin_id", title: "{:__('Admin_id')}", width: 90, align: "center", operate: '=' },
+                    { field: "image", title: "{:__('Image')}", width: 80, align: "center", templet: bdTable.api.formatter.image, operate: false },
+                    { field: "icon", title: "{:__('Icon')}", width: 80, align: "center", operate: 'LIKE' },
+                    { field: "diyname", title: "{:__('Diyname')}", minWidth: 120, operate: 'LIKE' },
+                    { field: "flag", title: "{:__('Flag')}", minWidth: 90, operate: 'LIKE' },
+                    { field: "views", title: "{:__('Views')}", width: 80, align: "center", operate: 'BETWEEN', sortable: true },
+                    { field: "likes", title: "{:__('Likes')}", width: 80, align: "center", operate: 'BETWEEN', sortable: true },
+                    { field: "dislikes", title: "{:__('Dislikes')}", width: 80, align: "center", operate: 'BETWEEN' },
+                    { field: "comments", title: "{:__('Comments')}", width: 80, align: "center", operate: 'BETWEEN', sortable: true },
+                    { field: "weigh", title: "{:__('Weigh')}", width: 80, align: "center", operate: 'BETWEEN', sortable: true },
+                    { field: "seotitle", title: "{:__('Seotitle')}", minWidth: 150, operate: 'LIKE' },
+                    { field: "keywords", title: "{:__('Keywords')}", minWidth: 130, operate: 'LIKE' },
+                    { field: "description", title: "{:__('Description')}", minWidth: 160, operate: 'LIKE' },
                     { field: "content", title: "{:__('Content')}", hide: true, operate: false },
-                    { field: "icon", title: "{:__('Icon')}", operate: 'LIKE' },
-                    { field: "views", title: "{:__('Views')}", operate: 'LIKE' },
-                    { field: "likes", title: "{:__('Likes')}", operate: 'LIKE' },
-                    { field: "dislikes", title: "{:__('Dislikes')}", operate: 'LIKE' },
-                    { field: "comments", title: "{:__('Comments')}", operate: 'LIKE' },
-                    { field: "diyname", title: "{:__('Diyname')}", operate: 'LIKE' },
                     { field: "iscomment", title: "{:__('Iscomment')}", hide: true, operate: false },
-                    { field: "weigh", title: "{:__('Weigh')}", operate: 'LIKE' },
-                    { field: "status", title: "{:__('Status')}", operate: 'LIKE' },
-                    { field: "createtime", title: "{:__('Createtime')}", templet: bdTable.api.formatter.datetime, hide: true, operate: false },
-                    { title: "{:__('Operate')}", width: 130, align: "center", templet: bdTable.api.formatter.operate },
+                    { field: "status", title: "{:__('Status')}", width: 90, align: "center", searchList: {"normal": "normal", "hidden": "hidden"}, custom: { normal: "green", hidden: "orange" }, templet: bdTable.api.formatter.status },
+                    { field: "createtime", title: "{:__('Createtime')}", width: 165, templet: bdTable.api.formatter.datetime, hide: true, operate: false },
+                    { title: "{:__('Operate')}", width: 130, align: "center", fixed: "right", templet: bdTable.api.formatter.operate },
                 ],
             ],
         });
