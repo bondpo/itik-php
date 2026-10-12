@@ -1,6 +1,6 @@
 # ITIK API 全接口自动化测试报告
 
-> **测试执行时间**: `2026-10-12 23:25:01`  
+> **测试执行时间**: `2026-10-12 23:46:37`  
 > **测试目标服务器**: `http://127.0.0.1:8000`  
 > **接口总数**: **86** 个 | **通过数**: <font color='green'>**86**</font> | **失败数**: <font color='red'>**0**</font> | **测试通过率**: **100%**
 
@@ -24,92 +24,92 @@
 
 | 序号 | 所属模块 | 接口描述 | HTTP Method | 请求路径 (Path) | 耗时 | HTTP状态 | 业务码 | 测试判定 |
 | :--- | :--- | :--- | :---: | :--- | :---: | :---: | :---: | :---: |
-| 1 | Auth | 发送邮箱验证码 | `POST` | `/api/v1/auth/email/send-code` | 740ms | 200 | 1 | ✅ PASS |
-| 2 | Auth | 钱包挑战 (Challenge) | `POST` | `/api/v1/auth/wallet/challenge` | 17ms | 200 | 1 | ✅ PASS |
-| 3 | Auth | 钱包验签登录 (Verify) | `POST` | `/api/v1/auth/wallet/verify` | 37ms | 200 | 1 | ✅ PASS |
-| 4 | User | 获取个人信息 | `GET` | `/api/v1/users/me` | 26ms | 200 | 1 | ✅ PASS |
-| 5 | User | 更新个人信息 | `PUT` | `/api/v1/users/me` | 26ms | 200 | 1 | ✅ PASS |
-| 6 | User | 查询身份凭证 | `GET` | `/api/v1/users/me/identities` | 25ms | 200 | 1 | ✅ PASS |
-| 7 | User | 查询用户订阅 | `GET` | `/api/v1/users/me/subscription` | 26ms | 200 | 1 | ✅ PASS |
-| 8 | Billing | 获取角色套餐列表 | `GET` | `/api/v1/roles/plans` | 17ms | 200 | 1 | ✅ PASS |
+| 1 | Auth | 发送邮箱验证码 | `POST` | `/api/v1/auth/email/send-code` | 457ms | 200 | 1 | ✅ PASS |
+| 2 | Auth | 钱包挑战 (Challenge) | `POST` | `/api/v1/auth/wallet/challenge` | 28ms | 200 | 1 | ✅ PASS |
+| 3 | Auth | 钱包验签登录 (Verify) | `POST` | `/api/v1/auth/wallet/verify` | 36ms | 200 | 1 | ✅ PASS |
+| 4 | User | 获取个人信息 | `GET` | `/api/v1/users/me` | 28ms | 200 | 1 | ✅ PASS |
+| 5 | User | 更新个人信息 | `PUT` | `/api/v1/users/me` | 24ms | 200 | 1 | ✅ PASS |
+| 6 | User | 查询身份凭证 | `GET` | `/api/v1/users/me/identities` | 35ms | 200 | 1 | ✅ PASS |
+| 7 | User | 查询用户订阅 | `GET` | `/api/v1/users/me/subscription` | 24ms | 200 | 1 | ✅ PASS |
+| 8 | Billing | 获取角色套餐列表 | `GET` | `/api/v1/roles/plans` | 19ms | 200 | 1 | ✅ PASS |
 | 9 | Billing | 查询订单列表 | `GET` | `/api/v1/billing/orders` | 27ms | 200 | 1 | ✅ PASS |
-| 10 | Billing | 创建新订单 | `POST` | `/api/v1/billing/orders` | 32ms | 200 | 1 | ✅ PASS |
-| 11 | Billing | 查询当前订阅态 | `GET` | `/api/v1/billing/subscription` | 24ms | 200 | 1 | ✅ PASS |
-| 12 | Billing | 续费下单 | `POST` | `/api/v1/billing/subscription/renew` | 33ms | 200 | 1 | ✅ PASS |
+| 10 | Billing | 创建新订单 | `POST` | `/api/v1/billing/orders` | 31ms | 200 | 1 | ✅ PASS |
+| 11 | Billing | 查询当前订阅态 | `GET` | `/api/v1/billing/subscription` | 22ms | 200 | 1 | ✅ PASS |
+| 12 | Billing | 续费下单 | `POST` | `/api/v1/billing/subscription/renew` | 34ms | 200 | 1 | ✅ PASS |
 | 13 | Project | 获取项目分类树形列表 | `GET` | `/api/v1/projects/categories?tree=1` | 21ms | 200 | 1 | ✅ PASS |
-| 14 | Project | 获取项目分类平铺列表 | `GET` | `/api/v1/projects/categories?tree=0` | 23ms | 200 | 1 | ✅ PASS |
-| 15 | Project | 项目广场公开列表 | `GET` | `/api/v1/projects` | 23ms | 200 | 1 | ✅ PASS |
-| 16 | Project | 按分类赛道筛选项目列表 | `GET` | `/api/v1/projects?category_id=19` | 24ms | 200 | 1 | ✅ PASS |
-| 17 | Project | 项目详情查询(含关联分类) | `GET` | `/api/v1/projects/detail` | 29ms | 200 | 1 | ✅ PASS |
-| 18 | Project | 创建项目草稿(绑定分类) | `POST` | `/api/v1/projects` | 35ms | 200 | 1 | ✅ PASS |
-| 19 | Project | 修改项目资料 | `POST` | `/api/v1/projects/update` | 28ms | 200 | 1 | ✅ PASS |
-| 20 | Project | 查询项目资料库 | `GET` | `/api/v1/projects/materials` | 28ms | 200 | 1 | ✅ PASS |
-| 21 | Project | 上传新增项目资料 | `POST` | `/api/v1/projects/materials` | 29ms | 200 | 1 | ✅ PASS |
-| 22 | Project | 查询项目成员列表 | `GET` | `/api/v1/projects/members` | 28ms | 200 | 1 | ✅ PASS |
-| 23 | Project | 查询项目数据看板 | `GET` | `/api/v1/projects/stats` | 38ms | 200 | 1 | ✅ PASS |
-| 24 | Project | 查询项目发展历程时间轴 | `GET` | `/api/v1/projects/timelines` | 26ms | 200 | 1 | ✅ PASS |
-| 25 | Project | 项目方发布时间轴里程碑 | `POST` | `/api/v1/projects/timelines` | 27ms | 200 | 1 | ✅ PASS |
-| 26 | Project | 项目方更新时间轴节点 | `POST` | `/api/v1/projects/timelines/update` | 30ms | 200 | 1 | ✅ PASS |
-| 27 | Project | 项目方删除时间轴节点 | `POST` | `/api/v1/projects/timelines/delete` | 28ms | 200 | 1 | ✅ PASS |
-| 28 | Content | 资讯公开列表 | `GET` | `/api/v1/contents` | 18ms | 200 | 1 | ✅ PASS |
-| 29 | Content | 我的发布列表 | `GET` | `/api/v1/contents/mine` | 26ms | 200 | 1 | ✅ PASS |
-| 30 | Content | 创建资讯草稿 | `POST` | `/api/v1/contents` | 31ms | 200 | 1 | ✅ PASS |
-| 31 | Content | 查看资讯详情 | `GET` | `/api/v1/contents/detail` | 23ms | 200 | 1 | ✅ PASS |
-| 32 | Content | 更新资讯内容 | `POST` | `/api/v1/contents/update` | 26ms | 200 | 1 | ✅ PASS |
-| 33 | Content | 提交资讯审核 | `POST` | `/api/v1/contents/submit` | 28ms | 200 | 1 | ✅ PASS |
-| 34 | Relation | 关注用户 | `POST` | `/api/v1/relations/follow` | 33ms | 200 | 1 | ✅ PASS |
-| 35 | Relation | 获取关注列表 | `GET` | `/api/v1/relations/following` | 26ms | 200 | 1 | ✅ PASS |
-| 36 | Relation | 获取粉丝列表 | `GET` | `/api/v1/relations/followers` | 22ms | 200 | 1 | ✅ PASS |
-| 37 | Relation | 取消关注 | `POST` | `/api/v1/relations/unfollow` | 28ms | 200 | 1 | ✅ PASS |
-| 38 | Relation | 收藏项目 | `POST` | `/api/v1/relations/favorite` | 26ms | 200 | 1 | ✅ PASS |
-| 39 | Relation | 获取收藏列表 | `GET` | `/api/v1/relations/favorites` | 23ms | 200 | 1 | ✅ PASS |
-| 40 | Relation | 取消收藏项目 | `POST` | `/api/v1/relations/unfavorite` | 25ms | 200 | 1 | ✅ PASS |
-| 41 | Relation | 拉黑用户 | `POST` | `/api/v1/relations/block` | 26ms | 200 | 1 | ✅ PASS |
-| 42 | Relation | 查看黑名单列表 | `GET` | `/api/v1/relations/blocks` | 26ms | 200 | 1 | ✅ PASS |
-| 43 | Relation | 解除拉黑 | `POST` | `/api/v1/relations/unblock` | 27ms | 200 | 1 | ✅ PASS |
-| 44 | Relation | 举报反馈 | `POST` | `/api/v1/relations/reports` | 31ms | 200 | 1 | ✅ PASS |
-| 45 | Recommend | 查询今日推荐配额 | `GET` | `/api/v1/recommendations/quota` | 27ms | 200 | 1 | ✅ PASS |
-| 46 | Recommend | 撮合生成智能推荐 | `POST` | `/api/v1/recommendations/generate` | 43ms | 200 | 1 | ✅ PASS |
-| 47 | Recommend | 获取推荐列表 | `GET` | `/api/v1/recommendations` | 25ms | 200 | 1 | ✅ PASS |
-| 48 | Recommend | 标记推荐已浏览 | `POST` | `/api/v1/recommendations/view` | 26ms | 200 | 1 | ✅ PASS |
-| 49 | Recommend | 响应推荐结果 | `POST` | `/api/v1/recommendations/respond` | 30ms | 200 | 1 | ✅ PASS |
-| 50 | Recommend | 提交推荐满意度反馈 | `POST` | `/api/v1/recommendations/feedback` | 25ms | 200 | 1 | ✅ PASS |
-| 51 | Promotion | 查询推流投放套餐 | `GET` | `/api/v1/promotions/packages` | 16ms | 200 | 1 | ✅ PASS |
-| 52 | Promotion | 查询当前活跃推流展位 | `GET` | `/api/v1/promotions/active` | 17ms | 200 | 1 | ✅ PASS |
-| 53 | Promotion | 查询推流投放计划 | `GET` | `/api/v1/promotions/campaigns` | 24ms | 200 | 1 | ✅ PASS |
-| 54 | Promotion | 推流数据上报埋点 | `POST` | `/api/v1/promotions/track` | 18ms | 200 | 30001 | ✅ PASS |
-| 55 | Consult | 发起业务咨询 | `POST` | `/api/v1/consultations` | 35ms | 200 | 1 | ✅ PASS |
-| 56 | Consult | 查询咨询会话列表 | `GET` | `/api/v1/consultations` | 27ms | 200 | 1 | ✅ PASS |
-| 57 | Consult | 发送咨询消息 | `POST` | `/api/v1/consultations/messages` | 29ms | 200 | 1 | ✅ PASS |
-| 58 | Consult | 查询咨询消息记录 | `GET` | `/api/v1/consultations/messages` | 34ms | 200 | 1 | ✅ PASS |
-| 59 | Consult | 标记会话已读 | `POST` | `/api/v1/consultations/read` | 28ms | 200 | 1 | ✅ PASS |
-| 60 | Consult | 结束咨询会话 | `POST` | `/api/v1/consultations/close` | 27ms | 200 | 1 | ✅ PASS |
-| 61 | CMS | CMS 首页数据聚合 | `GET` | `/api/cms/index` | 32ms | 200 | 1 | ✅ PASS |
+| 14 | Project | 获取项目分类平铺列表 | `GET` | `/api/v1/projects/categories?tree=0` | 21ms | 200 | 1 | ✅ PASS |
+| 15 | Project | 项目广场公开列表 | `GET` | `/api/v1/projects` | 32ms | 200 | 1 | ✅ PASS |
+| 16 | Project | 按分类赛道筛选项目列表 | `GET` | `/api/v1/projects?category_id=37` | 24ms | 200 | 1 | ✅ PASS |
+| 17 | Project | 项目详情查询(含关联分类) | `GET` | `/api/v1/projects/detail` | 33ms | 200 | 1 | ✅ PASS |
+| 18 | Project | 创建项目草稿(绑定分类) | `POST` | `/api/v1/projects` | 56ms | 200 | 1 | ✅ PASS |
+| 19 | Project | 修改项目资料 | `POST` | `/api/v1/projects/update` | 36ms | 200 | 1 | ✅ PASS |
+| 20 | Project | 查询项目资料库 | `GET` | `/api/v1/projects/materials` | 32ms | 200 | 1 | ✅ PASS |
+| 21 | Project | 上传新增项目资料 | `POST` | `/api/v1/projects/materials` | 28ms | 200 | 1 | ✅ PASS |
+| 22 | Project | 查询项目成员列表 | `GET` | `/api/v1/projects/members` | 29ms | 200 | 1 | ✅ PASS |
+| 23 | Project | 查询项目数据看板 | `GET` | `/api/v1/projects/stats` | 50ms | 200 | 1 | ✅ PASS |
+| 24 | Project | 查询项目发展历程时间轴 | `GET` | `/api/v1/projects/timelines` | 22ms | 200 | 1 | ✅ PASS |
+| 25 | Project | 项目方发布时间轴里程碑 | `POST` | `/api/v1/projects/timelines` | 31ms | 200 | 1 | ✅ PASS |
+| 26 | Project | 项目方更新时间轴节点 | `POST` | `/api/v1/projects/timelines/update` | 31ms | 200 | 1 | ✅ PASS |
+| 27 | Project | 项目方删除时间轴节点 | `POST` | `/api/v1/projects/timelines/delete` | 31ms | 200 | 1 | ✅ PASS |
+| 28 | Content | 资讯公开列表 | `GET` | `/api/v1/contents` | 27ms | 200 | 1 | ✅ PASS |
+| 29 | Content | 我的发布列表 | `GET` | `/api/v1/contents/mine` | 39ms | 200 | 1 | ✅ PASS |
+| 30 | Content | 创建资讯草稿 | `POST` | `/api/v1/contents` | 66ms | 200 | 1 | ✅ PASS |
+| 31 | Content | 查看资讯详情 | `GET` | `/api/v1/contents/detail` | 25ms | 200 | 1 | ✅ PASS |
+| 32 | Content | 更新资讯内容 | `POST` | `/api/v1/contents/update` | 70ms | 200 | 1 | ✅ PASS |
+| 33 | Content | 提交资讯审核 | `POST` | `/api/v1/contents/submit` | 37ms | 200 | 1 | ✅ PASS |
+| 34 | Relation | 关注用户 | `POST` | `/api/v1/relations/follow` | 42ms | 200 | 1 | ✅ PASS |
+| 35 | Relation | 获取关注列表 | `GET` | `/api/v1/relations/following` | 46ms | 200 | 1 | ✅ PASS |
+| 36 | Relation | 获取粉丝列表 | `GET` | `/api/v1/relations/followers` | 38ms | 200 | 1 | ✅ PASS |
+| 37 | Relation | 取消关注 | `POST` | `/api/v1/relations/unfollow` | 31ms | 200 | 1 | ✅ PASS |
+| 38 | Relation | 收藏项目 | `POST` | `/api/v1/relations/favorite` | 41ms | 200 | 1 | ✅ PASS |
+| 39 | Relation | 获取收藏列表 | `GET` | `/api/v1/relations/favorites` | 30ms | 200 | 1 | ✅ PASS |
+| 40 | Relation | 取消收藏项目 | `POST` | `/api/v1/relations/unfavorite` | 103ms | 200 | 1 | ✅ PASS |
+| 41 | Relation | 拉黑用户 | `POST` | `/api/v1/relations/block` | 54ms | 200 | 1 | ✅ PASS |
+| 42 | Relation | 查看黑名单列表 | `GET` | `/api/v1/relations/blocks` | 30ms | 200 | 1 | ✅ PASS |
+| 43 | Relation | 解除拉黑 | `POST` | `/api/v1/relations/unblock` | 29ms | 200 | 1 | ✅ PASS |
+| 44 | Relation | 举报反馈 | `POST` | `/api/v1/relations/reports` | 28ms | 200 | 1 | ✅ PASS |
+| 45 | Recommend | 查询今日推荐配额 | `GET` | `/api/v1/recommendations/quota` | 32ms | 200 | 1 | ✅ PASS |
+| 46 | Recommend | 撮合生成智能推荐 | `POST` | `/api/v1/recommendations/generate` | 59ms | 200 | 1 | ✅ PASS |
+| 47 | Recommend | 获取推荐列表 | `GET` | `/api/v1/recommendations` | 36ms | 200 | 1 | ✅ PASS |
+| 48 | Recommend | 标记推荐已浏览 | `POST` | `/api/v1/recommendations/view` | 28ms | 200 | 1 | ✅ PASS |
+| 49 | Recommend | 响应推荐结果 | `POST` | `/api/v1/recommendations/respond` | 28ms | 200 | 1 | ✅ PASS |
+| 50 | Recommend | 提交推荐满意度反馈 | `POST` | `/api/v1/recommendations/feedback` | 28ms | 200 | 1 | ✅ PASS |
+| 51 | Promotion | 查询推流投放套餐 | `GET` | `/api/v1/promotions/packages` | 24ms | 200 | 1 | ✅ PASS |
+| 52 | Promotion | 查询当前活跃推流展位 | `GET` | `/api/v1/promotions/active` | 20ms | 200 | 1 | ✅ PASS |
+| 53 | Promotion | 查询推流投放计划 | `GET` | `/api/v1/promotions/campaigns` | 28ms | 200 | 1 | ✅ PASS |
+| 54 | Promotion | 推流数据上报埋点 | `POST` | `/api/v1/promotions/track` | 22ms | 200 | 30001 | ✅ PASS |
+| 55 | Consult | 发起业务咨询 | `POST` | `/api/v1/consultations` | 40ms | 200 | 1 | ✅ PASS |
+| 56 | Consult | 查询咨询会话列表 | `GET` | `/api/v1/consultations` | 30ms | 200 | 1 | ✅ PASS |
+| 57 | Consult | 发送咨询消息 | `POST` | `/api/v1/consultations/messages` | 32ms | 200 | 1 | ✅ PASS |
+| 58 | Consult | 查询咨询消息记录 | `GET` | `/api/v1/consultations/messages` | 30ms | 200 | 1 | ✅ PASS |
+| 59 | Consult | 标记会话已读 | `POST` | `/api/v1/consultations/read` | 32ms | 200 | 1 | ✅ PASS |
+| 60 | Consult | 结束咨询会话 | `POST` | `/api/v1/consultations/close` | 32ms | 200 | 1 | ✅ PASS |
+| 61 | CMS | CMS 首页数据聚合 | `GET` | `/api/cms/index` | 37ms | 200 | 1 | ✅ PASS |
 | 62 | CMS | CMS 站点全局配置 | `GET` | `/api/cms/config` | 23ms | 200 | 1 | ✅ PASS |
-| 63 | CMS | 主导航菜单列表 | `GET` | `/api/cms/navigation` | 21ms | 200 | 1 | ✅ PASS |
-| 64 | CMS | 友情链接列表 | `GET` | `/api/cms/friendlink` | 19ms | 200 | 1 | ✅ PASS |
-| 65 | CMS | 栏目分类列表 | `GET` | `/api/cms/channels` | 20ms | 200 | 1 | ✅ PASS |
-| 66 | CMS | 栏目详情查询 | `GET` | `/api/cms/channels/detail` | 25ms | 200 | 1 | ✅ PASS |
-| 67 | CMS | 栏目下文章列表 | `GET` | `/api/cms/channels/archives` | 27ms | 200 | 1 | ✅ PASS |
-| 68 | CMS | 文章正文详情 | `GET` | `/api/cms/archives/detail` | 36ms | 200 | 1 | ✅ PASS |
-| 69 | CMS | 相关推荐文章 | `GET` | `/api/cms/archives/relative` | 19ms | 200 | 1 | ✅ PASS |
-| 70 | CMS | 文章点赞 | `POST` | `/api/cms/archives/like` | 25ms | 200 | 1 | ✅ PASS |
-| 71 | CMS | 文章浏览数计数 | `POST` | `/api/cms/archives/view` | 21ms | 200 | 1 | ✅ PASS |
-| 72 | CMS | 热门标签列表 | `GET` | `/api/cms/tags` | 22ms | 200 | 1 | ✅ PASS |
-| 73 | CMS | 按标签索引文章 | `GET` | `/api/cms/tags/archives` | 26ms | 200 | 1 | ✅ PASS |
-| 74 | CMS | 单页列表 | `GET` | `/api/cms/pages` | 20ms | 200 | 1 | ✅ PASS |
-| 75 | CMS | 单页详情 | `GET` | `/api/cms/pages/detail` | 20ms | 200 | 1 | ✅ PASS |
-| 76 | CMS | 专题列表 | `GET` | `/api/cms/specials` | 19ms | 200 | 1 | ✅ PASS |
-| 77 | CMS | 专题详情 | `GET` | `/api/cms/specials/detail` | 27ms | 200 | 1 | ✅ PASS |
-| 78 | CMS | 全文关键字搜索 | `GET` | `/api/cms/search` | 21ms | 200 | 1 | ✅ PASS |
+| 63 | CMS | 主导航菜单列表 | `GET` | `/api/cms/navigation` | 30ms | 200 | 1 | ✅ PASS |
+| 64 | CMS | 友情链接列表 | `GET` | `/api/cms/friendlink` | 22ms | 200 | 1 | ✅ PASS |
+| 65 | CMS | 栏目分类列表 | `GET` | `/api/cms/channels` | 24ms | 200 | 1 | ✅ PASS |
+| 66 | CMS | 栏目详情查询 | `GET` | `/api/cms/channels/detail` | 28ms | 200 | 1 | ✅ PASS |
+| 67 | CMS | 栏目下文章列表 | `GET` | `/api/cms/channels/archives` | 29ms | 200 | 1 | ✅ PASS |
+| 68 | CMS | 文章正文详情 | `GET` | `/api/cms/archives/detail` | 41ms | 200 | 1 | ✅ PASS |
+| 69 | CMS | 相关推荐文章 | `GET` | `/api/cms/archives/relative` | 23ms | 200 | 1 | ✅ PASS |
+| 70 | CMS | 文章点赞 | `POST` | `/api/cms/archives/like` | 29ms | 200 | 1 | ✅ PASS |
+| 71 | CMS | 文章浏览数计数 | `POST` | `/api/cms/archives/view` | 23ms | 200 | 1 | ✅ PASS |
+| 72 | CMS | 热门标签列表 | `GET` | `/api/cms/tags` | 31ms | 200 | 1 | ✅ PASS |
+| 73 | CMS | 按标签索引文章 | `GET` | `/api/cms/tags/archives` | 27ms | 200 | 1 | ✅ PASS |
+| 74 | CMS | 单页列表 | `GET` | `/api/cms/pages` | 24ms | 200 | 1 | ✅ PASS |
+| 75 | CMS | 单页详情 | `GET` | `/api/cms/pages/detail` | 22ms | 200 | 1 | ✅ PASS |
+| 76 | CMS | 专题列表 | `GET` | `/api/cms/specials` | 23ms | 200 | 1 | ✅ PASS |
+| 77 | CMS | 专题详情 | `GET` | `/api/cms/specials/detail` | 28ms | 200 | 1 | ✅ PASS |
+| 78 | CMS | 全文关键字搜索 | `GET` | `/api/cms/search` | 24ms | 200 | 1 | ✅ PASS |
 | 79 | CMS | 热门搜索词 | `GET` | `/api/cms/search/hot` | 18ms | 200 | 1 | ✅ PASS |
-| 80 | CMS | 搜索关键字联想 | `GET` | `/api/cms/search/suggest` | 18ms | 200 | 1 | ✅ PASS |
-| 81 | CMS | 获取文章评论列表 | `GET` | `/api/cms/comments` | 23ms | 200 | 1 | ✅ PASS |
-| 82 | CMS | 发表互动评论 | `POST` | `/api/cms/comments` | 25ms | 200 | 1 | ✅ PASS |
-| 83 | CMS | 自定义表单配置查询 | `GET` | `/api/cms/diyform` | 22ms | 200 | 1 | ✅ PASS |
-| 84 | CMS | CMS 会员概览 | `GET` | `/api/cms/user/overview` | 35ms | 200 | 1 | ✅ PASS |
-| 85 | CMS | CMS 会员收藏列表 | `GET` | `/api/cms/user/favorites` | 23ms | 200 | 1 | ✅ PASS |
-| 86 | Auth | 退出登录 | `POST` | `/api/v1/auth/logout` | 21ms | 200 | 1 | ✅ PASS |
+| 80 | CMS | 搜索关键字联想 | `GET` | `/api/cms/search/suggest` | 21ms | 200 | 1 | ✅ PASS |
+| 81 | CMS | 获取文章评论列表 | `GET` | `/api/cms/comments` | 34ms | 200 | 1 | ✅ PASS |
+| 82 | CMS | 发表互动评论 | `POST` | `/api/cms/comments` | 32ms | 200 | 1 | ✅ PASS |
+| 83 | CMS | 自定义表单配置查询 | `GET` | `/api/cms/diyform` | 33ms | 200 | 1 | ✅ PASS |
+| 84 | CMS | CMS 会员概览 | `GET` | `/api/cms/user/overview` | 47ms | 200 | 1 | ✅ PASS |
+| 85 | CMS | CMS 会员收藏列表 | `GET` | `/api/cms/user/favorites` | 32ms | 200 | 1 | ✅ PASS |
+| 86 | Auth | 退出登录 | `POST` | `/api/v1/auth/logout` | 32ms | 200 | 1 | ✅ PASS |
 
 ## 三、重点接口返回值抽检
 
@@ -121,12 +121,12 @@
     "msg": "挑战生成成功",
     "data": {
         "address": "0x380d7f00d4bb7870cad919837269636c8420d3bd",
-        "nonce": "e5699fbd048da2717fda79ccded540c5",
-        "message": "127.0.0.1:8000 wants you to sign in with your Ethereum account:\n0x380d7f00d4bb7870cad919837269636c8420d3bd\n\nSign in to ITIK with your decentralized wallet.\n\nURI: http://127.0.0.1:8000\nVersion: 1\nChain ID: 1\nNonce: e5699fbd048da2717fda79ccded540c5\nIssued At: 2026-10-12T15:24:58Z",
+        "nonce": "955b2cb143017f8010049bb2ed12e960",
+        "message": "127.0.0.1:8000 wants you to sign in with your Ethereum account:\n0x380d7f00d4bb7870cad919837269636c8420d3bd\n\nSign in to ITIK with your decentralized wallet.\n\nURI: http://127.0.0.1:8000\nVersion: 1\nChain ID: 1\nNonce: 955b2cb143017f8010049bb2ed12e960\nIssued At: 2026-10-12T15:46:34Z",
         "expire": 300
     },
-    "request_id": "650b56e6959354b8f64182d622ab3c24",
-    "time": 1791818698
+    "request_id": "6fd2f50f9f4722fdc8a839b4ea549e72",
+    "time": 1791819994
 }
 ```
 
@@ -137,7 +137,7 @@
     "code": 1,
     "msg": "钱包登录成功",
     "data": {
-        "user_id": 112,
+        "user_id": 120,
         "username": "test_vitalik",
         "nickname": "Vitalik.eth",
         "wallet_address": "0x380d7f00d4bb7870cad919837269636c8420d3bd",
@@ -145,10 +145,10 @@
         "inviter_id": 0,
         "is_new_user": false,
         "role": "OWNER",
-        "token": "77e15379-cce3-452a-8eac-f8799eb37e87"
+        "token": "a771ee47-1abd-4592-abf5-7d9ee59d63fd"
     },
-    "request_id": "49beb5b725116a0a1b061943e9441e5e",
-    "time": 1791818698
+    "request_id": "ba60fa2de926ff011a69a08b39071cac",
+    "time": 1791819994
 }
 ```
 
@@ -160,7 +160,7 @@
     "msg": "",
     "data": {
         "user": {
-            "id": 112,
+            "id": 120,
             "username": "test_vitalik",
             "nickname": "Vitalik.eth",
             "email": "vitalik@itiklink.com",
@@ -179,14 +179,14 @@
             "status": "ACTIVE",
             "plan_code": "PLAN_OWNER_1Y",
             "role_code": "OWNER",
-            "start_at": 1790954589,
-            "end_at": 1822490589,
-            "grace_end_at": 1823095389,
+            "start_at": 1790955985,
+            "end_at": 1822491985,
+            "grace_end_at": 1823096785,
             "active": true
         }
     },
-    "request_id": "361e86b091e2eb4b6c649436a231cc01",
-    "time": 1791818698
+    "request_id": "02870a74353f3558191c6aa284b2e1ca",
+    "time": 1791819994
 }
 ```
 
@@ -249,8 +249,8 @@
             }
         ]
     },
-    "request_id": "6a5e066c5100c489d3033c60ddb19843",
-    "time": 1791818699
+    "request_id": "49b79a584e5712edbffb24325ff9a83a",
+    "time": 1791819994
 }
 ```
 
@@ -263,123 +263,108 @@
     "data": {
         "list": [
             {
-                "id": "60",
-                "name": "FlashSwap DEX (极速流动性聚合交易协议)",
-                "subtitle": "结合 PMM 算法与零滑点闪兑的高资本效率去中心化交易所",
-                "cover": "/assets/img/project_default.png",
-                "category_id": 20,
-                "category_l1": "DeFi 金融",
-                "category_l2": "去中心化交易 (DEX)",
-                "category_l3": "AMM",
-                "region": "全球",
-                "tags": "DEX,去中心化交易,闪兑,流动性",
-                "certified": 1,
-                "views": 15600,
-                "follows": 3210,
-                "sort_weight": 98,
-                "create_time": "2026-10-04 09:07:45",
-                "category": {
-                    "id": 20,
-                    "pid": 19,
-                    "name": "去中心化交易 (DEX)",
-                    "slug": "defi-dex",
-                    "icon": "🔄"
-                }
-            },
-            {
-                "id": "53",
-                "name": "UniLend Protocol (去中心化借贷协议)",
-                "subtitle": "支持全资产抵押与跨链闪电借贷的高性能流动性协议",
-                "cover": "/assets/img/project_default.png",
-                "category_id": 21,
-                "category_l1": "DeFi 金融",
-                "category_l2": "借贷协议 (Lending)",
-                "category_l3": "CrossChain",
-                "region": "全球/北美",
-                "tags": "DeFi,借贷,跨链,以太坊",
-                "certified": 1,
-                "views": 8921,
-                "follows": 1340,
-                "sort_weight": 93,
-                "create_time": "2026-10-06 08:39:16",
-                "category": {
-                    "id": 21,
-                    "pid": 19,
-                    "name": "借贷协议 (Lending)",
-                    "slug": "defi-lending",
-                    "icon": "🏦"
-                }
-            },
-            {
-                "id": "57",
-                "name": "ByteTrust DePIN (分布式算力共享网络)",
-                "subtitle": "聚合全球边缘闲置 GPU 算力为 AI 训练提供低成本算力租赁",
-                "cover": "/assets/img/project_default.png",
-                "category_id": 31,
-                "category_l1": "底层基础设施",
-                "category_l2": "DePIN (分布式硬件网络)",
-                "category_l3": "GPU Cloud",
-                "region": "北美",
-                "tags": "DePIN,算力,GPU,AI",
-                "certified": 1,
-                "views": 9340,
-                "follows": 1560,
-                "sort_weight": 86,
-                "create_time": "2026-10-04 03:00:37",
-                "category": {
-                    "id": 31,
-                    "pid": 29,
-                    "name": "DePIN (分布式硬件网络)",
-                    "slug": "depin",
-                    "icon": "📡"
-                }
-            },
-            {
-                "id": "54",
+                "id": "64",
                 "name": "ZK-Shield Bridge (零知识证明隐私跨链桥)",
                 "subtitle": "下一代多链隐私状态证明与轻节点免信任资产中继",
                 "cover": "/assets/img/project_default.png",
-                "category_id": 30,
-                "category_l1": "底层基础设施",
-                "category_l2": "跨链互操作 (Cross-Chain)",
-                "category_l3": "ZK-Rollup",
+                "category_id": 48,
                 "region": "欧洲/瑞士",
                 "tags": "ZK,隐私,跨链桥,Layer2",
                 "certified": 1,
                 "views": 12450,
                 "follows": 2890,
-                "sort_weight": 77,
-                "create_time": "2026-10-06 21:59:29",
+                "sort_weight": 56,
+                "create_time": "2026-10-10 11:33:51",
                 "category": {
-                    "id": 30,
-                    "pid": 29,
+                    "id": 48,
+                    "pid": 47,
                     "name": "跨链互操作 (Cross-Chain)",
                     "slug": "infra-bridge",
                     "icon": "🌉"
                 }
             },
             {
-                "id": "56",
+                "id": "66",
                 "name": "MetaDID (去中心化多链身份凭证协议)",
                 "subtitle": "基于 EIP-4361 与 SBT 构建的无感社交信誉与防女巫身份网络",
                 "cover": "/assets/img/project_default.png",
-                "category_id": 33,
-                "category_l1": "社交与身份 (Social & DID)",
-                "category_l2": "去中心化身份 (DID & SBT)",
-                "category_l3": "SBT",
+                "category_id": 51,
                 "region": "全球",
                 "tags": "DID,身份凭证,Web3,SBT",
                 "certified": 1,
                 "views": 6780,
                 "follows": 980,
-                "sort_weight": 45,
-                "create_time": "2026-10-05 15:50:52",
+                "sort_weight": 53,
+                "create_time": "2026-10-08 09:28:39",
                 "category": {
-                    "id": 33,
-                    "pid": 32,
+                    "id": 51,
+                    "pid": 50,
                     "name": "去中心化身份 (DID & SBT)",
                     "slug": "did",
                     "icon": "🪪"
+                }
+            },
+            {
+                "id": "63",
+                "name": "UniLend Protocol (去中心化借贷协议)",
+                "subtitle": "支持全资产抵押与跨链闪电借贷的高性能流动性协议",
+                "cover": "/assets/img/project_default.png",
+                "category_id": 39,
+                "region": "全球/北美",
+                "tags": "DeFi,借贷,跨链,以太坊",
+                "certified": 1,
+                "views": 8920,
+                "follows": 1340,
+                "sort_weight": 48,
+                "create_time": "2026-10-08 03:29:26",
+                "category": {
+                    "id": 39,
+                    "pid": 37,
+                    "name": "借贷协议 (Lending)",
+                    "slug": "defi-lending",
+                    "icon": "🏦"
+                }
+            },
+            {
+                "id": "70",
+                "name": "FlashSwap DEX (极速流动性聚合交易协议)",
+                "subtitle": "结合 PMM 算法与零滑点闪兑的高资本效率去中心化交易所",
+                "cover": "/assets/img/project_default.png",
+                "category_id": 38,
+                "region": "全球",
+                "tags": "DEX,去中心化交易,闪兑,流动性",
+                "certified": 1,
+                "views": 15600,
+                "follows": 3210,
+                "sort_weight": 41,
+                "create_time": "2026-10-08 00:54:07",
+                "category": {
+                    "id": 38,
+                    "pid": 37,
+                    "name": "去中心化交易 (DEX)",
+                    "slug": "defi-dex",
+                    "icon": "🔄"
+                }
+            },
+            {
+                "id": "67",
+                "name": "ByteTrust DePIN (分布式算力共享网络)",
+                "subtitle": "聚合全球边缘闲置 GPU 算力为 AI 训练提供低成本算力租赁",
+                "cover": "/assets/img/project_default.png",
+                "category_id": 49,
+                "region": "北美",
+                "tags": "DePIN,算力,GPU,AI",
+                "certified": 1,
+                "views": 9340,
+                "follows": 1560,
+                "sort_weight": 28,
+                "create_time": "2026-10-11 20:37:21",
+                "category": {
+                    "id": 49,
+                    "pid": 47,
+                    "name": "DePIN (分布式硬件网络)",
+                    "slug": "depin",
+                    "icon": "📡"
                 }
             }
         ],
@@ -387,8 +372,8 @@
         "page": 1,
         "limit": 5
     },
-    "request_id": "5f2f30f29b62d546c0b77a75787af7b6",
-    "time": 1791818699
+    "request_id": "995132fed4230e31baacdd9986da2b1f",
+    "time": 1791819995
 }
 ```
 
@@ -399,11 +384,11 @@
     "code": 1,
     "msg": "咨询已发送",
     "data": {
-        "conversation_id": 9,
-        "message_id": 18
+        "conversation_id": 11,
+        "message_id": 22
     },
-    "request_id": "87679de2b1d316da07a4dd5cacf593d7",
-    "time": 1791818700
+    "request_id": "44ede83af75350c6a746da2e7b3fd27c",
+    "time": 1791819996
 }
 ```
 
@@ -1022,8 +1007,8 @@
             }
         ]
     },
-    "request_id": "19bd27f154e86ca82c855e0f18d790d0",
-    "time": 1791818700
+    "request_id": "d9e4548ade4be8b74f59fd014f5e2b8b",
+    "time": 1791819996
 }
 ```
 

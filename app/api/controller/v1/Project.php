@@ -119,11 +119,9 @@ class Project extends Base
                 $q->whereLike('name', "%{$keyword}%")->whereOr('subtitle', 'like', "%{$keyword}%");
             });
         }
-        foreach (['category_l1', 'category_l2', 'category_l3', 'region'] as $field) {
-            $val = (string)$this->request->param($field, '');
-            if ($val !== '') {
-                $query->where($field, $val);
-            }
+        $region = (string)$this->request->param('region', '');
+        if ($region !== '') {
+            $query->where('region', $region);
         }
         $certified = $this->request->param('certified', '');
         if ($certified !== '') {
@@ -137,7 +135,7 @@ class Project extends Base
             ->order($orderby, $orderway)
             ->order('id', 'desc')
             ->page($page, $limit)
-            ->field('id,name,subtitle,cover,category_id,category_l1,category_l2,category_l3,region,tags,certified,views,follows,sort_weight,create_time')
+            ->field('id,name,subtitle,cover,category_id,region,tags,certified,views,follows,sort_weight,create_time')
             ->select()
             ->toArray();
 
@@ -623,7 +621,7 @@ class Project extends Base
     protected function collectProjectInput(bool $isCreate): array
     {
         $fields = [
-            'name', 'subtitle', 'cover', 'category_l1', 'category_l2', 'category_l3',
+            'name', 'subtitle', 'cover',
             'region', 'tags', 'summary', 'content', 'seo_title', 'seo_keywords', 'seo_description',
         ];
         $data = [];
@@ -642,16 +640,6 @@ class Project extends Base
                     $this->fail('所选项目分类不存在或已禁用', self::CODE_PARAM_INVALID);
                 }
                 $data['category_id'] = $catId;
-                // 若未单独传分类文本，自动冗余名称
-                if (empty($data['category_l1']) && $category->pid == 0) {
-                    $data['category_l1'] = $category->name;
-                } elseif (empty($data['category_l2']) && $category->pid > 0) {
-                    $parentCat = ProjectCategory::where('id', $category->pid)->value('name');
-                    if ($parentCat && empty($data['category_l1'])) {
-                        $data['category_l1'] = $parentCat;
-                    }
-                    $data['category_l2'] = $category->name;
-                }
             } else {
                 $data['category_id'] = 0;
             }

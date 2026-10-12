@@ -321,7 +321,12 @@ class PromotionService
 
         $pids = array_unique(array_column($rows, 'project_id'));
         $projects = array_column(
-            Db::name('app_project')->whereIn('id', $pids)->field('id,name,cover,subtitle,certified,category_l1')->select()->toArray(),
+            Db::name('app_project')
+                ->alias('p')
+                ->leftJoin('app_project_category c', 'p.category_id = c.id')
+                ->whereIn('p.id', $pids)
+                ->field('p.id,p.name,p.cover,p.subtitle,p.certified,c.name as category_name')
+                ->select()->toArray(),
             null, 'id'
         );
         foreach ($rows as $k => $r) {
@@ -330,7 +335,7 @@ class PromotionService
             $rows[$k]['cover']     = $p['cover'] ?? '';
             $rows[$k]['subtitle']  = $p['subtitle'] ?? '';
             $rows[$k]['certified'] = (int)($p['certified'] ?? 0);
-            $rows[$k]['category']  = $p['category_l1'] ?? '';
+            $rows[$k]['category']  = $p['category_name'] ?? '';
         }
         return $rows;
     }

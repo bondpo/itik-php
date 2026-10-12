@@ -200,10 +200,12 @@ class ReportService
     public function projectByCategory(int $limit = 10): array
     {
         return Db::name('app_project')
-            ->whereNull('deletetime')
-            ->where('category_l1', '<>', '')
-            ->field('category_l1 AS name, COUNT(*) AS num')
-            ->group('category_l1')
+            ->alias('p')
+            ->join('app_project_category c', 'p.category_id = c.id')
+            ->whereNull('p.deletetime')
+            ->where('c.status', 'normal')
+            ->field('c.name AS name, COUNT(*) AS num')
+            ->group('c.id, c.name')
             ->order('num', 'desc')
             ->limit($limit)
             ->select()->toArray();

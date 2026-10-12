@@ -453,7 +453,31 @@ class AdminAuth extends Auth
 
     public function getMenus(int $uid = 0): array
     {
-        return parent::getMenus($uid ?: $this->id);
+        $menus = parent::getMenus($uid ?: $this->id);
+        return $this->filterMenuTree($menus);
+    }
+
+    /**
+     * 过滤非菜单项(ismenu=0)与清理空子项，避免单叶子或带按钮的二级菜单被错误识别为折叠目录
+     */
+    protected function filterMenuTree(array $items): array
+    {
+        $result = [];
+        foreach ($items as $item) {
+            if (isset($item['ismenu']) && (int)$item['ismenu'] === 0) {
+                continue;
+            }
+            if (!empty($item['children'])) {
+                $item['children'] = $this->filterMenuTree($item['children']);
+                if (empty($item['children'])) {
+                    unset($item['children']);
+                }
+            } else {
+                unset($item['children']);
+            }
+            $result[] = $item;
+        }
+        return $result;
     }
 
     /**

@@ -65,8 +65,6 @@
                         }
                         return "<span class=\"layui-badge layui-bg-gray\">未分类</span>";
                     }},
-                    { field: "category_l1", title: "一级栏目", minWidth: 100, operate: 'LIKE' },
-                    { field: "category_l2", title: "二级栏目", minWidth: 100, operate: 'LIKE' },
                     { field: "status", title: "状态", width: 90, align: "center", searchList: { draft: '草稿', pending: '待审核', normal: '已通过', rejected: '已驳回', hidden: '已下架', offline: '已下线' }, custom: { draft: 'default', pending: 'orange', normal: 'green', rejected: 'red', hidden: 'default', offline: 'default' }, templet: bdTable.api.formatter.status },
                     { field: "verify_status", title: "认证状态", width: 100, align: "center", searchList: { none: '未认证', pending: '认证中', normal: '已认证', rejected: '认证驳回' }, custom: { none: 'default', pending: 'orange', normal: 'green', rejected: 'red' }, templet: bdTable.api.formatter.status },
                     { field: "certified", title: "认证标识", width: 95, align: "center", searchList: { 1: "已认证", 0: "未认证" }, templet: function (d) { return d.certified == 1 ? "<span class=\"layui-badge layui-bg-green\">已认证</span>" : "<span class=\"layui-badge layui-bg-gray\">未认证</span>"; }, operate: false },

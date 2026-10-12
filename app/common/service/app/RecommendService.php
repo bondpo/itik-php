@@ -377,7 +377,15 @@ class RecommendService
             ? array_column(Db::name('user')->whereIn('id', array_unique($uids))->field('id,nickname,avatar,level,bio')->select()->toArray(), null, 'id')
             : [];
         $projects = $pids
-            ? array_column(Db::name('app_project')->whereIn('id', array_unique($pids))->field('id,name,cover,certified,category_l1')->select()->toArray(), null, 'id')
+            ? array_column(
+                Db::name('app_project')
+                    ->alias('p')
+                    ->leftJoin('app_project_category c', 'p.category_id = c.id')
+                    ->whereIn('p.id', array_unique($pids))
+                    ->field('p.id,p.name,p.cover,p.certified,c.name as category_name')
+                    ->select()->toArray(),
+                null, 'id'
+            )
             : [];
 
         foreach ($rows as $k => $r) {
@@ -390,7 +398,7 @@ class RecommendService
             } else {
                 $rows[$k]['title']     = $projects[$tid]['name'] ?? '';
                 $rows[$k]['cover']     = $projects[$tid]['cover'] ?? '';
-                $rows[$k]['bio']       = $projects[$tid]['category_l1'] ?? '';
+                $rows[$k]['bio']       = $projects[$tid]['category_name'] ?? '';
                 $rows[$k]['certified'] = (int)($projects[$tid]['certified'] ?? 0);
             }
             $rows[$k]['score'] = (float)$r['score'];

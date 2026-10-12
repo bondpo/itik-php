@@ -182,12 +182,6 @@
                 {if !empty($row.category)}
                 <span class="layui-badge layui-bg-blue">{$row.category.icon|default=''} {$row.category.name}</span>
                 {/if}
-                {if !empty($row.category_l1)}
-                <span class="layui-badge layui-bg-cyan">{$row.category_l1}</span>
-                {/if}
-                {if !empty($row.category_l2)}
-                <span class="layui-badge-rim">{$row.category_l2}</span>
-                {/if}
 
                 <!-- 审核状态 -->
                 {if $row.status == 'normal'}
