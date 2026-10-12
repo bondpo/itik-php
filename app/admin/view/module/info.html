@@ -1,0 +1,205 @@
+{layout name="layout/default" /}
+<style>
+    .layui-form-switch{
+       margin-top: 0;
+    }
+    .module-info-item{
+        padding: 5px 0;
+    }
+</style>
+<div class="layui-row">
+    <div class="layui-col-md4 layui-col-xs6">
+        <div class="layui-carousel" id="carousel">
+            <div carousel-item>
+                <div>条目1</div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-col-md8 layui-col-xs6">
+        <div class="layui-card">
+            <div class="layui-card-body">
+                <h3>{$info.title}</h3>
+                <button class="layui-btn layui-btn-xs layui-bg-black" id="price-dropdown">￥{$info.standard_price} 起 <i class="layui-icon layui-font-12 layui-icon-down"></i></button>
+                <div class="layui-bg-gray layui-form module-info-list" style="padding: 10px">
+                    <div class="module-info-item">
+                        <label>下载次数：</label>
+                        <span class="layui-font-blue">{$info.downloads|default=0}</span>
+                    </div>
+                    <div class="module-info-item">
+                        <label>发布时间：</label>
+                        <span class="layui-text">{$info.create_time|default='2023-02-15 15:46:54'}</span>
+                    </div>
+                    <div class="module-info-item">
+                        <label>更新时间：</label>
+                        <span class="layui-text">{$info.update_time|default='2025-04-14 15:32:16'}</span>
+                    </div>
+                    <div class="module-info-item">
+                        <label>当前版本：</label>
+                        <span class="layui-font-blue">{$info.version}</span>
+                    </div>
+                    <div class="module-info-item">
+                        <label>开发者：</label>
+                        <span class="layui-font-blue">{$info.author}</span>
+                    </div>
+                    <div class="module-info-item d-flex align-items-center">
+                        <label>模块状态：</label>
+                        <input type="checkbox" name="state" value="{$info.state}" {if $info.state==1} checked {/if} lay-skin="switch" lay-filter="state" />
+                    </div>
+                    <div class="module-info-item mt-1">
+                        {if $info.module}
+                        <button class="layui-btn layui-btn-sm layui-bg-blue" data-name="{$info.name}" id="upgrade-dropdown">
+                            <i class="fa fa-cloud"></i> 升级
+                            <i class="layui-icon layui-icon-down layui-font-12"></i>
+                        </button>
+                        <button class="layui-btn layui-btn-sm layui-bg-red btn-uninstall"  data-name="{$info.name}"><i class="fa fa-times"></i> 卸载</button>
+                        {else /}
+                        <button type="button" data-version="{$info.version}" data-name="{$info.name}" class="layui-btn layui-btn-sm layui-bg-green btn-install"><i class="fa fa-cloud-download"></i> 安装</button>
+                        {/if}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{include file="module/script" /}
+
+<script type="text/javascript">
+    layui.use(["badou","carousel", "dropdown", "layer", "form","laytpl"], function () {
+        var carousel     = layui.carousel;
+        var dropdown     = layui.dropdown;
+        var $            = layui.$;
+        var form         = layui.form;
+        var badou        = layui.badou;
+
+        var iframeRefresh = function () {
+             // 获取当前iframe层的索引
+             var index = parent.layer.getFrameIndex(window.name);
+             // 重新加载
+             parent.layer.iframeSrc(index, window.location.href);
+        };
+        // 渲染 - 常规轮播
+        carousel.render({
+            elem: "#carousel",
+            width: "auto",
+        });
+
+        dropdown.render({
+            elem: "#price-dropdown",
+            data: [
+                {
+                    title: "标准版：￥{$info.standard_price}",
+                    id: 1,
+                },
+                {
+                    title: "高级版：￥{$info.senior_price}",
+                    id: 2,
+                },
+            ],
+        });
+
+        dropdown.render({
+            elem: "#upgrade-dropdown",
+            data: Config.info.releaselist,
+            customName:{
+                id:'id',
+                title:'version'
+            },
+            click:function (data) {
+                var name = Config.info.name;
+                if (Config.info.state == 1) {
+                    Layer.alert(__('Please disable the add before trying to upgrade'), {icon: 7});
+                    return false;
+                }
+                var version =  Config.info.version;
+
+                Layer.confirm(__('Upgrade tips', Config.info.title), function (index, layero) {
+                    upgrade(name, version);
+                });
+
+            }
+        });
+
+        form.on("switch(state)", function (data) {
+            if(!Config.info.module){
+                data.elem.checked = false;
+                return false;
+            }
+            var userinfo = badou.api.badouStorage.get('userinfo');
+            var uid = userinfo ? userinfo.id : 0;
+            if (parseInt(uid) === 0) {
+                $(".btn-userinfo").trigger("click", name, version);
+                return false;
+            }
+
+            var action='disable';
+            if(data.elem.checked){
+                action='enable';
+            }
+            badou.api.ajax({
+                url: "{:url('module/state')}",
+                data: {
+                    name: '{$info.name}',
+                    action: action,
+                },
+            }, function (data, ret) {
+                iframeRefresh();
+            })
+        })
+
+         // 点击安装
+         $(document).on("click", ".btn-install", function () {
+            var that = this;
+            var version = $(this).data("version");
+            var name = $(this).data("name");
+            var userinfo = badou.api.badouStorage.get('userinfo');
+            var uid = userinfo ? userinfo.id : 0;
+            if (parseInt(uid) === 0) {
+                $(".btn-userinfo").trigger("click", name, version);
+                return false;
+            }
+
+            install(name, version, false,function(){
+                iframeRefresh();
+            });
+        });
+
+        // 点击卸载
+        $(document).on("click", ".btn-uninstall", function () {
+            var name = $(this).data('name');
+
+            if (Config.info.state == 1) {
+                Layer.alert(__('Please disable the add before trying to uninstall'), {icon: 7});
+                return false;
+            }
+
+            laytpl.extendVars({
+                __:__,
+            })
+            Layer.confirm(laytpl(uninstalltpl, {tagStyle: 'modern'}).render(Config.info), {focusBtn: false, title: __("Warning")}, function (index, layero) {
+                uninstall(name, false, $("input[name='droptables']", layero).prop("checked"));
+            });
+        });
+
+        $(document).on("click", "#droptables", function () {
+            if ($(this).prop("checked")) {
+                badou.api.ajax({
+                    url: "module/get_table_list",
+                    async: false,
+                    data: {name: $(this).data("name")}
+                }, function (data) {
+                    tables = data.tables;
+                    return false;
+                });
+                var html;
+                html = tables.length > 0 ? '<div class="alert alert-warning-light droptablestips" style="max-width:480px;max-height:300px;overflow-y: auto;">' + __('The following data tables will be deleted') + '：<br>' + tables.join("<br>") + '</div>'
+                    : '<div class="alert alert-warning-light droptablestips">' + __('The Addon did not create a data table') + '</div>';
+                $(html).insertAfter($(this).closest("p"));
+            } else {
+                $(".droptablestips").remove();
+            }
+            $(window).resize();
+        });
+
+    });
+</script>

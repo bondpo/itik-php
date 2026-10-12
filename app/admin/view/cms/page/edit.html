@@ -1,0 +1,154 @@
+{layout name="layout/form" /}
+<form class="layui-form" method="post">
+    {:token_field()}
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Category_id')}</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[category_id]" value="{$row.category_id|default=''}" placeholder="{:__('Category_id')}" class="layui-input" />
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Admin_id')}</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[admin_id]" value="{$row.admin_id|default=''}" placeholder="{:__('Admin_id')}" class="layui-input" />
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Type')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[type]" value="{$row.type|default=''}" placeholder="{:__('Type')}" class="layui-input" />
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Title')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[title]" value="{$row.title|default=''}" placeholder="{:__('Title')}" class="layui-input" />
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Seotitle')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[seotitle]" value="{$row.seotitle|default=''}" placeholder="{:__('Seotitle')}" class="layui-input" />
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Keywords')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[keywords]" value="{$row.keywords|default=''}" placeholder="{:__('Keywords')}" class="layui-input" />
+        </div>
+    </div>
+    <div class="layui-form-item layui-form-text">
+        <label class="layui-form-label">{:__('Description')}</label>
+        <div class="layui-input-block">
+            <textarea name="row[description]" placeholder="{:__('Description')}" class="layui-textarea">{$row.description|default=''}</textarea>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Flag')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[flag]" value="{$row.flag|default=''}" placeholder="{:__('Flag')}" class="layui-input" />
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Image')}</label>
+        <div class="layui-input-block">
+            <input type="text" id="c-image" name="row[image]" value="{$row.image|default=''}" placeholder="{:__('Image')}" class="layui-input" style="width:70%" />
+            <div class="layui-input-suffix" style="width:30%">
+                <button type="button" data-input-id="c-image" data-preview-id="p-image" class="layui-btn btn-bdupload"><i class="fa fa-upload"></i> 上传</button>
+                <button type="button" data-input-id="c-image" class="layui-btn layui-bg-green btn-bdchoose"><i class="fa fa-list"></i> 选择</button>
+            </div>
+            <div class="layui-upload-list" id="p-image"></div>
+        </div>
+    </div>
+    <div class="layui-form-item layui-form-text">
+        <label class="layui-form-label">{:__('Content')}</label>
+        <div class="layui-input-block">
+            <textarea name="row[content]" placeholder="{:__('Content')}" class="layui-textarea">{$row.content|default=''}</textarea>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Icon')}</label>
+        <div class="layui-input-block">
+            <input type="text" id="c-icon" name="row[icon]" value="{$row.icon|default=''}" placeholder="{:__('Icon')}" class="layui-input" style="width:70%" />
+            <div class="layui-input-suffix" style="width:30%">
+                <button type="button" data-input-id="c-icon" data-preview-id="p-icon" class="layui-btn btn-bdupload"><i class="fa fa-upload"></i> 上传</button>
+                <button type="button" data-input-id="c-icon" class="layui-btn layui-bg-green btn-bdchoose"><i class="fa fa-list"></i> 选择</button>
+            </div>
+            <div class="layui-upload-list" id="p-icon"></div>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Views')}</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[views]" value="{$row.views|default=''}" placeholder="{:__('Views')}" class="layui-input" />
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Likes')}</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[likes]" value="{$row.likes|default=''}" placeholder="{:__('Likes')}" class="layui-input" />
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Dislikes')}</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[dislikes]" value="{$row.dislikes|default=''}" placeholder="{:__('Dislikes')}" class="layui-input" />
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Comments')}</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[comments]" value="{$row.comments|default=''}" placeholder="{:__('Comments')}" class="layui-input" />
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Diyname')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[diyname]" value="{$row.diyname|default=''}" placeholder="{:__('Diyname')}" class="layui-input" />
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Showtpl')}</label>
+        <div class="layui-input-block">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Iscomment')}</label>
+        <div class="layui-input-block">
+            <input type="hidden" name="row[iscomment]" value="0" />
+            <input type="checkbox" name="row[iscomment]" value="1" lay-skin="switch" lay-text="开启|关闭" {if $row.iscomment}checked{/if} />
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Parsetpl')}</label>
+        <div class="layui-input-block">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Weigh')}</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[weigh]" value="{$row.weigh|default=''}" placeholder="{:__('Weigh')}" class="layui-input" />
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Status')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[status]" value="{$row.status|default=''}" placeholder="{:__('Status')}" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item layer-footer hide">
+        <div class="layui-input-block">
+            <button class="layui-btn btn-theme-color disabled" lay-submit>{:__('OK')}</button>
+            <button type="reset" class="layui-btn layui-btn-primary">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
+
+<script>
+    layui.use(["badou"], function () {
+        var bdForm = layui.bdForm;
+        bdForm.api.bindevent($("form.layui-form"));
+    });
+</script>

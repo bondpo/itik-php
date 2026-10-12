@@ -1,0 +1,144 @@
+{layout name="layout/form" /}
+<form class="layui-form" method="post">
+    {:token_field()}
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">项目 ID</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[project_id]" value="{$row.project_id|default=''}" placeholder="项目 ID" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">上传人 ID</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[uploader_id]" value="{$row.uploader_id|default=0}" placeholder="上传人 ID" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">分类</label>
+        <div class="layui-input-block">
+            <select name="row[category]">
+                <option value="license" {:$row.category=='license'?'selected':''} >资质</option>
+                <option value="brand" {:$row.category=='brand'?'selected':''} >品牌</option>
+                <option value="project" {:$row.category=='project'?'selected':''} >项目</option>
+                <option value="quality" {:$row.category=='quality'?'selected':''} >质量</option>
+                <option value="other" {:$row.category=='other'?'selected':''} >其它</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">类型</label>
+        <div class="layui-input-block">
+            <select name="row[type]">
+                <option value="news" {:$row.type=='news'?'selected':''} >资讯</option>
+                <option value="case" {:$row.type=='case'?'selected':''} >案例</option>
+                <option value="activity" {:$row.type=='activity'?'selected':''} >活动</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">标题</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[title]" value="{$row.title|default=''}" placeholder="标题" autocomplete="off" class="layui-input" lay-verify="required" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">文件路径</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[storage_key]" value="{$row.storage_key|default=''}" placeholder="文件路径" autocomplete="off" class="layui-input" lay-verify="required" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">附件 ID</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[attachment_id]" value="{$row.attachment_id|default=0}" placeholder="附件 ID" autocomplete="off" class="layui-input" readonly />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">扩展名</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[ext]" value="{$row.ext|default=''}" placeholder="扩展名" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">文件大小</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[filesize]" value="{$row.filesize|default=''}" placeholder="文件大小" autocomplete="off" class="layui-input" readonly />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">版本号</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[version]" value="{$row.version|default=0}" placeholder="版本号" autocomplete="off" class="layui-input" readonly />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">来源说明</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[source]" value="{$row.source|default=''}" placeholder="来源说明" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">版权责任方</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[copyright_owner]" value="{$row.copyright_owner|default=''}" placeholder="版权责任方" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">审核状态</label>
+        <div class="layui-input-block">
+            <select name="row[review_status]">
+                <option value="pending" {:$row.review_status=='pending'?'selected':''} >待审核</option>
+                <option value="approved" {:$row.review_status=='approved'?'selected':''} >已通过</option>
+                <option value="rejected" {:$row.review_status=='rejected'?'selected':''} >已驳回</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">审核说明</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[review_reason]" value="{$row.review_reason|default=''}" placeholder="审核说明" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">是否公开</label>
+        <div class="layui-input-block">
+            <input type="hidden" name="row[is_public]" value="0" />
+            <input type="checkbox" name="row[is_public]" value="1" {:$row.is_public==1?'checked':''} lay-skin="switch" lay-text="是|否" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">权重</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[weigh]" value="{$row.weigh|default=0}" placeholder="权重" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item layer-footer hide">
+        <div class="layui-input-block">
+            <button class="layui-btn btn-theme-color disabled" lay-submit>{:__('OK')}</button>
+            <button type="reset" class="layui-btn layui-btn-primary">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
+
+<script>
+    layui.use(["form", "badou"], function () {
+        layui.bdForm.api.bindevent($("form.layui-form"));
+    });
+</script>

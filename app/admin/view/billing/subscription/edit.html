@@ -1,0 +1,88 @@
+{layout name="layout/form" /}
+<form class="layui-form" method="post">
+    {:token_field()}
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">用户 ID</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[user_id]" value="{$row.user_id|default=0}" placeholder="用户 ID" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">套餐代码</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[plan_code]" value="{$row.plan_code|default=''}" placeholder="套餐代码" autocomplete="off" class="layui-input" lay-verify="required" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">适用角色</label>
+        <div class="layui-input-block">
+            <select name="row[role_code]">
+                <option value="OWNER" {:$row.role_code=='OWNER'?'selected':''} >项目方</option>
+                <option value="LEADER" {:$row.role_code=='LEADER'?'selected':''} >社区长</option>
+                <option value="MEMBER" {:$row.role_code=='MEMBER'?'selected':''} >会员</option>
+                <option value="VISITOR" {:$row.role_code=='VISITOR'?'selected':''} >游客</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">状态</label>
+        <div class="layui-input-block">
+            <select name="row[status]">
+                <option value="normal" {:$row.status=='normal'?'selected':''} >正常</option>
+                <option value="hidden" {:$row.status=='hidden'?'selected':''} >隐藏</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">开始时间</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[start_at]" value="{$row.start_at|default=''}" placeholder="开始时间" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">结束时间</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[end_at]" value="{$row.end_at|default=''}" placeholder="结束时间" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">宽限期截止</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[grace_end_at]" value="{$row.grace_end_at|default=''}" placeholder="宽限期截止" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">来源订单 ID</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[source_order_id]" value="{$row.source_order_id|default=''}" placeholder="来源订单 ID" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">暂停原因</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[suspend_reason]" value="{$row.suspend_reason|default=''}" placeholder="暂停原因" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item layer-footer hide">
+        <div class="layui-input-block">
+            <button class="layui-btn btn-theme-color disabled" lay-submit>{:__('OK')}</button>
+            <button type="reset" class="layui-btn layui-btn-primary">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
+
+<script>
+    layui.use(["form", "badou"], function () {
+        layui.bdForm.api.bindevent($("form.layui-form"));
+    });
+</script>

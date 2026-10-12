@@ -1,0 +1,60 @@
+{layout name="layout/default" /}
+
+<!-- 表格 -->
+<div class="layui-card">
+    <div class="layui-card-body">
+        <table class="layui-hide" id="material" data-operate-edit="{:$auth->check('project.material/edit')}" data-operate-del="{:$auth->check('project.material/del')}"></table>
+    </div>
+</div>
+
+<script type="text/html" id="toolbar">
+    <a href="javascript:;" lay-event="refresh" class="layui-btn btn-refresh layui-bg-black"><i class="fa fa-refresh"></i></a>
+    <button class="layui-btn layui-bg-green {:$auth->check('project.material/add')?'':'hide'}" lay-event="add"><i class="fa fa-plus"></i> {:__('Add')}</button>
+    <button class="layui-btn layui-bg-blue btn-disabled disabled {:$auth->check('project.material/edit')?'':'hide'}" lay-event="edit"><i class="fa fa-pencil"></i> {:__('Edit')}</button>
+    <button class="layui-btn layui-bg-red btn-disabled disabled {:$auth->check('project.material/del')?'':'hide'}" lay-event="del"><i class="fa fa-trash"></i> {:__('Del')}</button>
+</script>
+
+<script>
+    layui.use(["badou", "table"], function () {
+        var bdTable = layui.bdTable;
+        var table = layui.table;
+
+        bdTable.api.init({
+            table: table,
+            extend: {
+                index_url: "project.material/index" + location.search,
+                add_url: "project.material/add",
+                edit_url: "project.material/edit",
+                del_url: "project.material/del",
+                multi_url: "project.material/multi",
+                table: "app_project_material",
+            },
+        });
+
+        bdTable.render({
+            elem: "#material",
+            url: "{:url('project.material/index')}",
+            pk: "id",
+            even: true,
+            toolbar: "#toolbar",
+            page: true,
+            cols: [
+                [
+                    { type: "checkbox" },
+                    { field: "id", title: "ID", width: 70, sort: true },
+                    { field: "project.name", title: "所属项目", operate: false },
+{ field: "category", title: "资料分类" },
+{ field: "type", title: "资料类型" },
+{ field: "title", title: "标题", operate: 'LIKE' },
+{ field: "version", title: "版本" },
+{ field: "copyright_owner", title: "版权责任方", operate: 'LIKE' },
+{ field: "review_status", title: "审核状态", searchList: { pending: '待审核', normal: '已通过', rejected: '已驳回' }, custom: { pending: 'orange', normal: 'green', rejected: 'red' }, templet: bdTable.api.formatter.status },
+{ field: "review_reason", title: "驳回原因", operate: 'LIKE' },
+{ field: "create_time_text", title: "上传时间", templet: bdTable.api.formatter.datetime, operate: false },
+                    { field: "create_time", title: "上传时间", templet: bdTable.api.formatter.datetime, searchType: 'time', hide: true },
+                    { title: "操作", width: 200, align: "center", templet: bdTable.api.formatter.operate },
+                ],
+            ],
+        });
+    });
+</script>

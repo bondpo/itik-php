@@ -1,0 +1,59 @@
+{layout name="layout/default" /}
+
+<!-- 表格 -->
+<div class="layui-card">
+    <div class="layui-card-body">
+        <table class="layui-hide" id="subscription" data-operate-edit="{:$auth->check('billing.subscription/edit')}" data-operate-del="{:$auth->check('billing.subscription/del')}"></table>
+    </div>
+</div>
+
+<script type="text/html" id="toolbar">
+    <a href="javascript:;" lay-event="refresh" class="layui-btn btn-refresh layui-bg-black"><i class="fa fa-refresh"></i></a>
+    <button class="layui-btn layui-bg-green {:$auth->check('billing.subscription/add')?'':'hide'}" lay-event="add"><i class="fa fa-plus"></i> {:__('Add')}</button>
+    <button class="layui-btn layui-bg-blue btn-disabled disabled {:$auth->check('billing.subscription/edit')?'':'hide'}" lay-event="edit"><i class="fa fa-pencil"></i> {:__('Edit')}</button>
+    <button class="layui-btn layui-bg-red btn-disabled disabled {:$auth->check('billing.subscription/del')?'':'hide'}" lay-event="del"><i class="fa fa-trash"></i> {:__('Del')}</button>
+</script>
+
+<script>
+    layui.use(["badou", "table"], function () {
+        var bdTable = layui.bdTable;
+        var table = layui.table;
+
+        bdTable.api.init({
+            table: table,
+            extend: {
+                index_url: "billing.subscription/index" + location.search,
+                add_url: "billing.subscription/add",
+                edit_url: "billing.subscription/edit",
+                del_url: "billing.subscription/del",
+                multi_url: "billing.subscription/multi",
+                table: "app_subscription",
+            },
+        });
+
+        bdTable.render({
+            elem: "#subscription",
+            url: "{:url('billing.subscription/index')}",
+            pk: "id",
+            even: true,
+            toolbar: "#toolbar",
+            page: true,
+            cols: [
+                [
+                    { type: "checkbox" },
+                    { field: "id", title: "ID", width: 70, sort: true },
+                    { field: "user.nickname", title: "用户", operate: false },
+{ field: "plan_code", title: "套餐", operate: 'LIKE' },
+{ field: "role_code", title: "角色" },
+{ field: "status", title: "订阅状态", searchList: { PENDING_PAYMENT: '待支付', ACTIVE: '生效中', GRACE: '宽限期', EXPIRED: '已到期', SUSPENDED: '已暂停', CANCELLED: '已取消' }, custom: { PENDING_PAYMENT: 'orange', ACTIVE: 'green', GRACE: 'blue', EXPIRED: 'default', SUSPENDED: 'red', CANCELLED: 'default' }, templet: bdTable.api.formatter.status },
+                    { field: "start_at", title: "生效时间", templet: bdTable.api.formatter.datetime, operate: false },
+                    { field: "end_at", title: "到期时间", templet: bdTable.api.formatter.datetime, operate: false },
+                    { field: "grace_end_at", title: "宽限截止", templet: bdTable.api.formatter.datetime, operate: false },
+{ field: "create_time_text", title: "创建时间", templet: bdTable.api.formatter.datetime, operate: false },
+                    { field: "create_time", title: "创建时间", templet: bdTable.api.formatter.datetime, searchType: 'time', hide: true },
+                    { title: "操作", width: 130, align: "center", templet: bdTable.api.formatter.operate },
+                ],
+            ],
+        });
+    });
+</script>

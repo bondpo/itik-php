@@ -1,0 +1,180 @@
+{layout name="layout/form" /}
+<form class="layui-form" method="post">
+    {:token_field()}
+    <input type="hidden" name="row[style]" value="" />
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Channel')}</label>
+        <div class="layui-input-block">
+            <select name="row[channel_id]" lay-verify="required" lay-search>
+                <option value="">请选择栏目</option>
+                {$channelOptions|raw}
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Channel_ids')}</label>
+        <div class="layui-input-block">
+            <select name="row[channel_ids][]" multiple lay-search>
+                {$secondChannelOptions|raw}
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Title')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[title]" value="{$row.title|htmlentities}" lay-verify="required" placeholder="{:__('Title')}" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Flag')}</label>
+        <div class="layui-input-block">
+            {volist name="flagList" id="vo" key="k"}
+            <input type="checkbox" name="row[flag][]" value="{$key}" title="{$vo}" lay-skin="primary" {if in_array($key, explode(',', (string)$row.flag))}checked{/if} />
+            {/volist}
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Image')}</label>
+        <div class="layui-input-block">
+            <input type="text" id="c-image" name="row[image]" value="{$row.image|htmlentities}" placeholder="缩略图可以直接从正文提取，可为空" class="layui-input" style="width:70%" />
+            <div class="layui-input-suffix" style="width:30%">
+                <button type="button" data-input-id="c-image" data-preview-id="p-image" class="layui-btn btn-bdupload"><i class="fa fa-upload"></i> 上传</button>
+                <button type="button" data-input-id="c-image" class="layui-btn layui-bg-green btn-bdchoose"><i class="fa fa-list"></i> 选择</button>
+            </div>
+            <div class="layui-upload-list" id="p-image"></div>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Images')}</label>
+        <div class="layui-input-block">
+            <input type="text" id="c-images" name="row[images]" value="{$row.images|htmlentities}" placeholder="组图可以从正文提取，多个地址用英文逗号分隔" class="layui-input" style="width:70%" />
+            <div class="layui-input-suffix" style="width:30%">
+                <button type="button" data-input-id="c-images" data-preview-id="p-images" class="layui-btn btn-bdupload"><i class="fa fa-upload"></i> 上传</button>
+                <button type="button" data-input-id="c-images" class="layui-btn layui-bg-green btn-bdchoose"><i class="fa fa-list"></i> 选择</button>
+            </div>
+            <div class="layui-upload-list" id="p-images"></div>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Tags')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[tags]" value="{$row.tags|htmlentities}" placeholder="多个标签用英文逗号分隔" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item layui-form-text">
+        <label class="layui-form-label">{:__('Content')}</label>
+        <div class="layui-input-block">
+            <textarea name="row[content]" class="layui-textarea editor" rows="15">{$row.content}</textarea>
+        </div>
+    </div>
+
+    <div class="layui-form-item layui-form-text">
+        <label class="layui-form-label">{:__('Description')}</label>
+        <div class="layui-input-block">
+            <textarea name="row[description]" rows="3" placeholder="{:__('Description')}" class="layui-textarea">{$row.description|htmlentities}</textarea>
+        </div>
+    </div>
+
+    {include file="cms/common/fields" /}
+    <div id="extend"></div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Seotitle')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[seotitle]" value="{$row.seotitle|htmlentities}" placeholder="为空时将使用文档标题" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Keywords')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[keywords]" value="{$row.keywords|htmlentities}" placeholder="{:__('Keywords')}" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Price')}</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[price]" value="{$row.price|default=0}" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Outlink')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[outlink]" value="{$row.outlink|htmlentities}" placeholder="只有当需要跳转到外部链接时才需填写" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Weigh')}</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[weigh]" value="{$row.weigh|default=0}" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Publishtime')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[publishtime]" value="{$row.publishtime_text|htmlentities}" class="layui-input laydate" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Status')}</label>
+        <div class="layui-input-block">
+            <select name="row[status]">
+                {volist name="statusList" id="vo" key="k"}
+                <option value="{$key}" {if $row.status==$key}selected{/if}>{$vo}</option>
+                {/volist}
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Iscomment')}</label>
+        <div class="layui-input-block">
+            <input type="hidden" name="row[iscomment]" value="0" />
+            <input type="checkbox" name="row[iscomment]" value="1" lay-skin="switch" lay-text="开启|关闭" {if $row.iscomment}checked{/if} />
+        </div>
+    </div>
+
+    <div class="layui-form-item layer-footer hide">
+        <div class="layui-input-block">
+            <button class="layui-btn btn-theme-color disabled" lay-submit>{:__('OK')}</button>
+            <button type="reset" class="layui-btn layui-btn-primary">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
+
+<script>
+    layui.use(["badou", "form"], function () {
+        var $ = layui.jquery;
+        var bdForm = layui.bdForm;
+        var form = layui.form;
+
+        // 切换栏目后重新加载该模型的自定义字段
+        $('select[name="row[channel_id]"]').on("change", function () {
+            var channelId = $(this).val();
+            if (!channelId) {
+                return;
+            }
+            $.post("{:url('cms.archives/get_fields_html')}", { channel_id: channelId, archives_id: "{$row.id}" }, function (ret) {
+                if (ret.code === 1 && ret.data && ret.data.html) {
+                    $("#extend").html(ret.data.html);
+                    form.render();
+                }
+            });
+        });
+
+        bdForm.api.bindevent($("form.layui-form"));
+    });
+</script>

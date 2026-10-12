@@ -1,0 +1,189 @@
+{layout name="layout/default" /}
+
+<style>
+    .cms-stat-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 66px;
+    }
+
+    .cms-stat-number {
+        font-size: 28px;
+        line-height: 66px;
+        color: #28333e;
+    }
+
+    .cms-stat-tips {
+        padding-top: 14px;
+        font-size: 12px;
+        text-align: right;
+        color: #a2a8b4;
+    }
+
+    .cms-stat-list li {
+        padding: 6px 0;
+        border-bottom: 1px dashed #eceff9;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .cms-stat-list li:last-child {
+        border-bottom: none;
+    }
+
+    .cms-stat-list .cms-stat-extra {
+        float: right;
+        color: #a2a8b4;
+        font-size: 12px;
+    }
+</style>
+
+<div class="layui-row layui-col-space10">
+    <div class="layui-col-xs6 layui-col-md3">
+        <div class="layui-card">
+            <div class="layui-card-header">会员总数</div>
+            <div class="layui-card-body">
+                <div class="cms-stat-item">
+                    <div class="cms-stat-number" id="cms-total-user">{$totalUser|htmlentities}</div>
+                    <div class="cms-stat-tips">
+                        今日新增 {$todayUser|htmlentities}<br />昨日 {$yesterdayUser|htmlentities} · 同比 {$todayUserRatio|htmlentities}%
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-col-xs6 layui-col-md3">
+        <div class="layui-card">
+            <div class="layui-card-header">内容总数</div>
+            <div class="layui-card-body">
+                <div class="cms-stat-item">
+                    <div class="cms-stat-number" id="cms-total-archives">{$totalArchives|htmlentities}</div>
+                    <div class="cms-stat-tips">待审核 {$unsettleArchives|htmlentities}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-col-xs6 layui-col-md3">
+        <div class="layui-card">
+            <div class="layui-card-header">评论总数</div>
+            <div class="layui-card-body">
+                <div class="cms-stat-item">
+                    <div class="cms-stat-number" id="cms-total-comment">{$totalComment|htmlentities}</div>
+                    <div class="cms-stat-tips">待审核 {$unsettleComment|htmlentities}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-col-xs6 layui-col-md3">
+        <div class="layui-card">
+            <div class="layui-card-header">标签总数</div>
+            <div class="layui-card-body">
+                <div class="cms-stat-item">
+                    <div class="cms-stat-number" id="cms-total-tag">{:count($tagsList)}</div>
+                    <div class="cms-stat-tips">热门标签 {$hotTagList|count}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="layui-row layui-col-space10">
+    <div class="layui-col-md6">
+        <div class="layui-card">
+            <div class="layui-card-header">内容发布统计</div>
+            <div class="layui-card-body">
+                <div id="cms-chart-archives" style="height: 300px;"></div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-col-md6">
+        <div class="layui-card">
+            <div class="layui-card-header">订单趋势统计</div>
+            <div class="layui-card-body">
+                <div id="cms-chart-order" style="height: 300px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="layui-row layui-col-space10">
+    <div class="layui-col-md6">
+        <div class="layui-card">
+            <div class="layui-card-header">热门内容</div>
+            <div class="layui-card-body">
+                {notempty name="hotArchivesList"}
+                <ul class="cms-stat-list">
+                    {volist name="hotArchivesList" id="vo"}
+                    <li>{$vo.title|htmlentities}<span class="cms-stat-extra">浏览 {$vo.views|htmlentities}</span></li>
+                    {/volist}
+                </ul>
+                {else /}
+                <div class="text-secondary">暂无数据</div>
+                {/notempty}
+            </div>
+        </div>
+    </div>
+    <div class="layui-col-md6">
+        <div class="layui-card">
+            <div class="layui-card-header">热门搜索</div>
+            <div class="layui-card-body">
+                {notempty name="hotSearchList"}
+                <ul class="cms-stat-list">
+                    {volist name="hotSearchList" id="vo"}
+                    <li>{$vo.keywords|htmlentities}<span class="cms-stat-extra">{$vo.nums|htmlentities}</span></li>
+                    {/volist}
+                </ul>
+                {else /}
+                <div class="text-secondary">暂无数据</div>
+                {/notempty}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="__CDN__/assets/libs/echarts/echarts.min.js"></script>
+<script src="__CDN__/assets/libs/echarts/echarts-theme.js"></script>
+<script>
+    layui.use(["badou"], function () {
+        var $ = layui.jquery;
+
+        // echarts 未加载时跳过图表渲染，避免抛错影响其它脚本
+        if (typeof echarts === "undefined") {
+            return;
+        }
+
+        function renderChart(elemId, category, series, name) {
+            var el = document.getElementById(elemId);
+            if (!el) {
+                return null;
+            }
+            var chart = echarts.init(el, "walden");
+            chart.setOption({
+                color: ["#0090FF", "#36CE9E", "#FFC005"],
+                tooltip: { trigger: "axis" },
+                grid: { top: 40, bottom: 30, left: 40, right: 20, containLabel: true },
+                xAxis: { type: "category", boundaryGap: false, data: category },
+                yAxis: { type: "value" },
+                series: [{ name: name, type: "line", smooth: true, areaStyle: {}, data: series }]
+            });
+            window.addEventListener("resize", function () {
+                chart.resize();
+            });
+            return chart;
+        }
+
+        var statUrl = "{:url('cms.statistics/index')}";
+        $.post(statUrl, { type: "archives" }, function (ret) {
+            if (ret && ret.code === 1 && ret.data) {
+                renderChart("cms-chart-archives", ret.data.category || [], ret.data.data || [], "发布量");
+            }
+        });
+        $.post(statUrl, { type: "order" }, function (ret) {
+            if (ret && ret.code === 1 && ret.data) {
+                renderChart("cms-chart-order", ret.data.category || [], ret.data.data || [], "订单量");
+            }
+        });
+    });
+</script>

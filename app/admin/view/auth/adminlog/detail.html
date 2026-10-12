@@ -1,0 +1,24 @@
+{layout name="layout/form" /}
+<style>
+    .layui-table tr td:first-child {
+        background-color: #F6F7FA;
+    }
+    .layui-table tr td {
+        word-break: break-all;
+    }
+</style>
+<table class="layui-table" >
+    <colgroup>
+        <col width="50">
+        <col width="150">
+        <col>
+    </colgroup>
+    <tbody>
+    {volist name="row" id="vo"}
+    <tr>
+        <td>{:__($key)}</td>
+        <td>{$vo}</td>
+    </tr>
+    {/volist}
+    </tbody>
+</table>

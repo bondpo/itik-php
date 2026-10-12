@@ -1,0 +1,65 @@
+{layout name="layout/form" /}
+<form class="layui-form" method="post">
+    {:token_field()}
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">地区代码</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[region_code]" value="" placeholder="地区代码" autocomplete="off" class="layui-input" lay-verify="required" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">分类</label>
+        <div class="layui-input-block">
+            <select name="row[category]">
+                <option value="license">资质</option>
+                <option value="brand">品牌</option>
+                <option value="project">项目</option>
+                <option value="quality">质量</option>
+                <option value="other">其它</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">政策</label>
+        <div class="layui-input-block">
+            <select name="row[policy]">
+                <option value="allow">允许</option>
+                <option value="restrict">限制</option>
+                <option value="forbid">禁止</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">提示文案</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[notice_text]" value="" placeholder="提示文案" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">状态</label>
+        <div class="layui-input-block">
+            <select name="row[status]">
+                <option value="normal">正常</option>
+                <option value="hidden">隐藏</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item layer-footer hide">
+        <div class="layui-input-block">
+            <button class="layui-btn btn-theme-color disabled" lay-submit>{:__('OK')}</button>
+            <button type="reset" class="layui-btn layui-btn-primary">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
+
+<script>
+    layui.use(["form", "badou"], function () {
+        layui.bdForm.api.bindevent($("form.layui-form"));
+    });
+</script>

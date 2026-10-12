@@ -1,0 +1,90 @@
+{layout name="layout/default" /}
+
+<!-- 表格 -->
+<div class="layui-card">
+    <div class="layui-card-body">
+        <table
+            class="layui-hide"
+            id="archives"
+            data-operate-edit="{:$auth->check('cms.archives/edit')}"
+            data-operate-del="{:$auth->check('cms.archives/del')}"></table>
+    </div>
+</div>
+
+<!-- 表格左侧按钮 toolbar  -->
+<script type="text/html" id="toolbar">
+    <a href="javascript:;" lay-event="refresh" class="layui-btn btn-refresh layui-bg-black">
+        <i class="fa fa-refresh"></i>
+    </a>
+    <button class="layui-btn layui-bg-green {:$auth->check('cms.archives/add')?'':'hide'}" lay-event="add">
+        <i class="fa fa-plus"></i>
+        {:__('Add')}
+    </button>
+    <button class="layui-btn layui-bg-blue btn-disabled disabled {:$auth->check('cms.archives/edit')?'':'hide'}" lay-event="edit">
+        <i class="fa fa-pencil"></i>
+        {:__('Edit')}
+    </button>
+    <button class="layui-btn layui-bg-red btn-disabled disabled {:$auth->check('cms.archives/del')?'':'hide'}" lay-event="del">
+        <i class="fa fa-trash"></i>
+        {:__('Del')}
+    </button>
+</script>
+
+<script>
+    layui.use(["badou", "table"], function () {
+        var bdTable = layui.bdTable;
+        var table = layui.table;
+
+        // 栏目与模型的筛选项来自后台配置
+        var channelSearch = {};
+        (Config.channelList || []).forEach(function (item) {
+            channelSearch[item.id] = item.text;
+        });
+        var modelSearch = {};
+        {volist name="modelList" id="vo"}
+        modelSearch["{$vo.id}"] = "{$vo.name}";
+        {/volist}
+
+        bdTable.api.init({
+            table: table,
+            extend: {
+                index_url: "cms.archives/index" + location.search,
+                add_url: "cms.archives/add",
+                edit_url: "cms.archives/edit",
+                del_url: "cms.archives/del",
+                multi_url: "cms.archives/multi",
+                table: "cms_archives",
+            },
+        });
+
+        bdTable.render({
+            elem: "#archives",
+            url: "{:url('cms.archives/index')}",
+            pk: "id",
+            even: true,
+            toolbar: "#toolbar",
+            page: true,
+            cols: [
+                [
+                    { type: "checkbox" },
+                    { field: "id", title: "ID", width: 80, sort: true },
+                    { field: "channel_id", title: "{:__('Channel')}", width: 140, searchList: channelSearch, templet: function (d) { return channelSearch[d.channel_id] || d.channel_id; } },
+                    { field: "model_id", title: "{:__('Modelx')}", width: 120, hide: true, searchList: modelSearch },
+                    { field: "title", title: "{:__('Title')}", operate: "LIKE", minWidth: 220 },
+                    { field: "weigh", title: "{:__('Weigh')}", width: 90, sort: true, hide: true },
+                    { field: "views", title: "{:__('Views')}", width: 90, hide: true },
+                    { field: "comments", title: "{:__('Comments')}", width: 90, hide: true },
+                    {
+                        field: "status",
+                        title: "{:__('Status')}",
+                        width: 100,
+                        searchList: { normal: "正常", hidden: "隐藏", draft: "草稿", prepare: "待发布", rejected: "已拒绝", pulloff: "已下架" },
+                        templet: bdTable.api.formatter.status,
+                    },
+                    { field: "createtime", title: "{:__('Createtime')}", width: 170, templet: bdTable.api.formatter.datetime, hide: true },
+                    { title: "{:__('Operate')}", width: 130, align: "center", templet: bdTable.api.formatter.operate },
+                ],
+            ],
+        });
+    });
+</script>

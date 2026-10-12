@@ -1,0 +1,107 @@
+{layout name="layout/form" /}
+<form class="layui-form" method="post">
+    {:token_field()}
+
+    <div class="layui-form-item layui-form-text">
+        <div class="layui-input-block">
+            <p class="text-secondary">插件名称：{$addon.info.title}　版本：{$addon.info.version}　作者：{$addon.info.author}</p>
+        </div>
+    </div>
+
+    {foreach name="$addon.config" item="field"}
+    <div class="layui-form-item">
+        <label class="layui-form-label">{$field.title}</label>
+        <div class="layui-input-block">
+            {switch name="$field.type"}
+                {case value="string|number|password"}
+                <input
+                    type="text"
+                    name="row[{$field.name}]"
+                    value="{$field.value|htmlentities}"
+                    placeholder="{$field.title}"
+                    autocomplete="off"
+                    class="layui-input" />
+                {/case}
+
+                {case value="text"}
+                <textarea name="row[{$field.name}]" placeholder="{$field.title}" class="layui-textarea">{$field.value|htmlentities}</textarea>
+                {/case}
+
+                {case value="array"}
+                <textarea name="row[{$field.name}]" placeholder="{$field.title}" class="layui-textarea">{$field.value|json_encode|htmlentities}</textarea>
+                {/case}
+
+                {case value="switch"}
+                <input type="hidden" name="row[{$field.name}]" value="0" />
+                <input type="checkbox" name="row[{$field.name}]" value="1" lay-skin="switch" lay-text="开启|关闭" {if $field.value=='1'}checked{/if} />
+                {/case}
+
+                {case value="image"}
+                <input
+                    type="text"
+                    id="c-{$field.name}"
+                    name="row[{$field.name}]"
+                    value="{$field.value|htmlentities}"
+                    placeholder="{$field.title}"
+                    class="layui-input"
+                    style="width:70%" />
+                <div class="layui-input-suffix" style="width:30%">
+                    <button type="button" data-input-id="c-{$field.name}" data-preview-id="p-{$field.name}" class="layui-btn btn-bdupload">
+                        <i class="fa fa-upload"></i> 上传
+                    </button>
+                    <button type="button" data-input-id="c-{$field.name}" class="layui-btn layui-bg-green btn-bdchoose">
+                        <i class="fa fa-list"></i> 选择
+                    </button>
+                </div>
+                <div class="layui-upload-list" id="p-{$field.name}"></div>
+                {/case}
+
+                {case value="select|radio"}
+                {if $field.type=='select'}
+                <select name="row[{$field.name}]">
+                    {foreach name="$field.content" item="vo" key="k"}
+                    <option value="{$k}" {if $field.value==$k}selected{/if}>{$vo}</option>
+                    {/foreach}
+                </select>
+                {else /}
+                {foreach name="$field.content" item="vo" key="k"}
+                <input type="radio" name="row[{$field.name}]" value="{$k}" title="{$vo}" {if $field.value==$k}checked{/if} />
+                {/foreach}
+                {/if}
+                {/case}
+
+                {case value="checkbox"}
+                <input type="hidden" name="row[{$field.name}]" value="" />
+                {foreach name="$field.content" item="vo" key="k"}
+                <input type="checkbox" name="row[{$field.name}][]" value="{$k}" title="{$vo}" lay-skin="primary" {if in_array($k, explode(',', (string)$field.value))}checked{/if} />
+                {/foreach}
+                {/case}
+
+                {case value="selects"}
+                <input type="text" name="row[{$field.name}]" value="{$field.value|htmlentities}" placeholder="多个值用英文逗号分隔" class="layui-input" />
+                {/case}
+
+                {default /}
+                <input type="text" name="row[{$field.name}]" value="{$field.value|htmlentities}" class="layui-input" />
+            {/switch}
+            {if $field.tip}
+            <p class="text-secondary mt-2">{$field.tip}</p>
+            {/if}
+        </div>
+    </div>
+    {/foreach}
+
+    <div class="layui-form-item layer-footer hide">
+        <div class="layui-input-block">
+            <button class="layui-btn btn-theme-color disabled" lay-submit>{:__('OK')}</button>
+            <button type="reset" class="layui-btn layui-btn-primary">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
+
+<script>
+    layui.use(["badou"], function () {
+        var bdForm = layui.bdForm;
+        bdForm.api.bindevent($("form.layui-form"));
+    });
+</script>

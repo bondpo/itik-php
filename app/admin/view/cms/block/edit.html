@@ -1,0 +1,90 @@
+{layout name="layout/form" /}
+<form class="layui-form" method="post">
+    {:token_field()}
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Type')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[type]" value="{$row.type|default=''}" placeholder="{:__('Type')}" class="layui-input" />
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Name')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[name]" value="{$row.name|default=''}" placeholder="{:__('Name')}" class="layui-input" />
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Title')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[title]" value="{$row.title|default=''}" placeholder="{:__('Title')}" class="layui-input" />
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Image')}</label>
+        <div class="layui-input-block">
+            <input type="text" id="c-image" name="row[image]" value="{$row.image|default=''}" placeholder="{:__('Image')}" class="layui-input" style="width:70%" />
+            <div class="layui-input-suffix" style="width:30%">
+                <button type="button" data-input-id="c-image" data-preview-id="p-image" class="layui-btn btn-bdupload"><i class="fa fa-upload"></i> 上传</button>
+                <button type="button" data-input-id="c-image" class="layui-btn layui-bg-green btn-bdchoose"><i class="fa fa-list"></i> 选择</button>
+            </div>
+            <div class="layui-upload-list" id="p-image"></div>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Url')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[url]" value="{$row.url|default=''}" placeholder="{:__('Url')}" class="layui-input" />
+        </div>
+    </div>
+    <div class="layui-form-item layui-form-text">
+        <label class="layui-form-label">{:__('Content')}</label>
+        <div class="layui-input-block">
+            <textarea name="row[content]" placeholder="{:__('Content')}" class="layui-textarea">{$row.content|default=''}</textarea>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Parsetpl')}</label>
+        <div class="layui-input-block">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Weigh')}</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[weigh]" value="{$row.weigh|default=''}" placeholder="{:__('Weigh')}" class="layui-input" />
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Begintime')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[begintime]" value="{$row.begintime|default=''}" placeholder="{:__('Begintime')}" class="layui-input laydate" />
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Endtime')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[endtime]" value="{$row.endtime|default=''}" placeholder="{:__('Endtime')}" class="layui-input laydate" />
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Status')}</label>
+        <div class="layui-input-block">
+            <input type="radio" name="row[status]" value="normal" title="normal" {if $row.status=='normal'}checked{/if} />
+            <input type="radio" name="row[status]" value="hidden" title="hidden" {if $row.status=='hidden'}checked{/if} />
+        </div>
+    </div>
+
+    <div class="layui-form-item layer-footer hide">
+        <div class="layui-input-block">
+            <button class="layui-btn btn-theme-color disabled" lay-submit>{:__('OK')}</button>
+            <button type="reset" class="layui-btn layui-btn-primary">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
+
+<script>
+    layui.use(["badou"], function () {
+        var bdForm = layui.bdForm;
+        bdForm.api.bindevent($("form.layui-form"));
+    });
+</script>

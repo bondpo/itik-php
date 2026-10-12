@@ -1,0 +1,59 @@
+{layout name="layout/default" /}
+
+<!-- 表格 -->
+<div class="layui-card">
+    <div class="layui-card-body">
+        <table class="layui-hide" id="campaign" data-operate-edit="{:$auth->check('promotion.campaign/edit')}" data-operate-del="{:$auth->check('promotion.campaign/del')}"></table>
+    </div>
+</div>
+
+<script type="text/html" id="toolbar">
+    <a href="javascript:;" lay-event="refresh" class="layui-btn btn-refresh layui-bg-black"><i class="fa fa-refresh"></i></a>
+    <button class="layui-btn layui-bg-green {:$auth->check('promotion.campaign/add')?'':'hide'}" lay-event="add"><i class="fa fa-plus"></i> {:__('Add')}</button>
+    <button class="layui-btn layui-bg-blue btn-disabled disabled {:$auth->check('promotion.campaign/edit')?'':'hide'}" lay-event="edit"><i class="fa fa-pencil"></i> {:__('Edit')}</button>
+    <button class="layui-btn layui-bg-red btn-disabled disabled {:$auth->check('promotion.campaign/del')?'':'hide'}" lay-event="del"><i class="fa fa-trash"></i> {:__('Del')}</button>
+</script>
+
+<script>
+    layui.use(["badou", "table"], function () {
+        var bdTable = layui.bdTable;
+        var table = layui.table;
+
+        bdTable.api.init({
+            table: table,
+            extend: {
+                index_url: "promotion.campaign/index" + location.search,
+                add_url: "promotion.campaign/add",
+                edit_url: "promotion.campaign/edit",
+                del_url: "promotion.campaign/del",
+                multi_url: "promotion.campaign/multi",
+                table: "app_promotion_campaign",
+            },
+        });
+
+        bdTable.render({
+            elem: "#campaign",
+            url: "{:url('promotion.campaign/index')}",
+            pk: "id",
+            even: true,
+            toolbar: "#toolbar",
+            page: true,
+            cols: [
+                [
+                    { type: "checkbox" },
+                    { field: "id", title: "ID", width: 70, sort: true },
+{ field: "project_id", title: "项目ID", operate: 'BETWEEN', sortable: true },
+{ field: "position", title: "广告位", searchList: { home: '首页推荐位', channel: '行业频道位', rank: '热门项目榜单', target: '定向相关项目' } },
+{ field: "budget", title: "预算", operate: 'BETWEEN', sortable: true },
+{ field: "currency", title: "币种" },
+{ field: "status", title: "状态", searchList: { pending: '待审核', normal: '投放中', rejected: '已驳回', finished: '已结束', canceled: '已取消' }, custom: { pending: 'orange', normal: 'green', rejected: 'red', finished: 'default', canceled: 'default' }, templet: bdTable.api.formatter.status },
+{ field: "review_status", title: "素材审核", searchList: { pending: '待审核', normal: '已通过', rejected: '已驳回' }, custom: { pending: 'orange', normal: 'green', rejected: 'red' }, templet: bdTable.api.formatter.status },
+{ field: "exposure_used", title: "已用曝光", operate: 'BETWEEN', sortable: true },
+                    { field: "start_at", title: "开始时间", templet: bdTable.api.formatter.datetime, operate: false },
+                    { field: "end_at", title: "结束时间", templet: bdTable.api.formatter.datetime, operate: false },
+                    { title: "操作", width: 200, align: "center", templet: bdTable.api.formatter.operate },
+                ],
+            ],
+        });
+    });
+</script>

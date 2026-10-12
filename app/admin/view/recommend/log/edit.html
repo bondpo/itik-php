@@ -1,0 +1,99 @@
+{layout name="layout/form" /}
+<form class="layui-form" method="post">
+    {:token_field()}
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">接收人 ID</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[receiver_id]" value="{$row.receiver_id|default=0}" placeholder="接收人 ID" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">目标类型</label>
+        <div class="layui-input-block">
+            <select name="row[target_type]">
+                <option value="project" {:$row.target_type=='project'?'selected':''} >项目</option>
+                <option value="content" {:$row.target_type=='content'?'selected':''} >内容</option>
+                <option value="user" {:$row.target_type=='user'?'selected':''} >用户</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">目标 ID</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[target_id]" value="{$row.target_id|default=0}" placeholder="目标 ID" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">评分</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[score]" value="{$row.score|default=0}" placeholder="评分" autocomplete="off" class="layui-input" readonly />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">原因</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[reason]" value="{$row.reason|default=''}" placeholder="原因" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">推荐渠道</label>
+        <div class="layui-input-block">
+            <select name="row[channel]">
+                <option value="owner_match" {:$row.channel=='owner_match'?'selected':''} >项目方匹配</option>
+                <option value="leader_member" {:$row.channel=='leader_member'?'selected':''} >社区长匹配</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">批次日期</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[batch_date]" value="{$row.batch_date|default=''}" placeholder="批次日期" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">是否已读</label>
+        <div class="layui-input-block">
+            <input type="hidden" name="row[is_viewed]" value="0" />
+            <input type="checkbox" name="row[is_viewed]" value="1" {:$row.is_viewed==1?'checked':''} lay-skin="switch" lay-text="是|否" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">是否已响应</label>
+        <div class="layui-input-block">
+            <input type="hidden" name="row[is_responded]" value="0" />
+            <input type="checkbox" name="row[is_responded]" value="1" {:$row.is_responded==1?'checked':''} lay-skin="switch" lay-text="是|否" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">反馈</label>
+        <div class="layui-input-block">
+            <select name="row[feedback]">
+                <option value="relevant" {:$row.feedback=='relevant'?'selected':''} >相关</option>
+                <option value="irrelevant" {:$row.feedback=='irrelevant'?'selected':''} >不相关</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item layer-footer hide">
+        <div class="layui-input-block">
+            <button class="layui-btn btn-theme-color disabled" lay-submit>{:__('OK')}</button>
+            <button type="reset" class="layui-btn layui-btn-primary">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
+
+<script>
+    layui.use(["form", "badou"], function () {
+        layui.bdForm.api.bindevent($("form.layui-form"));
+    });
+</script>

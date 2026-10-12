@@ -1,0 +1,86 @@
+{volist name="fields" id="field"}
+{if $field.type == 'hidden'}
+<input type="hidden" name="row[{$field.name}]" value="{$field.value}" />
+{else /}
+<div class="layui-form-item">
+    <label class="layui-form-label">{$field.title}</label>
+    <div class="layui-input-block">
+        {switch name="field.type"}
+            {case value="string|number|custom|flag"}
+            <input type="text" name="row[{$field.name}]" value="{$field.value}" placeholder="{$field.title}" class="layui-input" />
+            {/case}
+
+            {case value="text|array|array3"}
+            <textarea name="row[{$field.name}]" placeholder="{$field.title}" class="layui-textarea">{$field.value}</textarea>
+            {/case}
+
+            {case value="editor"}
+            <textarea name="row[{$field.name}]" class="layui-textarea editor">{$field.value}</textarea>
+            {/case}
+
+            {case value="datetime|date|time"}
+            <input type="text" name="row[{$field.name}]" value="{$field.value}" placeholder="{$field.title}" class="layui-input laydate" />
+            {/case}
+
+            {case value="image"}
+            <input type="text" id="c-{$field.name}" name="row[{$field.name}]" value="{$field.value}" placeholder="{$field.title}" class="layui-input" style="width:70%" />
+            <div class="layui-input-suffix" style="width:30%">
+                <button type="button" data-input-id="c-{$field.name}" data-preview-id="p-{$field.name}" class="layui-btn btn-bdupload"><i class="fa fa-upload"></i> 上传</button>
+                <button type="button" data-input-id="c-{$field.name}" class="layui-btn layui-bg-green btn-bdchoose"><i class="fa fa-list"></i> 选择</button>
+            </div>
+            <div class="layui-upload-list" id="p-{$field.name}"></div>
+            {/case}
+
+            {case value="images|file|files|imagestitle"}
+            <input type="text" id="c-{$field.name}" name="row[{$field.name}]" value="{$field.value}" placeholder="多个文件用英文逗号分隔" class="layui-input" style="width:70%" />
+            <div class="layui-input-suffix" style="width:30%">
+                <button type="button" data-input-id="c-{$field.name}" data-preview-id="p-{$field.name}" class="layui-btn btn-bdupload"><i class="fa fa-upload"></i> 上传</button>
+                <button type="button" data-input-id="c-{$field.name}" class="layui-btn layui-bg-green btn-bdchoose"><i class="fa fa-list"></i> 选择</button>
+            </div>
+            <div class="layui-upload-list" id="p-{$field.name}"></div>
+            {/case}
+
+            {case value="select"}
+            <select name="row[{$field.name}]">
+                {volist name="field.content_list" id="vo" key="k"}
+                <option value="{$key}" {if $field.value==$key}selected{/if}>{$vo}</option>
+                {/volist}
+            </select>
+            {/case}
+
+            {case value="selects"}
+            <select name="row[{$field.name}][]" multiple>
+                {volist name="field.content_list" id="vo" key="k"}
+                <option value="{$key}" {if in_array($key, explode(',', (string)$field.value))}selected{/if}>{$vo}</option>
+                {/volist}
+            </select>
+            {/case}
+
+            {case value="radio"}
+            {volist name="field.content_list" id="vo" key="k"}
+            <input type="radio" name="row[{$field.name}]" value="{$key}" title="{$vo}" {if $field.value==$key}checked{/if} />
+            {/volist}
+            {/case}
+
+            {case value="checkbox"}
+            <input type="hidden" name="row[{$field.name}]" value="" />
+            {volist name="field.content_list" id="vo" key="k"}
+            <input type="checkbox" name="row[{$field.name}][]" value="{$key}" title="{$vo}" lay-skin="primary" {if in_array($key, explode(',', (string)$field.value))}checked{/if} />
+            {/volist}
+            {/case}
+
+            {case value="switch|bool"}
+            <input type="hidden" name="row[{$field.name}]" value="0" />
+            <input type="checkbox" name="row[{$field.name}]" value="1" lay-skin="switch" lay-text="开启|关闭" {if $field.value=='1'}checked{/if} />
+            {/case}
+
+            {default /}
+            <input type="text" name="row[{$field.name}]" value="{$field.value}" placeholder="{$field.title}" class="layui-input" />
+        {/switch}
+        {if $field.tip}
+        <p class="text-secondary mt-2">{$field.tip}</p>
+        {/if}
+    </div>
+</div>
+{/if}
+{/volist}

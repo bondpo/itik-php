@@ -1,0 +1,118 @@
+{layout name="layout/form" /}
+<form class="layui-form" method="post">
+    {:token_field()}
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">订单号</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[order_no]" value="{$row.order_no|default=''}" placeholder="订单号" autocomplete="off" class="layui-input" lay-verify="required" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">用户 ID</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[user_id]" value="{$row.user_id|default=0}" placeholder="用户 ID" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">套餐代码</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[plan_code]" value="{$row.plan_code|default=''}" placeholder="套餐代码" autocomplete="off" class="layui-input" lay-verify="required" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">金额</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[amount]" value="{$row.amount|default=0}" placeholder="金额" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">币种</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[currency]" value="{$row.currency|default=''}" placeholder="币种" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">状态</label>
+        <div class="layui-input-block">
+            <select name="row[status]">
+                <option value="normal" {:$row.status=='normal'?'selected':''} >正常</option>
+                <option value="hidden" {:$row.status=='hidden'?'selected':''} >隐藏</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">支付渠道</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[pay_type]" value="{$row.pay_type|default=''}" placeholder="支付渠道" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">交易号</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[pay_trade_no]" value="{$row.pay_trade_no|default=''}" placeholder="交易号" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item layui-form-text">
+        <label class="layui-form-label">支付回执</label>
+        <div class="layui-input-block">
+            <textarea name="row[pay_payload]" placeholder="支付回执" class="layui-textarea">{$row.pay_payload|default=''}</textarea>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">幂等键</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[idempotent_key]" value="{$row.idempotent_key|default=''}" placeholder="幂等键" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">优惠码</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[coupon_code]" value="{$row.coupon_code|default=''}" placeholder="优惠码" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">优惠金额</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[discount]" value="{$row.discount|default=0}" placeholder="优惠金额" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">支付时间</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[paid_at]" value="{$row.paid_at|default=''}" placeholder="支付时间" autocomplete="off" class="layui-input" readonly />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">过期时间</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[expire_at]" value="{$row.expire_at|default=''}" placeholder="过期时间" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item layer-footer hide">
+        <div class="layui-input-block">
+            <button class="layui-btn btn-theme-color disabled" lay-submit>{:__('OK')}</button>
+            <button type="reset" class="layui-btn layui-btn-primary">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
+
+<script>
+    layui.use(["form", "badou"], function () {
+        layui.bdForm.api.bindevent($("form.layui-form"));
+    });
+</script>

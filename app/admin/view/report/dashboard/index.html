@@ -1,0 +1,175 @@
+{layout name="layout/default" /}
+
+<style>
+    .stat-item { display: flex; align-items: center; justify-content: space-between; height: 66px; }
+    .stat-number { font-size: 28px; line-height: 66px; color: #28333e; }
+    .stat-tips { padding-top: 14px; font-size: 12px; text-align: right; color: #a2a8b4; }
+</style>
+
+<div class="layui-row layui-col-space10">
+    <div class="layui-col-xs6 layui-col-md3">
+        <div class="layui-card"><div class="layui-card-header">注册用户</div>
+            <div class="layui-card-body"><div class="stat-item">
+                <div class="stat-number">{$overview.user.total}</div>
+                <div class="stat-tips">今日新增 {$overview.user.today_new}<br />昨日 {$overview.user.yesterday_new} · 环比 {$overview.user.growth_rate}%</div>
+            </div></div></div>
+    </div>
+    <div class="layui-col-xs6 layui-col-md3">
+        <div class="layui-card"><div class="layui-card-header">付费转化率</div>
+            <div class="layui-card-body"><div class="stat-item">
+                <div class="stat-number">{$overview.billing.conversion_rate}%</div>
+                <div class="stat-tips">付费用户 {$overview.billing.paid_user}<br />生效订阅 {$overview.billing.active_subscription} · 宽限 {$overview.billing.grace_subscription}</div>
+            </div></div></div>
+    </div>
+    <div class="layui-col-xs6 layui-col-md3">
+        <div class="layui-card"><div class="layui-card-header">有效项目</div>
+            <div class="layui-card-body"><div class="stat-item">
+                <div class="stat-number">{$overview.project.valid}</div>
+                <div class="stat-tips">已认证 {$overview.project.certified}<br />待审核 {$overview.project.pending} · 总数 {$overview.project.total}</div>
+            </div></div></div>
+    </div>
+    <div class="layui-col-xs6 layui-col-md3">
+        <div class="layui-card"><div class="layui-card-header">累计收入（{$overview.billing.currency}）</div>
+            <div class="layui-card-body"><div class="stat-item">
+                <div class="stat-number">{$overview.billing.revenue_total}</div>
+                <div class="stat-tips">本月 {$overview.billing.revenue_month}<br />今日 {$overview.billing.revenue_today} · 支付率 {$overview.billing.order_pay_rate}%</div>
+            </div></div></div>
+    </div>
+</div>
+
+<div class="layui-row layui-col-space10">
+    <div class="layui-col-xs6 layui-col-md3">
+        <div class="layui-card"><div class="layui-card-header">内容审核通过率</div>
+            <div class="layui-card-body"><div class="stat-item">
+                <div class="stat-number">{$overview.content.review_pass_rate}%</div>
+                <div class="stat-tips">通过 {$overview.content.review_pass} / {$overview.content.review_total}<br />内容总数 {$overview.content.total} · 待审 {$overview.content.pending}</div>
+            </div></div></div>
+    </div>
+    <div class="layui-col-xs6 layui-col-md3">
+        <div class="layui-card"><div class="layui-card-header">推荐响应</div>
+            <div class="layui-card-body"><div class="stat-item">
+                <div class="stat-number">{$overview.recommend.responded}</div>
+                <div class="stat-tips">推荐总量 {$overview.recommend.total}<br />查看率 {$overview.recommend.view_rate}% · 响应率 {$overview.recommend.response_rate}%</div>
+            </div></div></div>
+    </div>
+    <div class="layui-col-xs6 layui-col-md3">
+        <div class="layui-card"><div class="layui-card-header">咨询留言</div>
+            <div class="layui-card-body"><div class="stat-item">
+                <div class="stat-number">{$overview.consult.message}</div>
+                <div class="stat-tips">会话 {$overview.consult.conversation}<br />今日 {$overview.consult.message_today} 条</div>
+            </div></div></div>
+    </div>
+    <div class="layui-col-xs6 layui-col-md3">
+        <div class="layui-card"><div class="layui-card-header">推流曝光</div>
+            <div class="layui-card-body"><div class="stat-item">
+                <div class="stat-number">{$overview.promotion.exposure}</div>
+                <div class="stat-tips">点击 {$overview.promotion.click} · CTR {$overview.promotion.ctr}%<br />投放中 {$overview.promotion.campaign_active} · 待审 {$overview.promotion.campaign_pending}</div>
+            </div></div></div>
+    </div>
+</div>
+
+<div class="layui-row layui-col-space10">
+    <div class="layui-col-md8">
+        <div class="layui-card">
+            <div class="layui-card-header">近 14 天趋势</div>
+            <div class="layui-card-body"><div id="chart-trend" style="height: 320px;"></div></div>
+        </div>
+    </div>
+    <div class="layui-col-md4">
+        <div class="layui-card">
+            <div class="layui-card-header">角色分布</div>
+            <div class="layui-card-body"><div id="chart-role" style="height: 320px;"></div></div>
+        </div>
+    </div>
+</div>
+
+<div class="layui-row layui-col-space10">
+    <div class="layui-col-md6">
+        <div class="layui-card">
+            <div class="layui-card-header">项目行业分布</div>
+            <div class="layui-card-body"><div id="chart-category" style="height: 300px;"></div></div>
+        </div>
+    </div>
+    <div class="layui-col-md6">
+        <div class="layui-card">
+            <div class="layui-card-header">订阅套餐分布</div>
+            <div class="layui-card-body"><div id="chart-plan" style="height: 300px;"></div></div>
+        </div>
+    </div>
+</div>
+
+<div class="layui-row layui-col-space10">
+    <div class="layui-col-md12">
+        <div class="layui-card">
+            <div class="layui-card-header">风险与待办</div>
+            <div class="layui-card-body">
+                <ul style="padding-left:18px;line-height:2;">
+                    <li>待处理举报：<b>{$overview.risk.pending_report}</b> 条</li>
+                    <li>待审核项目：<b>{$overview.project.pending}</b> 个</li>
+                    <li>待审核内容：<b>{$overview.content.pending}</b> 条</li>
+                    <li>待审核投放：<b>{$overview.promotion.campaign_pending}</b> 个</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="__CDN__/assets/libs/echarts/echarts.min.js"></script>
+<script src="__CDN__/assets/libs/echarts/echarts-theme.js"></script>
+<script>
+    layui.use(["badou"], function () {
+        var $ = layui.jquery;
+        if (typeof echarts === "undefined") { return; }
+
+        function initChart(id, option) {
+            var el = document.getElementById(id);
+            if (!el) { return null; }
+            var chart = echarts.init(el, "walden");
+            chart.setOption(option);
+            window.addEventListener("resize", function () { chart.resize(); });
+            return chart;
+        }
+
+        $.get("{:url('report.dashboard/trend')}", { days: 14 }, function (ret) {
+            if (!ret || ret.code !== 1 || !ret.data) { return; }
+            var d = ret.data, t = d.trend || {}, s = t.series || {};
+
+            initChart("chart-trend", {
+                color: ["#0090FF", "#36CE9E", "#FFC005", "#FF6B6B"],
+                tooltip: { trigger: "axis" },
+                legend: { data: ["注册", "已支付订单", "内容", "留言"] },
+                grid: { top: 50, bottom: 30, left: 40, right: 20, containLabel: true },
+                xAxis: { type: "category", boundaryGap: false, data: t.category || [] },
+                yAxis: { type: "value" },
+                series: [
+                    { name: "注册", type: "line", smooth: true, data: s.user || [] },
+                    { name: "已支付订单", type: "line", smooth: true, data: s.order || [] },
+                    { name: "内容", type: "line", smooth: true, data: s.content || [] },
+                    { name: "留言", type: "line", smooth: true, data: s.message || [] }
+                ]
+            });
+
+            var role = d.role || {}, labels = role._labels || {}, roleData = [];
+            for (var k in labels) { roleData.push({ name: labels[k], value: role[k] || 0 }); }
+            initChart("chart-role", {
+                tooltip: { trigger: "item" }, legend: { bottom: 0 },
+                series: [{ type: "pie", radius: ["40%", "65%"], data: roleData }]
+            });
+
+            var cat = d.category || [];
+            initChart("chart-category", {
+                tooltip: { trigger: "axis" },
+                grid: { top: 30, bottom: 30, left: 40, right: 20, containLabel: true },
+                xAxis: { type: "category", data: cat.map(function (i) { return i.name; }) },
+                yAxis: { type: "value" },
+                series: [{ type: "bar", data: cat.map(function (i) { return i.num; }), itemStyle: { borderRadius: [4, 4, 0, 0] } }]
+            });
+
+            var plan = d.plan || [];
+            initChart("chart-plan", {
+                tooltip: { trigger: "item" }, legend: { bottom: 0 },
+                series: [{ type: "pie", radius: "60%", data: plan.map(function (i) { return { name: i.name, value: i.num }; }) }]
+            });
+        });
+    });
+</script>

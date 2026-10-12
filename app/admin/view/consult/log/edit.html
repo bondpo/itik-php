@@ -1,0 +1,77 @@
+{layout name="layout/form" /}
+<form class="layui-form" method="post">
+    {:token_field()}
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">类型</label>
+        <div class="layui-input-block">
+            <select name="row[type]">
+                <option value="news" {:$row.type=='news'?'selected':''} >资讯</option>
+                <option value="case" {:$row.type=='case'?'selected':''} >案例</option>
+                <option value="activity" {:$row.type=='activity'?'selected':''} >活动</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">发起人 ID</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[initiator_id]" value="{$row.initiator_id|default=0}" placeholder="发起人 ID" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">目标类型</label>
+        <div class="layui-input-block">
+            <select name="row[target_type]">
+                <option value="project" {:$row.target_type=='project'?'selected':''} >项目</option>
+                <option value="content" {:$row.target_type=='content'?'selected':''} >内容</option>
+                <option value="user" {:$row.target_type=='user'?'selected':''} >用户</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">目标 ID</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[target_id]" value="{$row.target_id|default=0}" placeholder="目标 ID" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">会话主题</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[subject]" value="{$row.subject|default=''}" placeholder="会话主题" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">状态</label>
+        <div class="layui-input-block">
+            <select name="row[status]">
+                <option value="normal" {:$row.status=='normal'?'selected':''} >正常</option>
+                <option value="hidden" {:$row.status=='hidden'?'selected':''} >隐藏</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">最后留言时间</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[last_message_at]" value="{$row.last_message_at|default=''}" placeholder="最后留言时间" autocomplete="off" class="layui-input" readonly />
+        </div>
+    </div>
+
+    <div class="layui-form-item layer-footer hide">
+        <div class="layui-input-block">
+            <button class="layui-btn btn-theme-color disabled" lay-submit>{:__('OK')}</button>
+            <button type="reset" class="layui-btn layui-btn-primary">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
+
+<script>
+    layui.use(["form", "badou"], function () {
+        layui.bdForm.api.bindevent($("form.layui-form"));
+    });
+</script>

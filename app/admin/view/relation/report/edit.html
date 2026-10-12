@@ -1,0 +1,93 @@
+{layout name="layout/form" /}
+<form class="layui-form" method="post">
+    {:token_field()}
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">举报人 ID</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[reporter_id]" value="{$row.reporter_id|default=0}" placeholder="举报人 ID" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">目标类型</label>
+        <div class="layui-input-block">
+            <select name="row[target_type]">
+                <option value="project" {:$row.target_type=='project'?'selected':''} >项目</option>
+                <option value="content" {:$row.target_type=='content'?'selected':''} >内容</option>
+                <option value="user" {:$row.target_type=='user'?'selected':''} >用户</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">目标 ID</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[target_id]" value="{$row.target_id|default=0}" placeholder="目标 ID" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">分类</label>
+        <div class="layui-input-block">
+            <select name="row[category]">
+                <option value="license" {:$row.category=='license'?'selected':''} >资质</option>
+                <option value="brand" {:$row.category=='brand'?'selected':''} >品牌</option>
+                <option value="project" {:$row.category=='project'?'selected':''} >项目</option>
+                <option value="quality" {:$row.category=='quality'?'selected':''} >质量</option>
+                <option value="other" {:$row.category=='other'?'selected':''} >其它</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">备注</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[remark]" value="{$row.remark|default=''}" placeholder="备注" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">证据</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[evidence]" value="{$row.evidence|default=''}" placeholder="证据" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">状态</label>
+        <div class="layui-input-block">
+            <select name="row[status]">
+                <option value="normal" {:$row.status=='normal'?'selected':''} >正常</option>
+                <option value="hidden" {:$row.status=='hidden'?'selected':''} >隐藏</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">处理人 ID</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[handler_id]" value="{$row.handler_id|default=0}" placeholder="处理人 ID" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">处理备注</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[handle_note]" value="{$row.handle_note|default=''}" placeholder="处理备注" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item layer-footer hide">
+        <div class="layui-input-block">
+            <button class="layui-btn btn-theme-color disabled" lay-submit>{:__('OK')}</button>
+            <button type="reset" class="layui-btn layui-btn-primary">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
+
+<script>
+    layui.use(["form", "badou"], function () {
+        layui.bdForm.api.bindevent($("form.layui-form"));
+    });
+</script>

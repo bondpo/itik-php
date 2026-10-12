@@ -1,0 +1,93 @@
+{layout name="layout/default" /}
+
+<!-- 表格 -->
+<div class="layui-card">
+    <div class="layui-card-body">
+        <table class="layui-hide" id="reportlist" data-operate-edit="{:$auth->check('relation.report/edit')}" data-operate-del="{:$auth->check('relation.report/del')}"></table>
+    </div>
+</div>
+
+<script type="text/html" id="toolbar">
+    <a href="javascript:;" lay-event="refresh" class="layui-btn btn-refresh layui-bg-black"><i class="fa fa-refresh"></i></a>
+    <button class="layui-btn layui-bg-green btn-disabled disabled {:$auth->check('relation.report/handle')?'':'hide'}" lay-event="resolve"><i class="fa fa-check"></i> 判定成立</button>
+    <button class="layui-btn layui-bg-blue btn-disabled disabled {:$auth->check('relation.report/handle')?'':'hide'}" lay-event="process"><i class="fa fa-spinner"></i> 处理中</button>
+    <button class="layui-btn layui-bg-red btn-disabled disabled {:$auth->check('relation.report/handle')?'':'hide'}" lay-event="reject"><i class="fa fa-times"></i> 判定不成立</button>
+</script>
+
+<script>
+    layui.use(["badou", "table"], function () {
+        var bdTable = layui.bdTable;
+        var table = layui.table;
+        var $ = layui.jquery;
+        var layer = layui.layer;
+
+        bdTable.api.init({
+            table: table,
+            extend: {
+                index_url: "relation.report/index" + location.search,
+                edit_url: "relation.report/edit",
+                del_url: "relation.report/del",
+                multi_url: "relation.report/multi",
+                table: "app_report",
+            },
+        });
+
+        var tableObj = bdTable.render({
+            elem: "#reportlist",
+            url: "{:url('relation.report/index')}",
+            pk: "id",
+            even: true,
+            toolbar: "#toolbar",
+            page: true,
+            cols: [
+                [
+                    { type: "checkbox" },
+                    { field: "id", title: "ID", width: 70, sort: true },
+                    { field: "reporter_id", title: "举报人ID", operate: "BETWEEN", sortable: true },
+                    { field: "target_type", title: "对象类型", searchList: { user: "用户", project: "项目", content: "内容" } },
+                    { field: "target_id", title: "对象ID", operate: "BETWEEN", sortable: true },
+                    { field: "category", title: "分类", searchList: { fraud: "欺诈", false_content: "虚假内容", harass: "骚扰", illegal: "违法违规", other: "其他" } },
+                    { field: "remark", title: "补充说明", operate: "LIKE" },
+                    { field: "status", title: "状态", searchList: { pending: "待处理", processing: "处理中", resolved: "已处理", rejected: "已驳回" }, custom: { pending: "orange", processing: "blue", resolved: "green", rejected: "default" }, templet: bdTable.api.formatter.status },
+                    { field: "handler_id", title: "处理人", operate: false },
+                    { field: "handle_note", title: "处理备注", operate: "LIKE" },
+                    { field: "create_time", title: "举报时间", templet: bdTable.api.formatter.datetime, operate: false },
+                ],
+            ],
+        });
+
+        table.on("toolbar(reportlist)", function (obj) {
+            var event = obj.event;
+            if (event === "refresh") { tableObj.reload(); return; }
+            var rows = table.checkStatus("reportlist").data;
+            if (!rows.length) { layer.msg("请先选择举报记录"); return; }
+            var ids = rows.map(function (r) { return r.id; }).join(",");
+
+            layer.prompt({ title: "请填写处理备注（" + event + "）", formType: 2 }, function (value, index) {
+                var post = { ids: ids, action: event, note: value };
+                if (event === "resolve") {
+                    layer.confirm("是否同时封禁被举报用户？（仅用户类举报生效）", {
+                        btn: ["封禁并处理", "仅处理"],
+                    }, function (i) {
+                        layer.close(i);
+                        post.ban = 1;
+                        submit(index, post);
+                    }, function (i) {
+                        layer.close(i);
+                        submit(index, post);
+                    });
+                    return;
+                }
+                submit(index, post);
+            });
+
+            function submit(index, post) {
+                $.post("{:url('relation.report/handle')}", post, function (ret) {
+                    layer.close(index);
+                    layer.msg(ret.msg || "操作完成");
+                    if (ret.code === 1) { tableObj.reload(); }
+                });
+            }
+        });
+    });
+</script>

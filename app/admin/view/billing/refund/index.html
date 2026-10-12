@@ -1,0 +1,58 @@
+{layout name="layout/default" /}
+
+<!-- 表格 -->
+<div class="layui-card">
+    <div class="layui-card-body">
+        <table class="layui-hide" id="refund" data-operate-edit="{:$auth->check('billing.refund/edit')}" data-operate-del="{:$auth->check('billing.refund/del')}"></table>
+    </div>
+</div>
+
+<script type="text/html" id="toolbar">
+    <a href="javascript:;" lay-event="refresh" class="layui-btn btn-refresh layui-bg-black"><i class="fa fa-refresh"></i></a>
+    <button class="layui-btn layui-bg-green {:$auth->check('billing.refund/add')?'':'hide'}" lay-event="add"><i class="fa fa-plus"></i> {:__('Add')}</button>
+    <button class="layui-btn layui-bg-blue btn-disabled disabled {:$auth->check('billing.refund/edit')?'':'hide'}" lay-event="edit"><i class="fa fa-pencil"></i> {:__('Edit')}</button>
+    <button class="layui-btn layui-bg-red btn-disabled disabled {:$auth->check('billing.refund/del')?'':'hide'}" lay-event="del"><i class="fa fa-trash"></i> {:__('Del')}</button>
+</script>
+
+<script>
+    layui.use(["badou", "table"], function () {
+        var bdTable = layui.bdTable;
+        var table = layui.table;
+
+        bdTable.api.init({
+            table: table,
+            extend: {
+                index_url: "billing.refund/index" + location.search,
+                add_url: "billing.refund/add",
+                edit_url: "billing.refund/edit",
+                del_url: "billing.refund/del",
+                multi_url: "billing.refund/multi",
+                table: "app_refund",
+            },
+        });
+
+        bdTable.render({
+            elem: "#refund",
+            url: "{:url('billing.refund/index')}",
+            pk: "id",
+            even: true,
+            toolbar: "#toolbar",
+            page: true,
+            cols: [
+                [
+                    { type: "checkbox" },
+                    { field: "id", title: "ID", width: 70, sort: true },
+                    { field: "order.order_no", title: "订单号", operate: false },
+{ field: "amount", title: "退款金额", operate: 'BETWEEN', sortable: true },
+{ field: "currency", title: "币种" },
+{ field: "reason", title: "申请原因", operate: 'LIKE' },
+{ field: "status", title: "状态", searchList: { pending: '待审批', approved: '已通过', rejected: '已驳回', refunded: '已退款' }, custom: { pending: 'orange', approved: 'green', rejected: 'red', refunded: 'blue' }, templet: bdTable.api.formatter.status },
+{ field: "audit_note", title: "审批备注", operate: 'LIKE' },
+{ field: "create_time_text", title: "申请时间", templet: bdTable.api.formatter.datetime, operate: false },
+                    { field: "create_time", title: "申请时间", templet: bdTable.api.formatter.datetime, searchType: 'time', hide: true },
+                    { title: "操作", width: 200, align: "center", templet: bdTable.api.formatter.operate },
+                ],
+            ],
+        });
+    });
+</script>

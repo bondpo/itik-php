@@ -1,0 +1,144 @@
+{layout name="layout/form" /}
+<form class="layui-form" method="post">
+    {:token_field()}
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">项目 ID</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[project_id]" value="" placeholder="项目 ID" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">上传人 ID</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[uploader_id]" value="0" placeholder="上传人 ID" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">分类</label>
+        <div class="layui-input-block">
+            <select name="row[category]">
+                <option value="license">资质</option>
+                <option value="brand">品牌</option>
+                <option value="project">项目</option>
+                <option value="quality">质量</option>
+                <option value="other">其它</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">类型</label>
+        <div class="layui-input-block">
+            <select name="row[type]">
+                <option value="news">资讯</option>
+                <option value="case">案例</option>
+                <option value="activity">活动</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">标题</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[title]" value="" placeholder="标题" autocomplete="off" class="layui-input" lay-verify="required" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">文件路径</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[storage_key]" value="" placeholder="文件路径" autocomplete="off" class="layui-input" lay-verify="required" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">附件 ID</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[attachment_id]" value="0" placeholder="附件 ID" autocomplete="off" class="layui-input" readonly />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">扩展名</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[ext]" value="" placeholder="扩展名" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">文件大小</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[filesize]" value="" placeholder="文件大小" autocomplete="off" class="layui-input" readonly />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">版本号</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[version]" value="0" placeholder="版本号" autocomplete="off" class="layui-input" readonly />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">来源说明</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[source]" value="" placeholder="来源说明" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">版权责任方</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[copyright_owner]" value="" placeholder="版权责任方" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">审核状态</label>
+        <div class="layui-input-block">
+            <select name="row[review_status]">
+                <option value="pending">待审核</option>
+                <option value="approved">已通过</option>
+                <option value="rejected">已驳回</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">审核说明</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[review_reason]" value="" placeholder="审核说明" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">是否公开</label>
+        <div class="layui-input-block">
+            <input type="hidden" name="row[is_public]" value="0" />
+            <input type="checkbox" name="row[is_public]" value="1" lay-skin="switch" lay-text="是|否" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">权重</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[weigh]" value="0" placeholder="权重" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item layer-footer hide">
+        <div class="layui-input-block">
+            <button class="layui-btn btn-theme-color disabled" lay-submit>{:__('OK')}</button>
+            <button type="reset" class="layui-btn layui-btn-primary">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
+
+<script>
+    layui.use(["form", "badou"], function () {
+        layui.bdForm.api.bindevent($("form.layui-form"));
+    });
+</script>

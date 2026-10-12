@@ -1,0 +1,85 @@
+{layout name="layout/form" /}
+<form class="layui-form" method="post">
+    {:token_field()}
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">风控场景</label>
+        <div class="layui-input-block">
+            <select name="row[scene]" lay-verify="required">
+                <option value="login" {:$row.scene=='login'?'selected':''} >登录</option>
+                <option value="register" {:$row.scene=='register'?'selected':''} >注册</option>
+                <option value="content_post" {:$row.scene=='content_post'?'selected':''} >内容发布</option>
+                <option value="comment" {:$row.scene=='comment'?'selected':''} >评论</option>
+                <option value="consult" {:$row.scene=='consult'?'selected':''} >咨询</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">规则类型</label>
+        <div class="layui-input-block">
+            <select name="row[rule_type]">
+                <option value="freq" {:$row.rule_type=='freq'?'selected':''} >频次</option>
+                <option value="ip" {:$row.rule_type=='ip'?'selected':''} >IP 限制</option>
+                <option value="device" {:$row.rule_type=='device'?'selected':''} >设备</option>
+                <option value="account" {:$row.rule_type=='account'?'selected':''} >账号</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">阈值</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[threshold]" value="{$row.threshold|default=0}" placeholder="阈值" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">统计窗口(秒)</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[window_sec]" value="{$row.window_sec|default=0}" placeholder="统计窗口(秒)" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">处置动作</label>
+        <div class="layui-input-block">
+            <select name="row[action]">
+                <option value="log" {:$row.action=='log'?'selected':''} >仅记录</option>
+                <option value="verify" {:$row.action=='verify'?'selected':''} >要求验证</option>
+                <option value="block" {:$row.action=='block'?'selected':''} >拦截</option>
+                <option value="limit" {:$row.action=='limit'?'selected':''} >限流</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">备注</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[remark]" value="{$row.remark|default=''}" placeholder="备注" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">状态</label>
+        <div class="layui-input-block">
+            <select name="row[status]">
+                <option value="normal" {:$row.status=='normal'?'selected':''} >正常</option>
+                <option value="hidden" {:$row.status=='hidden'?'selected':''} >隐藏</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item layer-footer hide">
+        <div class="layui-input-block">
+            <button class="layui-btn btn-theme-color disabled" lay-submit>{:__('OK')}</button>
+            <button type="reset" class="layui-btn layui-btn-primary">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
+
+<script>
+    layui.use(["form", "badou"], function () {
+        layui.bdForm.api.bindevent($("form.layui-form"));
+    });
+</script>

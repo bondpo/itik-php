@@ -1,0 +1,99 @@
+{layout name="layout/default" /}
+
+<!-- 表格 -->
+<div class="layui-card">
+    <div class="layui-card-body">
+        <table class="layui-hide" id="contentreview" data-operate-edit="{:$auth->check('content.review/edit')}" data-operate-del="{:$auth->check('content.review/del')}"></table>
+    </div>
+</div>
+
+<script type="text/html" id="toolbar">
+    <a href="javascript:;" lay-event="refresh" class="layui-btn btn-refresh layui-bg-black"><i class="fa fa-refresh"></i></a>
+    <button class="layui-btn layui-bg-green btn-disabled disabled {:$auth->check('content.review/review')?'':'hide'}" lay-event="pass"><i class="fa fa-check"></i> 通过</button>
+    <button class="layui-btn layui-bg-red btn-disabled disabled {:$auth->check('content.review/review')?'':'hide'}" lay-event="reject"><i class="fa fa-times"></i> 驳回</button>
+    <button class="layui-btn layui-bg-orange btn-disabled disabled {:$auth->check('content.review/offline')?'':'hide'}" lay-event="offline"><i class="fa fa-eye-slash"></i> 下架</button>
+</script>
+
+<script>
+    layui.use(["badou", "table"], function () {
+        var bdTable = layui.bdTable;
+        var table = layui.table;
+        var $ = layui.jquery;
+        var layer = layui.layer;
+
+        bdTable.api.init({
+            table: table,
+            extend: {
+                index_url: "content.review/index" + location.search,
+                edit_url: "content.review/edit",
+                del_url: "content.review/del",
+                multi_url: "content.review/multi",
+                table: "app_content",
+            },
+        });
+
+        var tableObj = bdTable.render({
+            elem: "#contentreview",
+            url: "{:url('content.review/index')}",
+            pk: "id",
+            even: true,
+            toolbar: "#toolbar",
+            page: true,
+            cols: [
+                [
+                    { type: "checkbox" },
+                    { field: "id", title: "ID", width: 70, sort: true },
+                    { field: "title", title: "标题", operate: "LIKE" },
+                    { field: "type", title: "类型", searchList: { news: "资讯", material: "资料", member_upload: "会员上传" } },
+                    { field: "author_id", title: "作者ID", operate: "BETWEEN", sortable: true },
+                    { field: "project_id", title: "关联项目", operate: "BETWEEN", sortable: true },
+                    { field: "category_l1", title: "一级栏目", operate: "LIKE" },
+                    { field: "tags", title: "标签", operate: "LIKE" },
+                    { field: "status", title: "状态", searchList: { draft: "草稿", pending: "待审核", normal: "已通过", rejected: "已驳回", hidden: "已下架" }, custom: { draft: "default", pending: "orange", normal: "green", rejected: "red", hidden: "default" }, templet: bdTable.api.formatter.status },
+                    { field: "visibility", title: "可见性", searchList: { public: "公开", member: "会员", relation: "关系可见" } },
+                    { field: "version", title: "版本", operate: false },
+                    { field: "published_at", title: "发布时间", templet: bdTable.api.formatter.datetime, operate: false },
+                    { field: "create_time", title: "提交时间", templet: bdTable.api.formatter.datetime, operate: false },
+                ],
+            ],
+        });
+
+        // 工具栏：通过 / 驳回 / 下架
+        table.on("toolbar(contentreview)", function (obj) {
+            var event = obj.event;
+            if (event === "refresh") { tableObj.reload(); return; }
+            var rows = table.checkStatus("contentreview").data;
+            if (!rows.length) { layer.msg("请先选择内容"); return; }
+            var ids = rows.map(function (r) { return r.id; }).join(",");
+
+            if (event === "pass" || event === "reject") {
+                layer.prompt({
+                    title: event === "pass" ? "确认通过（可填备注）" : "请填写驳回原因",
+                    formType: 2,
+                }, function (value, index) {
+                    $.post("{:url('content.review/review')}", {
+                        ids: ids,
+                        action: event === "pass" ? "pass" : "reject",
+                        reason: value,
+                        __token__: $('meta[name="csrf-token"]').attr("content") || ""
+                    }, function (ret) {
+                        layer.close(index);
+                        layer.msg(ret.msg || "操作完成");
+                        if (ret.code === 1) { tableObj.reload(); }
+                    });
+                });
+                return;
+            }
+
+            if (event === "offline") {
+                layer.confirm("确认下架所选内容？", function (index) {
+                    $.post("{:url('content.review/offline')}", { ids: ids }, function (ret) {
+                        layer.close(index);
+                        layer.msg(ret.msg || "操作完成");
+                        if (ret.code === 1) { tableObj.reload(); }
+                    });
+                });
+            }
+        });
+    });
+</script>

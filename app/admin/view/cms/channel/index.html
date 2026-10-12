@@ -1,0 +1,86 @@
+{layout name="layout/default" /}
+
+<!-- 表格 -->
+<div class="layui-card">
+    <div class="layui-card-body">
+        <table
+            class="layui-hide"
+            id="channel"
+            data-operate-edit="{:$auth->check('cms.channel/edit')}"
+            data-operate-del="{:$auth->check('cms.channel/del')}"></table>
+    </div>
+</div>
+
+<!-- 表格左侧按钮 toolbar  -->
+<script type="text/html" id="toolbar">
+    <a href="javascript:;" lay-event="refresh" class="layui-btn btn-refresh layui-bg-black">
+        <i class="fa fa-refresh"></i>
+    </a>
+    <button class="layui-btn layui-bg-green {:$auth->check('cms.channel/add')?'':'hide'}" lay-event="add">
+        <i class="fa fa-plus"></i>
+        {:__('Add')}
+    </button>
+    <button class="layui-btn layui-bg-blue btn-disabled disabled {:$auth->check('cms.channel/edit')?'':'hide'}" lay-event="edit">
+        <i class="fa fa-pencil"></i>
+        {:__('Edit')}
+    </button>
+    <button class="layui-btn layui-bg-red btn-disabled disabled {:$auth->check('cms.channel/del')?'':'hide'}" lay-event="del">
+        <i class="fa fa-trash"></i>
+        {:__('Del')}
+    </button>
+</script>
+
+<script>
+    layui.use(["badou", "table"], function () {
+        var bdTable = layui.bdTable;
+        var table = layui.table;
+        bdTable.api.init({
+            table: table,
+            extend: {
+                index_url: "cms.channel/index" + location.search,
+                add_url: "cms.channel/add",
+                edit_url: "cms.channel/edit",
+                del_url: "cms.channel/del",
+                multi_url: "cms.channel/multi",
+                table: "cms_channel",
+            },
+        });
+        bdTable.render({
+            elem: "#channel",
+            url: "{:url('cms.channel/index')}",
+            pk: "id",
+            even: true,
+            toolbar: "#toolbar",
+            page: true,
+            cols: [
+                [
+                    { type: "checkbox" },
+                    { field: "id", title: "ID", width: 80, sort: true },
+                    { field: "type", title: "{:__('Type')}", searchList: {"channel": "channel", "page": "page", "link": "link", "list": "list"}, templet: bdTable.api.formatter.status },
+                    { field: "model_id", title: "{:__('Model_id')}", operate: 'LIKE' },
+                    { field: "parent_id", title: "{:__('Parent_id')}", operate: 'LIKE' },
+                    { field: "name", title: "{:__('Name')}", operate: 'LIKE' },
+                    { field: "image", title: "{:__('Image')}", operate: 'LIKE' },
+                    { field: "flag", title: "{:__('Flag')}", operate: 'LIKE' },
+                    { field: "seotitle", title: "{:__('Seotitle')}", operate: 'LIKE' },
+                    { field: "keywords", title: "{:__('Keywords')}", operate: 'LIKE' },
+                    { field: "description", title: "{:__('Description')}", operate: 'LIKE' },
+                    { field: "diyname", title: "{:__('Diyname')}", operate: 'LIKE' },
+                    { field: "outlink", title: "{:__('Outlink')}", operate: 'LIKE' },
+                    { field: "linktype", title: "{:__('Linktype')}", operate: 'LIKE' },
+                    { field: "linkid", title: "{:__('Linkid')}", operate: 'LIKE' },
+                    { field: "items", title: "{:__('Items')}", operate: 'LIKE' },
+                    { field: "weigh", title: "{:__('Weigh')}", operate: 'LIKE' },
+                    { field: "pagesize", title: "{:__('Pagesize')}", operate: 'LIKE' },
+                    { field: "vip", title: "{:__('Vip')}", hide: true, operate: false },
+                    { field: "listtype", title: "{:__('Listtype')}", hide: true, operate: false },
+                    { field: "iscontribute", title: "{:__('Iscontribute')}", hide: true, operate: false },
+                    { field: "isnav", title: "{:__('Isnav')}", hide: true, operate: false },
+                    { field: "status", title: "{:__('Status')}", searchList: {"normal": "normal", "hidden": "hidden"}, templet: bdTable.api.formatter.status },
+                    { field: "createtime", title: "{:__('Createtime')}", templet: bdTable.api.formatter.datetime, hide: true, operate: false },
+                    { title: "{:__('Operate')}", width: 130, align: "center", templet: bdTable.api.formatter.operate },
+                ],
+            ],
+        });
+    });
+</script>

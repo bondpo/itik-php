@@ -1,0 +1,94 @@
+{layout name="layout/default" /}
+
+<!-- 表格 -->
+<div class="layui-card">
+    <div class="layui-card-body">
+        <table
+            class="layui-hide"
+            id="adminlog"
+            data-operate-del="{:$auth->check('auth.adminlog/del')}"></table>
+    </div>
+</div>
+
+<!-- 表格左侧按钮 toolbar  -->
+<script type="text/html" id="toolbar">
+    <a href="javascript:;" lay-event="refresh" class="layui-btn btn-refresh layui-bg-black	">
+        <i class="fa fa-refresh"></i>
+    </a>
+    <button class="layui-btn layui-bg-red btn-disabled disabled {:$auth->check('auth.adminlog/del')?'':'hide'}" lay-event="del">
+        <i class="fa fa-trash"></i>
+        {:__('Del')}
+    </button>
+    <button class="layui-btn layui-bg-orange {:$auth->check('auth.adminlog/deletelog')?'':'hide'}" lay-event="deletelog">
+        <i class="fa fa-trash"></i>
+        {:__('Deletelog')}
+    </button>
+</script>
+
+<script>
+    layui.use(["badou", "table", "form"], function () {
+        var bdTable = layui.bdTable;
+        var table = layui.table;
+        var layer = layui.layer;
+        var badou = layui.badou;
+        var $ = layui.$;
+        var form = layui.form;
+
+        //初始化表格
+        bdTable.api.init({
+            table: table, // layui 表格对象，支持普通table与树结构table
+            extend: {
+                index_url: "auth.adminlog/index", //获取表格数据
+                del_url: "auth.adminlog/del", //删除数据
+                table: "adminlog", //数据表名称
+            },
+        });
+        // 创建渲染实例
+        bdTable.render({
+            elem: "#adminlog",
+            url: "{:url('auth.adminlog/index')}",
+            pk: "id",
+            even: true,
+            page:true,
+            toolbar: "#toolbar",
+            cols: [
+                [
+                    { type: "checkbox" },
+                    { field: "id", title: "ID", width: 80, sort: true },
+                    { field: "username", width: 120, title: "用户名" },
+                    { field: "title", title: "标题", searchOp: "like",operate:'like' },
+                    { field: "url", title: "操作URL",operate:'like' },
+                    { field: "ip", width: 120, title: "IP" },
+                    {
+                        field: "useragent",
+                        title: __('Useragent'),
+                        templet: function (d) {
+                            return "<span>" + layui.util.escape(d.useragent.split(" ")[0]) + "</span>";
+                        },
+                    },
+                    { field: "create_time", width: 180, title: "时间", search: "range" },
+
+                    { title: "操作", width: 150, align: "center",templet:bdTable.api.formatter.operate,buttons:[{
+                        text: "详情",
+                        icon:'fa fa-file-text-o',
+                        url: "auth.adminlog/detail?id={id}",
+                        classname: "btn-dialog layui-btn layui-btn-sm",
+                    }] },
+                ],
+            ],
+        });
+
+        bdTable.table.on('toolbar()', function (obj) {
+            if(obj.event == 'deletelog'){
+                var index=layer.confirm('确定要清空30天前的日志吗？', function (index) {
+                    badou.api.ajax({
+                        url: "{:url('auth.adminlog/deletelog')}",
+                    },function() {
+                        bdTable.table.reloadData(bdTable.initTable.config.id)
+                        layer.close(index);
+                    });
+                });
+            }
+        });
+    });
+</script>

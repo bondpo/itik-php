@@ -1,0 +1,101 @@
+{layout name="layout/default" /}
+
+<!-- 回收站列表 -->
+<div class="layui-card">
+    <div class="layui-card-body">
+        <table class="layui-hide" id="comment-recyclebin"></table>
+    </div>
+</div>
+
+<script type="text/html" id="toolbar">
+    <a href="javascript:;" lay-event="refresh" class="layui-btn btn-refresh layui-bg-black">
+        <i class="fa fa-refresh"></i>
+    </a>
+    <button
+        class="layui-btn layui-bg-blue btn-disabled disabled {:$auth->check('cms.comment/restore')?'':'hide'}"
+        lay-event="restore">
+        <i class="fa fa-rotate-left"></i> {:__('Restore')}
+    </button>
+    <button
+        class="layui-btn layui-bg-red btn-disabled disabled {:$auth->check('cms.comment/destroy')?'':'hide'}"
+        lay-event="destroy">
+        <i class="fa fa-times"></i> {:__('Destroy')}
+    </button>
+</script>
+
+<script type="text/html" id="comment-recyclebin-operate">
+    <a class="layui-btn layui-btn-xs layui-bg-blue" lay-event="restore">{:__('Restore')}</a>
+    <a class="layui-btn layui-btn-xs layui-bg-red" lay-event="destroy">{:__('Destroy')}</a>
+</script>
+
+<script>
+    layui.use(["badou", "table", "layer"], function () {
+        var bdTable = layui.bdTable;
+        var table = layui.table;
+        var layer = layui.layer;
+
+        function batch(action, ids, obj) {
+            var url = action === "restore" ? "{:url('cms.comment/restore')}" : "{:url('cms.comment/destroy')}";
+            var tip = action === "restore" ? "确认还原选中的评论？" : "真实删除后不可恢复，确认删除？";
+            layer.confirm(tip, function (i) {
+                layer.close(i);
+                $.post(url, { ids: ids }, function (ret) {
+                    if (ret.code === 1) {
+                        layui.toast.success({ message: ret.msg || "操作成功" });
+                        if (obj && obj.del) { obj.del(); } else { table.reload("comment-recyclebin"); }
+                    } else {
+                        layui.toast.error({ message: ret.msg || "操作失败" });
+                    }
+                });
+            });
+        }
+
+        bdTable.api.init({
+            table: table,
+            extend: {
+                index_url: "cms.comment/recyclebin" + location.search,
+                restore_url: "cms.comment/restore",
+                destroy_url: "cms.comment/destroy",
+            },
+        });
+
+        bdTable.render({
+            elem: "#comment-recyclebin",
+            url: "{:url('cms.comment/recyclebin')}",
+            pk: "id",
+            even: true,
+            toolbar: "#toolbar",
+            page: true,
+            cols: [
+                [
+                    { type: "checkbox" },
+                    { field: "id", title: "ID", width: 80, sort: true },
+                    { field: "content", title: "{:__('Content')}", minWidth: 240 },
+                    { field: "user.nickname", title: "{:__('User')}", width: 140, operate: false },
+                    { field: "type", title: "{:__('Type')}", width: 110 },
+                    { field: "deletetime", title: "{:__('Deletetime')}", width: 170, templet: bdTable.api.formatter.datetime },
+                    { title: "{:__('Operate')}", width: 170, align: "center", templet: "#comment-recyclebin-operate" },
+                ],
+            ],
+        });
+
+        // 顶部工具栏事件
+        table.on("toolbar(comment-recyclebin)", function (obj) {
+            var checked = table.checkStatus("comment-recyclebin");
+            var ids = checked.data.map(function (row) { return row.id; }).join(",");
+            if (obj.event === "restore") {
+                if (!ids) { return layui.toast.warning({ message: "请先选择数据" }); }
+                batch("restore", ids);
+            } else if (obj.event === "destroy") {
+                if (!ids) { return layui.toast.warning({ message: "请先选择数据" }); }
+                batch("destroy", ids);
+            }
+        });
+
+        // 行内操作事件
+        table.on("tool(comment-recyclebin)", function (obj) {
+            if (obj.event === "restore") { batch("restore", obj.data.id, obj); }
+            if (obj.event === "destroy") { batch("destroy", obj.data.id, obj); }
+        });
+    });
+</script>

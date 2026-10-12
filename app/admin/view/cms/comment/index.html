@@ -1,0 +1,75 @@
+{layout name="layout/default" /}
+
+<!-- 表格 -->
+<div class="layui-card">
+    <div class="layui-card-body">
+        <table
+            class="layui-hide"
+            id="comment"
+            data-operate-edit="{:$auth->check('cms.comment/edit')}"
+            data-operate-del="{:$auth->check('cms.comment/del')}"></table>
+    </div>
+</div>
+
+<!-- 表格左侧按钮 toolbar  -->
+<script type="text/html" id="toolbar">
+    <a href="javascript:;" lay-event="refresh" class="layui-btn btn-refresh layui-bg-black">
+        <i class="fa fa-refresh"></i>
+    </a>
+    <button class="layui-btn layui-bg-green {:$auth->check('cms.comment/add')?'':'hide'}" lay-event="add">
+        <i class="fa fa-plus"></i>
+        {:__('Add')}
+    </button>
+    <button class="layui-btn layui-bg-blue btn-disabled disabled {:$auth->check('cms.comment/edit')?'':'hide'}" lay-event="edit">
+        <i class="fa fa-pencil"></i>
+        {:__('Edit')}
+    </button>
+    <button class="layui-btn layui-bg-red btn-disabled disabled {:$auth->check('cms.comment/del')?'':'hide'}" lay-event="del">
+        <i class="fa fa-trash"></i>
+        {:__('Del')}
+    </button>
+</script>
+
+<script>
+    layui.use(["badou", "table"], function () {
+        var bdTable = layui.bdTable;
+        var table = layui.table;
+        bdTable.api.init({
+            table: table,
+            extend: {
+                index_url: "cms.comment/index" + location.search,
+                add_url: "cms.comment/add",
+                edit_url: "cms.comment/edit",
+                del_url: "cms.comment/del",
+                multi_url: "cms.comment/multi",
+                table: "cms_comment",
+            },
+        });
+        bdTable.render({
+            elem: "#comment",
+            url: "{:url('cms.comment/index')}",
+            pk: "id",
+            even: true,
+            toolbar: "#toolbar",
+            page: true,
+            cols: [
+                [
+                    { type: "checkbox" },
+                    { field: "id", title: "ID", width: 80, sort: true },
+                    { field: "user_id", title: "{:__('User_id')}", operate: 'LIKE' },
+                    { field: "type", title: "{:__('Type')}", searchList: {"archives": "archives", "page": "page", " 'special": " 'special"}, templet: bdTable.api.formatter.status },
+                    { field: "aid", title: "{:__('Aid')}", operate: 'LIKE' },
+                    { field: "pid", title: "{:__('Pid')}", operate: 'LIKE' },
+                    { field: "content", title: "{:__('Content')}", hide: true, operate: false },
+                    { field: "comments", title: "{:__('Comments')}", operate: 'LIKE' },
+                    { field: "ip", title: "{:__('Ip')}", operate: 'LIKE' },
+                    { field: "useragent", title: "{:__('Useragent')}", operate: 'LIKE' },
+                    { field: "subscribe", title: "{:__('Subscribe')}", hide: true, operate: false },
+                    { field: "status", title: "{:__('Status')}", searchList: {"normal": "normal", "hidden": "hidden"}, templet: bdTable.api.formatter.status },
+                    { field: "createtime", title: "{:__('Createtime')}", templet: bdTable.api.formatter.datetime, hide: true, operate: false },
+                    { title: "{:__('Operate')}", width: 130, align: "center", templet: bdTable.api.formatter.operate },
+                ],
+            ],
+        });
+    });
+</script>

@@ -1,0 +1,90 @@
+{layout name="layout/default" /}
+
+<div class="layui-card">
+    <div class="layui-card-body">
+        <div class="layui-form-item">
+            <label class="layui-form-label">选择表单</label>
+            <div class="layui-input-inline">
+                <select id="diydata-form" lay-filter="diydata-form">
+                    {volist name="diyformList" id="vo"}
+                    <option value="{$vo.id}" {if $diyform['id']==$vo['id']}selected{/if}>{$vo.name}</option>
+                    {/volist}
+                </select>
+            </div>
+        </div>
+        <table
+            class="layui-hide"
+            id="diydata"
+            data-operate-edit="{:$auth->check('cms.diydata/edit')}"
+            data-operate-del="{:$auth->check('cms.diydata/del')}"></table>
+    </div>
+</div>
+
+<script type="text/html" id="toolbar">
+    <a href="javascript:;" lay-event="refresh" class="layui-btn btn-refresh layui-bg-black">
+        <i class="fa fa-refresh"></i>
+    </a>
+    <button class="layui-btn layui-bg-green {:$auth->check('cms.diydata/add')?'':'hide'}" lay-event="add">
+        <i class="fa fa-plus"></i>
+        {:__('Add')}
+    </button>
+    <button class="layui-btn layui-bg-blue btn-disabled disabled {:$auth->check('cms.diydata/edit')?'':'hide'}" lay-event="edit">
+        <i class="fa fa-pencil"></i>
+        {:__('Edit')}
+    </button>
+    <button class="layui-btn layui-bg-red btn-disabled disabled {:$auth->check('cms.diydata/del')?'':'hide'}" lay-event="del">
+        <i class="fa fa-trash"></i>
+        {:__('Del')}
+    </button>
+</script>
+
+<script>
+    layui.use(["badou", "form", "table"], function () {
+        var bdTable = layui.bdTable;
+        var table = layui.table;
+        var form = layui.form;
+        var fields = Config.fields || [];
+        var diyformId = "{$diyform.id}";
+
+        bdTable.api.init({
+            table: table,
+            extend: {
+                index_url: "cms.diydata/index?diyform_id=" + diyformId + location.search,
+                add_url: "cms.diydata/add?diyform_id=" + diyformId,
+                edit_url: "cms.diydata/edit?diyform_id=" + diyformId,
+                del_url: "cms.diydata/del?diyform_id=" + diyformId,
+                multi_url: "cms.diydata/multi?diyform_id=" + diyformId,
+                table: "cms_diyform_data",
+            },
+        });
+
+        var cols = [
+            [
+                { type: "checkbox" },
+                { field: "id", title: "ID", width: 80, sort: true },
+            ],
+        ];
+        // 自定义表单字段动态生成列
+        fields.forEach(function (item) {
+            cols[0].push({ field: item.field, title: item.title, operate: "LIKE" });
+        });
+        cols[0].push({ field: "createtime", title: "{:__('Createtime')}", templet: bdTable.api.formatter.datetime, hide: true });
+        cols[0].push({ title: "{:__('Operate')}", width: 130, align: "center", templet: bdTable.api.formatter.operate });
+
+        bdTable.render({
+            elem: "#diydata",
+            url: "{:url('cms.diydata/index')}?diyform_id=" + diyformId,
+            pk: "id",
+            even: true,
+            toolbar: "#toolbar",
+            page: true,
+            cols: cols,
+        });
+
+        form.on("select(diydata-form)", function (data) {
+            var url = new URL(location.href);
+            url.searchParams.set("diyform_id", data.value);
+            location.href = url.toString();
+        });
+    });
+</script>

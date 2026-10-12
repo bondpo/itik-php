@@ -1,0 +1,91 @@
+{layout name="layout/default" /}
+
+<!-- 表格 -->
+<div class="layui-card">
+    <div class="layui-card-body">
+        <table class="layui-hide" id="consultlog"></table>
+    </div>
+</div>
+
+<script type="text/html" id="toolbar">
+    <a href="javascript:;" lay-event="refresh" class="layui-btn btn-refresh layui-bg-black"><i class="fa fa-refresh"></i></a>
+    <button class="layui-btn layui-bg-blue btn-disabled disabled {:$auth->check('consult.log/messages')?'':'hide'}" lay-event="view"><i class="fa fa-comments"></i> 查看留言</button>
+    <button class="layui-btn layui-bg-orange btn-disabled disabled {:$auth->check('consult.log/close')?'':'hide'}" lay-event="close"><i class="fa fa-lock"></i> 关闭会话</button>
+</script>
+
+<script>
+    layui.use(["badou", "table"], function () {
+        var bdTable = layui.bdTable;
+        var table = layui.table;
+        var layer = layui.layer;
+        var $ = layui.jquery;
+
+        bdTable.api.init({
+            table: table,
+            extend: {
+                index_url: "consult.log/index" + location.search,
+                table: "app_conversation",
+            },
+        });
+
+        var tableObj = bdTable.render({
+            elem: "#consultlog",
+            url: "{:url('consult.log/index')}",
+            pk: "id",
+            even: true,
+            toolbar: "#toolbar",
+            page: true,
+            cols: [
+                [
+                    { type: "checkbox" },
+                    { field: "id", title: "ID", width: 70, sort: true },
+                    { field: "initiator.nickname", title: "发起人", operate: false },
+                    { field: "initiator_id", title: "发起人ID", operate: "BETWEEN", sortable: true, hide: true },
+                    { field: "type", title: "类型", searchList: { consult: "留言咨询" } },
+                    { field: "target_type", title: "咨询对象", searchList: { project: "项目", user: "用户" } },
+                    { field: "target_id", title: "对象ID", operate: "BETWEEN", sortable: true },
+                    { field: "subject", title: "主题", operate: "LIKE" },
+                    { field: "status", title: "状态", searchList: { open: "进行中", closed: "已关闭" }, custom: { open: "green", closed: "default" }, templet: bdTable.api.formatter.status },
+                    { field: "last_message_at", title: "最后留言", templet: bdTable.api.formatter.datetime, operate: false },
+                    { field: "create_time", title: "创建时间", templet: bdTable.api.formatter.datetime, operate: false },
+                ],
+            ],
+        });
+
+        table.on("toolbar(consultlog)", function (obj) {
+            var event = obj.event;
+            if (event === "refresh") { tableObj.reload(); return; }
+
+            var rows = table.checkStatus("consultlog").data;
+            if (!rows.length) { layer.msg("请先选择会话"); return; }
+
+            if (event === "view") {
+                var id = rows[0].id;
+                $.get("{:url('consult.log/messages')}", { conversation_id: id }, function (ret) {
+                    if (!ret || ret.code !== 1 || !ret.data) { layer.msg("加载失败"); return; }
+                    var html = '<div style="padding:14px 18px;max-height:60vh;overflow:auto;">';
+                    (ret.data.list || []).forEach(function (m) {
+                        html += '<div style="margin-bottom:10px;"><b>' + (m.nickname || ("用户#" + m.sender_id)) +
+                                '</b> <span style="color:#a2a8b4;font-size:12px;">' + new Date(m.create_time * 1000).toLocaleString() + '</span>' +
+                                '<div style="margin-top:4px;white-space:pre-wrap;">' + $('<div>').text(m.body || "").html() + '</div></div>';
+                    });
+                    html += '</div>';
+                    if (!(ret.data.list || []).length) { html = '<div style="padding:20px;text-align:center;color:#a2a8b4;">暂无留言</div>'; }
+                    layer.open({ type: 1, title: "会话 #" + id + " 留言记录", area: ["720px", "auto"], content: html });
+                });
+                return;
+            }
+
+            if (event === "close") {
+                var ids = rows.map(function (r) { return r.id; }).join(",");
+                layer.confirm("确认关闭所选会话？", function (index) {
+                    $.post("{:url('consult.log/close')}", { ids: ids }, function (ret) {
+                        layer.close(index);
+                        layer.msg(ret.msg || "操作完成");
+                        if (ret.code === 1) { tableObj.reload(); }
+                    });
+                });
+            }
+        });
+    });
+</script>

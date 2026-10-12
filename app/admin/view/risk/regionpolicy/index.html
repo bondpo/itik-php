@@ -1,0 +1,57 @@
+{layout name="layout/default" /}
+
+<!-- 表格 -->
+<div class="layui-card">
+    <div class="layui-card-body">
+        <table class="layui-hide" id="regionpolicy" data-operate-edit="{:$auth->check('risk.regionpolicy/edit')}" data-operate-del="{:$auth->check('risk.regionpolicy/del')}"></table>
+    </div>
+</div>
+
+<script type="text/html" id="toolbar">
+    <a href="javascript:;" lay-event="refresh" class="layui-btn btn-refresh layui-bg-black"><i class="fa fa-refresh"></i></a>
+    <button class="layui-btn layui-bg-green {:$auth->check('risk.regionpolicy/add')?'':'hide'}" lay-event="add"><i class="fa fa-plus"></i> {:__('Add')}</button>
+    <button class="layui-btn layui-bg-blue btn-disabled disabled {:$auth->check('risk.regionpolicy/edit')?'':'hide'}" lay-event="edit"><i class="fa fa-pencil"></i> {:__('Edit')}</button>
+    <button class="layui-btn layui-bg-red btn-disabled disabled {:$auth->check('risk.regionpolicy/del')?'':'hide'}" lay-event="del"><i class="fa fa-trash"></i> {:__('Del')}</button>
+</script>
+
+<script>
+    layui.use(["badou", "table"], function () {
+        var bdTable = layui.bdTable;
+        var table = layui.table;
+
+        bdTable.api.init({
+            table: table,
+            extend: {
+                index_url: "risk.regionpolicy/index" + location.search,
+                add_url: "risk.regionpolicy/add",
+                edit_url: "risk.regionpolicy/edit",
+                del_url: "risk.regionpolicy/del",
+                multi_url: "risk.regionpolicy/multi",
+                table: "app_region_policy",
+            },
+        });
+
+        bdTable.render({
+            elem: "#regionpolicy",
+            url: "{:url('risk.regionpolicy/index')}",
+            pk: "id",
+            even: true,
+            toolbar: "#toolbar",
+            page: true,
+            cols: [
+                [
+                    { type: "checkbox" },
+                    { field: "id", title: "ID", width: 70, sort: true },
+{ field: "region_code", title: "地区代码", operate: 'LIKE' },
+{ field: "category", title: "行业分类", operate: 'LIKE' },
+{ field: "policy", title: "策略", searchList: { allow: '放行', deny: '禁止', review: '人工复核' }, custom: { allow: 'green', deny: 'red', review: 'orange' }, templet: bdTable.api.formatter.status },
+{ field: "notice_text", title: "提示文案", operate: 'LIKE' },
+{ field: "status", title: "状态", searchList: { normal: '正常', hidden: '隐藏' }, custom: { normal: 'green', hidden: 'orange' }, templet: bdTable.api.formatter.status },
+{ field: "create_time_text", title: "创建时间", templet: bdTable.api.formatter.datetime, operate: false },
+                    { field: "create_time", title: "创建时间", templet: bdTable.api.formatter.datetime, searchType: 'time', hide: true },
+                    { title: "操作", width: 130, align: "center", templet: bdTable.api.formatter.operate },
+                ],
+            ],
+        });
+    });
+</script>

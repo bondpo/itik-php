@@ -1,0 +1,88 @@
+{layout name="layout/form" /}
+<form class="layui-form" method="post">
+    {:token_field()}
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">套餐代码</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[plan_code]" value="" placeholder="套餐代码" autocomplete="off" class="layui-input" lay-verify="required" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">适用角色</label>
+        <div class="layui-input-block">
+            <select name="row[role_code]">
+                <option value="OWNER">项目方</option>
+                <option value="LEADER">社区长</option>
+                <option value="MEMBER">会员</option>
+                <option value="VISITOR">游客</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">名称</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[name]" value="" placeholder="名称" autocomplete="off" class="layui-input" lay-verify="required" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">价格</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[price]" value="0" placeholder="价格" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">币种</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[currency]" value="" placeholder="币种" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">有效天数</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[duration_days]" value="0" placeholder="有效天数" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item layui-form-text">
+        <label class="layui-form-label">权益配置(JSON)</label>
+        <div class="layui-input-block">
+            <textarea name="row[feature_flags]" placeholder="权益配置(JSON)" class="layui-textarea"></textarea>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">权重</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[weigh]" value="0" placeholder="权重" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">状态</label>
+        <div class="layui-input-block">
+            <select name="row[status]">
+                <option value="normal">正常</option>
+                <option value="hidden">隐藏</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item layer-footer hide">
+        <div class="layui-input-block">
+            <button class="layui-btn btn-theme-color disabled" lay-submit>{:__('OK')}</button>
+            <button type="reset" class="layui-btn layui-btn-primary">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
+
+<script>
+    layui.use(["form", "badou"], function () {
+        layui.bdForm.api.bindevent($("form.layui-form"));
+    });
+</script>

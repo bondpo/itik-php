@@ -1,0 +1,45 @@
+{layout name="layout/default" /}
+
+<!-- 表格（审计日志只读） -->
+<div class="layui-card">
+    <div class="layui-card-body">
+        <table class="layui-hide" id="auditlog"></table>
+    </div>
+</div>
+
+<script>
+    layui.use(["badou", "table"], function () {
+        var bdTable = layui.bdTable;
+        var table = layui.table;
+
+        bdTable.api.init({
+            table: table,
+            extend: {
+                index_url: "risk.auditlog/index" + location.search,
+                table: "app_audit_log",
+            },
+        });
+
+        bdTable.render({
+            elem: "#auditlog",
+            url: "{:url('risk.auditlog/index')}",
+            pk: "id",
+            even: true,
+            page: true,
+            cols: [
+                [
+                    { field: "id", title: "ID", width: 80, sort: true },
+{ field: "actor_type", title: "操作方类型", searchList: { admin: '管理员', user: '用户', system: '系统' } },
+{ field: "actor_id", title: "操作方ID", operate: 'BETWEEN', sortable: true },
+{ field: "action", title: "动作", operate: 'LIKE' },
+{ field: "target_type", title: "目标类型", operate: 'LIKE' },
+{ field: "target_id", title: "目标ID", operate: 'BETWEEN', sortable: true },
+{ field: "ip", title: "IP", operate: 'LIKE' },
+{ field: "remark", title: "备注", operate: 'LIKE' },
+{ field: "create_time_text", title: "时间", templet: bdTable.api.formatter.datetime, operate: false },
+                    { field: "create_time", title: "时间", templet: bdTable.api.formatter.datetime, searchType: 'time', hide: true },
+                ],
+            ],
+        });
+    });
+</script>

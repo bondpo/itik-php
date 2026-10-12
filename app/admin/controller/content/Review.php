@@ -1,0 +1,146 @@
+<?php
+
+// +----------------------------------------------------------------------
+// | 项目社区信息交互平台 —— 后台控制器（内容审核）
+// +----------------------------------------------------------------------
+
+namespace app\admin\controller\content;
+
+use app\common\controller\Backend;
+use think\facade\Db;
+
+class Review extends Backend
+{
+    protected $model = null;
+    protected $modelValidate = false;
+    protected $noNeedRight = ['selectpage'];
+
+    public function initialize()
+    {
+        parent::initialize();
+        $this->model = new \app\admin\model\app\Content();
+    }
+
+    public function index()
+    {
+        $this->request->filter(['strip_tags', 'trim']);
+        if ($this->request->isAjax()) {
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
+            $list = $this->model
+                ->where($where)
+                ->order($sort, $order)
+                ->paginate($limit);
+
+            $this->result('ok', $list->items(), $list->total());
+        }
+        $this->view->assign('statusList', [
+            'draft'    => '草稿',
+            'pending'  => '待审核',
+            'normal'   => '已通过',
+            'rejected' => '已驳回',
+            'hidden'   => '已下架',
+        ]);
+        return $this->view->fetch();
+    }
+
+    /**
+     * 内容审核：通过 / 驳回（驳回须填原因）
+     * 审核通过时同步发布状态与发布时间。
+     */
+    public function review()
+    {
+        if (!$this->request->isPost()) {
+            $this->error('请求方式不正确');
+        }
+        $ids    = array_filter(array_map('intval', explode(',', (string)$this->request->post('ids'))));
+        $action = (string)$this->request->post('action');
+        $reason = (string)$this->request->post('reason', '');
+
+        if (!in_array($action, ['pass', 'reject'], true)) {
+            $this->error('审核动作不合法');
+        }
+        if (!$ids) {
+            $this->error('请选择要审核的内容');
+        }
+        if ($action === 'reject' && $reason === '') {
+            $this->error('驳回时必须填写原因');
+        }
+
+        Db::startTrans();
+        try {
+            foreach ($ids as $id) {
+                $content = Db::name('app_content')->where('id', $id)->whereNull('deletetime')->find();
+                if (!$content) {
+                    continue;
+                }
+                $before = ['status' => $content['status'], 'version' => (int)$content['version']];
+
+                $data = ['update_time' => time()];
+                if ($action === 'pass') {
+                    $data['status'] = 'normal';
+                    $data['published_at'] = (int)$content['published_at'] > 0 ? $content['published_at'] : time();
+                } else {
+                    $data['status'] = 'rejected';
+                }
+                Db::name('app_content')->where('id', $id)->update($data);
+
+                $version = (int)Db::name('app_content_review')
+                    ->where('content_type', 'content')->where('content_id', $id)->count() + 1;
+                Db::name('app_content_review')->insert([
+                    'content_type' => 'content',
+                    'content_id'   => $id,
+                    'version'      => $version,
+                    'submitter_id' => (int)$content['author_id'],
+                    'reviewer_id'  => (int)$this->auth->id,
+                    'result'       => $action === 'pass' ? 'normal' : 'rejected',
+                    'reason'       => $reason,
+                    'submitted_at' => time(),
+                    'reviewed_at'  => time(),
+                    'create_time'  => time(),
+                ]);
+
+                Db::name('app_audit_log')->insert([
+                    'actor_type'  => 'admin',
+                    'actor_id'    => (int)$this->auth->id,
+                    'action'      => 'content.' . $action,
+                    'target_type' => 'content',
+                    'target_id'   => $id,
+                    'before'      => json_encode($before, JSON_UNESCAPED_UNICODE),
+                    'after'       => json_encode($data, JSON_UNESCAPED_UNICODE),
+                    'ip'          => $this->request->ip(),
+                    'create_time' => time(),
+                ]);
+            }
+            Db::commit();
+        } catch (\Throwable $e) {
+            Db::rollback();
+            $this->error($e->getMessage());
+        }
+
+        $this->success('审核完成');
+    }
+
+    /**
+     * 下架（保留历史，供风控与投诉追溯）
+     */
+    public function offline()
+    {
+        $ids = array_filter(array_map('intval', explode(',', (string)$this->request->post('ids'))));
+        if (!$ids) {
+            $this->error('请选择要下架的内容');
+        }
+
+        Db::name('app_content')->whereIn('id', $ids)->update(['status' => 'hidden', 'update_time' => time()]);
+        foreach ($ids as $id) {
+            Db::name('app_audit_log')->insert([
+                'actor_type' => 'admin', 'actor_id' => (int)$this->auth->id,
+                'action' => 'content.offline', 'target_type' => 'content', 'target_id' => $id,
+                'ip' => $this->request->ip(), 'create_time' => time(),
+            ]);
+        }
+        $this->success('已下架 ' . count($ids) . ' 条内容');
+    }
+}

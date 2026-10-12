@@ -1,0 +1,85 @@
+{layout name="layout/default" /}
+
+<!-- 表格 -->
+<div class="layui-card">
+    <div class="layui-card-body">
+        <table
+            class="layui-hide"
+            id="tag"
+            data-operate-edit="{:$auth->check('cms.tag/edit')}"
+            data-operate-del="{:$auth->check('cms.tag/del')}"></table>
+    </div>
+</div>
+
+<!-- 表格左侧按钮 toolbar  -->
+<script type="text/html" id="toolbar">
+    <a href="javascript:;" lay-event="refresh" class="layui-btn btn-refresh layui-bg-black">
+        <i class="fa fa-refresh"></i>
+    </a>
+    <button class="layui-btn layui-bg-green {:$auth->check('cms.tag/add')?'':'hide'}" lay-event="add">
+        <i class="fa fa-plus"></i>
+        {:__('Add')}
+    </button>
+    <button
+        class="layui-btn layui-bg-blue btn-disabled disabled {:$auth->check('cms.tag/edit')?'':'hide'}"
+        lay-event="edit">
+        <i class="fa fa-pencil"></i>
+        {:__('Edit')}
+    </button>
+    <button class="layui-btn layui-bg-red btn-disabled disabled {:$auth->check('cms.tag/del')?'':'hide'}" lay-event="del">
+        <i class="fa fa-trash"></i>
+        {:__('Del')}
+    </button>
+</script>
+
+<script>
+    layui.use(["badou", "table"], function () {
+        var bdTable = layui.bdTable;
+        var table = layui.table;
+        bdTable.api.init({
+            table: table,
+            extend: {
+                index_url: "cms.tag/index" + location.search,
+                add_url: "cms.tag/add",
+                edit_url: "cms.tag/edit",
+                del_url: "cms.tag/del",
+                multi_url: "cms.tag/multi",
+                table: "cms_tag",
+            },
+        });
+        bdTable.render({
+            elem: "#tag",
+            url: "{:url('cms.tag/index')}",
+            pk: "id",
+            even: true,
+            toolbar: "#toolbar",
+            page: true,
+            cols: [
+                [
+                    { type: "checkbox" },
+                    { field: "id", title: "ID", width: 80, sort: true },
+                    { field: "name", title: __("Name"), operate: "LIKE" },
+                    { field: "nums", title: __("Nums"), width: 100, sort: true },
+                    { field: "seotitle", title: __("Seotitle"), operate: "LIKE", hide: true },
+                    {
+                        field: "autolink",
+                        title: __("Autolink"),
+                        width: 110,
+                        searchList: { "1": __("Yes"), "0": __("No") },
+                        templet: bdTable.api.formatter.switch,
+                    },
+                    { field: "views", title: __("Views"), width: 100, hide: true },
+                    {
+                        field: "status",
+                        title: __("Status"),
+                        width: 100,
+                        searchList: { normal: __("Normal"), hidden: __("Hidden") },
+                        templet: bdTable.api.formatter.status,
+                    },
+                    { field: "createtime", title: __("Createtime"), templet: bdTable.api.formatter.datetime, hide: true },
+                    { title: __("Operate"), width: 130, align: "center", templet: bdTable.api.formatter.operate },
+                ],
+            ],
+        });
+    });
+</script>

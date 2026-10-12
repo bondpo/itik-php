@@ -1,0 +1,120 @@
+{layout name="layout/form" /}
+<form class="layui-form" method="post">
+    {:token_field()}
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">项目 ID</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[project_id]" value="" placeholder="项目 ID" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">用户 ID</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[user_id]" value="0" placeholder="用户 ID" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">推流套餐 ID</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[package_id]" value="0" placeholder="推流套餐 ID" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">广告位</label>
+        <div class="layui-input-block">
+            <select name="row[position]">
+                <option value="home_banner">首页 Banner</option>
+                <option value="list_top">列表置顶</option>
+                <option value="detail_side">详情侧栏</option>
+                <option value="search_top">搜索置顶</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">素材 ID</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[material_id]" value="" placeholder="素材 ID" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">预算</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[budget]" value="0" placeholder="预算" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">币种</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[currency]" value="" placeholder="币种" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">开始时间</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[start_at]" value="" placeholder="开始时间" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">结束时间</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[end_at]" value="" placeholder="结束时间" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">状态</label>
+        <div class="layui-input-block">
+            <select name="row[status]">
+                <option value="normal">正常</option>
+                <option value="hidden">隐藏</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">审核状态</label>
+        <div class="layui-input-block">
+            <select name="row[review_status]">
+                <option value="pending">待审核</option>
+                <option value="approved">已通过</option>
+                <option value="rejected">已驳回</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">审核说明</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[review_reason]" value="" placeholder="审核说明" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">已消耗曝光</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[exposure_used]" value="0" placeholder="已消耗曝光" autocomplete="off" class="layui-input" readonly />
+        </div>
+    </div>
+
+    <div class="layui-form-item layer-footer hide">
+        <div class="layui-input-block">
+            <button class="layui-btn btn-theme-color disabled" lay-submit>{:__('OK')}</button>
+            <button type="reset" class="layui-btn layui-btn-primary">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
+
+<script>
+    layui.use(["form", "badou"], function () {
+        layui.bdForm.api.bindevent($("form.layui-form"));
+    });
+</script>

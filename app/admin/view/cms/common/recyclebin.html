@@ -1,0 +1,82 @@
+{layout name="layout/default" /}
+
+<div class="layui-card">
+    <div class="layui-card-body">
+        <table
+            class="layui-hide"
+            id="recyclebin"
+            data-operate-del="{:$auth->check('cms.archives/del')}"></table>
+    </div>
+</div>
+
+<script type="text/html" id="toolbar">
+    <a href="javascript:;" lay-event="refresh" class="layui-btn btn-refresh layui-bg-black">
+        <i class="fa fa-refresh"></i>
+    </a>
+    <button class="layui-btn layui-bg-blue btn-disabled disabled" lay-event="restore">
+        <i class="fa fa-recycle"></i> {:__('Restore')}
+    </button>
+    <button class="layui-btn layui-bg-red btn-disabled disabled" lay-event="destroy">
+        <i class="fa fa-trash"></i> {:__('Destroy')}
+    </button>
+</script>
+
+<script>
+    layui.use(["badou", "table", "layer"], function () {
+        var bdTable = layui.bdTable;
+        var table = layui.table;
+        var layer = layui.layer;
+        var indexUrl = "{$recyclebinUrl}";
+
+        bdTable.api.init({
+            table: table,
+            extend: {
+                index_url: indexUrl,
+                del_url: "{$destroyUrl}",
+            },
+        });
+
+        table.render({
+            elem: "#recyclebin",
+            url: indexUrl,
+            pk: "id",
+            even: true,
+            toolbar: "#toolbar",
+            page: true,
+            cols: [
+                [
+                    { type: "checkbox" },
+                    { field: "id", title: "ID", width: 80, sort: true },
+                    { field: "title", title: "{{:__('Title')}", minWidth: 220 },
+                    { field: "deletetime", title: "{{:__('Deletetime')}", width: 180, templet: bdTable.api.formatter.datetime },
+                    { title: "{{:__('Operate')}", width: 160, align: "center", templet: "#recyclebin-operate" },
+                ],
+            ],
+        });
+
+        // 回收站操作按钮：还原与真实删除
+        layui.laytpl;
+        var tpl = '<a class="layui-btn layui-btn-xs layui-bg-blue" lay-event="restore">还原</a>'
+            + '<a class="layui-btn layui-btn-xs layui-bg-red" lay-event="destroy">真实删除</a>';
+        table.on("tool(recyclebin)", function (obj) {
+            var data = obj.data;
+            if (obj.event === "restore") {
+                layer.confirm("确认还原该记录？", function (i) {
+                    layer.close(i);
+                    $.post("{$restoreUrl}", { ids: data.id }, function (ret) {
+                        if (ret.code === 1) { obj.del(); layui.toast.success({ message: ret.msg }); }
+                        else { layui.toast.error({ message: ret.msg }); }
+                    });
+                });
+            } else if (obj.event === "destroy") {
+                layer.confirm("真实删除后不可恢复，确认删除？", function (i) {
+                    layer.close(i);
+                    $.post("{$destroyUrl}", { ids: data.id }, function (ret) {
+                        if (ret.code === 1) { obj.del(); layui.toast.success({ message: ret.msg }); }
+                        else { layui.toast.error({ message: ret.msg }); }
+                    });
+                });
+            }
+        });
+    });
+</script>

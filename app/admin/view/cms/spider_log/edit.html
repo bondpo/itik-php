@@ -1,0 +1,74 @@
+{layout name="layout/form" /}
+<form class="layui-form" method="post">
+    {:token_field()}
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Type')}</label>
+        <div class="layui-input-block">
+            <input type="radio" name="row[type]" value="index" title="index" {if $row.type=='index'}checked{/if} />
+            <input type="radio" name="row[type]" value="archives" title="archives" {if $row.type=='archives'}checked{/if} />
+            <input type="radio" name="row[type]" value="page" title="page" {if $row.type=='page'}checked{/if} />
+            <input type="radio" name="row[type]" value="special" title="special" {if $row.type=='special'}checked{/if} />
+            <input type="radio" name="row[type]" value="channel" title="channel" {if $row.type=='channel'}checked{/if} />
+            <input type="radio" name="row[type]" value="diyform" title="diyform" {if $row.type=='diyform'}checked{/if} />
+            <input type="radio" name="row[type]" value="tag" title="tag" {if $row.type=='tag'}checked{/if} />
+            <input type="radio" name="row[type]" value="user" title="user" {if $row.type=='user'}checked{/if} />
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Aid')}</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[aid]" value="{$row.aid|default=''}" placeholder="{:__('Aid')}" class="layui-input" />
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Name')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[name]" value="{$row.name|default=''}" placeholder="{:__('Name')}" class="layui-input" />
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Url')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[url]" value="{$row.url|default=''}" placeholder="{:__('Url')}" class="layui-input" />
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Nums')}</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[nums]" value="{$row.nums|default=''}" placeholder="{:__('Nums')}" class="layui-input" />
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Firsttime')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[firsttime]" value="{$row.firsttime|default=''}" placeholder="{:__('Firsttime')}" class="layui-input laydate" />
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Lastdata')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[lastdata]" value="{$row.lastdata|default=''}" placeholder="{:__('Lastdata')}" class="layui-input" />
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Lasttime')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[lasttime]" value="{$row.lasttime|default=''}" placeholder="{:__('Lasttime')}" class="layui-input laydate" />
+        </div>
+    </div>
+
+    <div class="layui-form-item layer-footer hide">
+        <div class="layui-input-block">
+            <button class="layui-btn btn-theme-color disabled" lay-submit>{:__('OK')}</button>
+            <button type="reset" class="layui-btn layui-btn-primary">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
+
+<script>
+    layui.use(["badou"], function () {
+        var bdForm = layui.bdForm;
+        bdForm.api.bindevent($("form.layui-form"));
+    });
+</script>

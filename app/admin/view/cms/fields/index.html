@@ -1,0 +1,88 @@
+{layout name="layout/default" /}
+
+<!-- 表格 -->
+<div class="layui-card">
+    <div class="layui-card-body">
+        <table
+            class="layui-hide"
+            id="fields"
+            data-operate-edit="{:$auth->check('cms.fields/edit')}"
+            data-operate-del="{:$auth->check('cms.fields/del')}"></table>
+    </div>
+</div>
+
+<!-- 表格左侧按钮 toolbar  -->
+<script type="text/html" id="toolbar">
+    <a href="javascript:;" lay-event="refresh" class="layui-btn btn-refresh layui-bg-black">
+        <i class="fa fa-refresh"></i>
+    </a>
+    <button class="layui-btn layui-bg-green {:$auth->check('cms.fields/add')?'':'hide'}" lay-event="add">
+        <i class="fa fa-plus"></i>
+        {:__('Add')}
+    </button>
+    <button class="layui-btn layui-bg-blue btn-disabled disabled {:$auth->check('cms.fields/edit')?'':'hide'}" lay-event="edit">
+        <i class="fa fa-pencil"></i>
+        {:__('Edit')}
+    </button>
+    <button class="layui-btn layui-bg-red btn-disabled disabled {:$auth->check('cms.fields/del')?'':'hide'}" lay-event="del">
+        <i class="fa fa-trash"></i>
+        {:__('Del')}
+    </button>
+</script>
+
+<script>
+    layui.use(["badou", "table"], function () {
+        var bdTable = layui.bdTable;
+        var table = layui.table;
+        bdTable.api.init({
+            table: table,
+            extend: {
+                index_url: "cms.fields/index" + location.search,
+                add_url: "cms.fields/add",
+                edit_url: "cms.fields/edit",
+                del_url: "cms.fields/del",
+                multi_url: "cms.fields/multi",
+                table: "cms_fields",
+            },
+        });
+        bdTable.render({
+            elem: "#fields",
+            url: "{:url('cms.fields/index')}",
+            pk: "id",
+            even: true,
+            toolbar: "#toolbar",
+            page: true,
+            cols: [
+                [
+                    { type: "checkbox" },
+                    { field: "id", title: "ID", width: 80, sort: true },
+                    { field: "source", title: "{:__('Source')}", operate: 'LIKE' },
+                    { field: "source_id", title: "{:__('Source_id')}", operate: 'LIKE' },
+                    { field: "name", title: "{:__('Name')}", operate: 'LIKE' },
+                    { field: "type", title: "{:__('Type')}", operate: 'LIKE' },
+                    { field: "title", title: "{:__('Title')}", operate: 'LIKE' },
+                    { field: "content", title: "{:__('Content')}", hide: true, operate: false },
+                    { field: "defaultvalue", title: "{:__('Defaultvalue')}", operate: 'LIKE' },
+                    { field: "rule", title: "{:__('Rule')}", operate: 'LIKE' },
+                    { field: "msg", title: "{:__('Msg')}", operate: 'LIKE' },
+                    { field: "ok", title: "{:__('Ok')}", operate: 'LIKE' },
+                    { field: "tip", title: "{:__('Tip')}", operate: 'LIKE' },
+                    { field: "decimals", title: "{:__('Decimals')}", hide: true, operate: false },
+                    { field: "length", title: "{:__('Length')}", operate: 'LIKE' },
+                    { field: "minimum", title: "{:__('Minimum')}", operate: 'LIKE' },
+                    { field: "maximum", title: "{:__('Maximum')}", operate: 'LIKE' },
+                    { field: "extend", title: "{:__('Extend')}", operate: 'LIKE' },
+                    { field: "setting", title: "{:__('Setting')}", operate: 'LIKE' },
+                    { field: "favisible", title: "{:__('Favisible')}", operate: 'LIKE' },
+                    { field: "weigh", title: "{:__('Weigh')}", operate: 'LIKE' },
+                    { field: "isorder", title: "{:__('Isorder')}", hide: true, operate: false },
+                    { field: "iscontribute", title: "{:__('Iscontribute')}", hide: true, operate: false },
+                    { field: "isfilter", title: "{:__('Isfilter')}", hide: true, operate: false },
+                    { field: "status", title: "{:__('Status')}", searchList: {"normal": "normal", "hidden": "hidden"}, templet: bdTable.api.formatter.status },
+                    { field: "createtime", title: "{:__('Createtime')}", templet: bdTable.api.formatter.datetime, hide: true, operate: false },
+                    { title: "{:__('Operate')}", width: 130, align: "center", templet: bdTable.api.formatter.operate },
+                ],
+            ],
+        });
+    });
+</script>

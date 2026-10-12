@@ -1,0 +1,78 @@
+{layout name="layout/default" /}
+
+<!-- 表格 -->
+<div class="layui-card">
+    <div class="layui-card-body">
+        <table class="layui-hide" id="group" data-operate-edit="{:$auth->check('auth.group/edit')}" data-operate-del="{:$auth->check('auth.group/del')}"></table>
+    </div>
+</div>
+
+<!-- 表格左侧按钮 toolbar  -->
+<script type="text/html" id="toolbar">
+	<a href="javascript:;" lay-event="refresh" class="layui-btn btn-refresh layui-bg-black	"><i class="fa fa-refresh"></i></a>
+	<button class="layui-btn layui-bg-green {:$auth->check('auth.group/add')?'':'hide'}" lay-event="add"><i class="fa fa-plus"></i> {:__('Add')}</button>
+	<button class="layui-btn layui-bg-blue btn-disabled disabled {:$auth->check('auth.group/edit')?'':'hide'}" lay-event="edit"><i class="fa fa-pencil"></i> {:__('Edit')}</button>
+	<button class="layui-btn layui-bg-red btn-disabled disabled {:$auth->check('auth.group/del')?'':'hide'}" lay-event="del"><i class="fa fa-trash"></i> {:__('Del')}</button>
+</script>
+
+<script>
+    layui.use(["badou","table","form"], function () {
+        var bdTable = layui.bdTable;
+        var table = layui.table;
+        var layer = layui.layer;
+        var jstree = layui.jstree;
+        var $ = layui.$;
+        var form = layui.form;
+
+        //初始化表格
+        bdTable.api.init({
+            table:table, // layui 表格对象，支持普通table与树结构table
+            extend: {
+                index_url: "auth.group/index", //获取表格数据
+                add_url: "auth.group/add", //添加数据
+                edit_url: "auth.group/edit", //编辑数据
+                del_url: "auth.group/del", //删除数据
+                multi_url: "auth.group/multi", //批量处理
+                table: "auth_group", //数据表名称
+            },
+        });
+        // 创建渲染实例
+        bdTable.render({
+            elem: "#group",
+            url: "{:url('auth.group/index')}",
+            pk: "id",
+            even: true,
+            toolbar: "#toolbar",
+            cols: [
+                [
+                    { type: "checkbox" },
+                    { field: "id", title: "ID", width: 80, sort: true },
+                    { field: "pid", title: "父级", width: 80, sort: true },
+                    { field: "name", align: 'left', title: "名称" ,perate:'likeo' ,templet: function(d){
+                            return d.name.toString().replace(/(&|&amp;)nbsp;/g, '&nbsp;');
+                    }},
+                    {
+                        field: "status",
+                        title: "状态",
+                        width: 100,
+                        searchList: { normal: "正常", hidden: "隐藏" },
+                        custom: { normal: "green", hidden: "orange" },
+                        templet: bdTable.api.formatter.status,
+                    },
+                    { title: "操作",
+                    width: 190,
+                    align: "center",
+                    templet: function(d) {
+                        if (Config.admin.group_ids.indexOf(parseInt(d.id)) > -1) {
+                            return '<a class="layui-btn layui-btn-xs layui-btn-danger layui-btn-disabled">不可操作</a>';
+                        } else {
+                            return bdTable.api.formatter.operate.call(this, d, this);
+                        }
+                    },
+                    operat: ['edit', 'delete']},
+                ],
+            ],
+        });
+    });
+</script>
+

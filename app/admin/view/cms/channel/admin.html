@@ -1,0 +1,129 @@
+{layout name="layout/default" /}
+
+<div class="layui-card">
+    <div class="layui-card-body">
+        {if !$isChannelAllocate}
+        <div class="layui-elem-quote layui-quote-nm layui-bg-orange">
+            当前未开启「栏目授权」功能，以下的设置不会生效，请在
+            <a href="{:url('cms.config/index')}" class="layui-btn layui-btn-xs">站点配置</a>
+            中开启栏目授权功能。
+        </div>
+        {/if}
+
+        <table class="layui-hide" id="channel-admin"></table>
+    </div>
+</div>
+
+<script type="text/html" id="toolbar">
+    <a href="javascript:;" lay-event="refresh" class="layui-btn btn-refresh layui-bg-black">
+        <i class="fa fa-refresh"></i>
+    </a>
+</script>
+
+<script type="text/html" id="channel-admin-operate">
+    <a class="layui-btn layui-btn-xs layui-bg-blue {:$auth->check('cms.channel/admin')?'':'hide'}" lay-event="authorization">
+        <i class="fa fa-key"></i> 授权
+    </a>
+</script>
+
+<script>
+    layui.use(["badou", "table", "layer"], function () {
+        var bdTable = layui.bdTable;
+        var table = layui.table;
+        var layer = layui.layer;
+
+        bdTable.api.init({
+            table: table,
+            extend: {
+                index_url: "cms.channel/admin" + location.search,
+                table: "cms_channel_admin",
+            },
+        });
+
+        bdTable.render({
+            elem: "#channel-admin",
+            url: "{:url('cms.channel/admin')}",
+            pk: "id",
+            even: true,
+            toolbar: "#toolbar",
+            page: true,
+            cols: [
+                [
+                    { field: "id", title: "ID", width: 80, sort: true },
+                    { field: "username", title: "用户名", width: 160 },
+                    { field: "nickname", title: "昵称", width: 160 },
+                    { field: "channels", title: "已授权栏目数", width: 140, templet: function (d) { return d.superadmin ? "全部（超级管理员）" : d.channels; } },
+                    { title: "操作", width: 140, align: "center", templet: "#channel-admin-operate" },
+                ],
+            ],
+        });
+
+        // 打开授权弹窗：加载栏目树并按层级缩进渲染复选列表
+        function openAuthorization(adminId) {
+            $.post("{:url('cms.channel/admin')}", { act: "authorization", ids: adminId }, function (ret) {
+                if (ret.code !== 1) {
+                    return layui.toast.error({ message: ret.msg || "加载失败" });
+                }
+                var list = ret.data || [];
+                var selected = {};
+                list.forEach(function (item) {
+                    if (item.state && item.state.selected) { selected[item.id] = true; }
+                });
+                // 生成层级名称
+                var map = {};
+                list.forEach(function (item) { map[item.id] = item; });
+                function deep(id) {
+                    var depth = 0;
+                    var cur = map[id];
+                    while (cur && cur.parent && cur.parent !== "#" && map[cur.parent]) { depth++; cur = map[cur.parent]; }
+                    return depth;
+                }
+                var html = '<div style="padding:12px 16px;">'
+                    + '<div style="margin-bottom:8px;"><label><input type="checkbox" id="auth-checkall"> 全选</label></div>'
+                    + '<div id="auth-tree" style="max-height:420px;overflow:auto;">';
+                list.forEach(function (item) {
+                    var pad = deep(item.id) * 18;
+                    html += '<div style="padding:4px 0 4px ' + pad + 'px;">'
+                        + '<input type="checkbox" class="auth-item" value="' + item.id + '"'
+                        + (selected[item.id] ? " checked" : "")
+                        + ((item.state && item.state.checkbox_disabled) ? " disabled" : "")
+                        + '> <span>' + item.text + '</span></div>';
+                });
+                html += '</div></div>';
+
+                layer.open({
+                    type: 1,
+                    title: "栏目授权",
+                    area: ["600px", "560px"],
+                    content: html,
+                    btn: ["保存", "取消"],
+                    success: function (layero) {
+                        layero.find("#auth-checkall").on("change", function () {
+                            var checked = $(this).prop("checked");
+                            layero.find(".auth-item:not(:disabled)").prop("checked", checked);
+                        });
+                    },
+                    yes: function (index, layero) {
+                        var ids = [];
+                        layero.find(".auth-item:checked").each(function () { ids.push($(this).val()); });
+                        $.post("{:url('cms.channel/admin')}" + "?act=save&ids=" + adminId, { channel_ids: ids.join(",") }, function (ret) {
+                            if (ret.code === 1) {
+                                layer.close(index);
+                                layui.toast.success({ message: ret.msg || "保存成功" });
+                                table.reload("channel-admin");
+                            } else {
+                                layui.toast.error({ message: ret.msg || "保存失败" });
+                            }
+                        });
+                    },
+                });
+            });
+        }
+
+        table.on("tool(channel-admin)", function (obj) {
+            if (obj.event === "authorization") {
+                openAuthorization(obj.data.id);
+            }
+        });
+    });
+</script>
