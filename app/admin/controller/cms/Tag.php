@@ -4,7 +4,6 @@ namespace app\admin\controller\cms;
 
 use app\common\controller\Backend;
 use app\admin\model\cms\Tag as TagModel;
-use app\admin\model\cms\SpiderLog;
 
 /**
  * 标签管理
@@ -43,8 +42,6 @@ class Tag extends Backend
             ->where($where)
             ->order($sort, $order)
             ->paginate($limit);
-
-        SpiderLog::render($list, 'tag');
 
         $this->result('', $list->items(), $list->total());
     }

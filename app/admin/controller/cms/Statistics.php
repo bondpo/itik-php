@@ -57,11 +57,11 @@ class Statistics extends Backend
         $this->assignconfig('adminArchivesListCategory', $category);
         $this->assignconfig('adminArchivesListData', $data);
 
-        //今日订单和会员
-        $totalOrderAmount = round(\app\admin\model\cms\Order::where('status', 'paid')->sum('payamount'), 2);
-        $yesterdayOrderAmount = round(\app\admin\model\cms\Order::where('status', 'paid')->whereTime('paytime', 'yesterday')->sum('payamount'), 2);
-        $todayOrderAmount = round(\app\admin\model\cms\Order::where('status', 'paid')->whereTime('paytime', 'today')->sum('payamount'), 2);
-        $todayOrderRatio = $yesterdayOrderAmount > 0 ? ceil((($todayOrderAmount - $yesterdayOrderAmount) / $yesterdayOrderAmount) * 100) : ($todayOrderAmount > 0 ? 100 : 0);
+        //今日订单和会员统计
+        $totalOrderAmount = 0;
+        $yesterdayOrderAmount = 0;
+        $todayOrderAmount = 0;
+        $todayOrderRatio = 0;
 
         $totalUser = User::count();
         $yesterdayUser = User::whereTime('jointime', 'yesterday')->count();
@@ -73,10 +73,7 @@ class Statistics extends Backend
         $unsettleArchives = \app\admin\model\cms\Archives::where('status', 'hidden')->count();
         $totalComment = \app\admin\model\cms\Comment::count();
         $unsettleComment = \app\admin\model\cms\Comment::where('status', 'hidden')->count();
-        $diyformList = \app\admin\model\cms\Diyform::select();
-        foreach ($diyformList as $index => $item) {
-            $item->nums = \think\facade\Db::name($item['table'])->count();
-        }
+        $diyformList = [];
 
         //订单数和订单额统计
         list($orderSaleCategory, $orderSaleAmount, $orderSaleNums) = $this->getSaleStatisticsData();
@@ -105,24 +102,13 @@ class Statistics extends Backend
         $hotTagList = \app\admin\model\cms\Tag::order('nums', 'desc')->cache(3600, null, 'cms')->limit(10)->select();
         $hotArchivesList = \app\admin\model\cms\Archives::order('views', 'desc')->cache(3600, null, 'cms')->limit(10)->select();
 
-        //付费排行榜
-        $todayPaidTotal = \app\admin\model\cms\Order::whereTime('paytime', 'today')->sum("payamount");
-        $todayPaidList = \app\admin\model\cms\Order::with(['archives'])->whereTime('paytime', 'today')->group('archives_id')->field("COUNT(*) as nums,SUM(payamount) as amount,archives_id")->order("amount", "desc")->limit(10)->select();
-        foreach ($todayPaidList as $index => $item) {
-            $item->percent = $todayPaidTotal > 0 ? round(($item['amount'] / $todayPaidTotal) * 100, 2) : 0;
-        }
-
-        $weekPaidTotal = \app\admin\model\cms\Order::whereTime('paytime', 'week')->sum("payamount");
-        $weekPaidList = \app\admin\model\cms\Order::with(['archives'])->whereTime('paytime', 'week')->group('archives_id')->field("COUNT(*) as nums,SUM(payamount) as amount,archives_id")->order("amount", "desc")->limit(10)->select();
-        foreach ($weekPaidList as $index => $item) {
-            $item->percent = $weekPaidTotal > 0 ? round(($item['amount'] / $weekPaidTotal) * 100, 2) : 0;
-        }
-
-        $monthPaidTotal = \app\admin\model\cms\Order::whereTime('paytime', 'month')->sum("payamount");
-        $monthPaidList = \app\admin\model\cms\Order::with(['archives'])->whereTime('paytime', 'month')->group('archives_id')->field("COUNT(*) as nums,SUM(payamount) as amount,archives_id")->order("amount", "desc")->limit(10)->select();
-        foreach ($monthPaidList as $index => $item) {
-            $item->percent = $monthPaidTotal > 0 ? round(($item['amount'] / $monthPaidTotal) * 100, 2) : 0;
-        }
+        //付费排行榜（已裁撤CMS订单，返回安全空列表）
+        $todayPaidTotal = 0;
+        $todayPaidList = [];
+        $weekPaidTotal = 0;
+        $weekPaidList = [];
+        $monthPaidTotal = 0;
+        $monthPaidList = [];
 
         //投稿排行榜
         $todayContributeTotal = \app\admin\model\cms\Archives::whereTime('createtime', 'today')->count();

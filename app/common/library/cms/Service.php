@@ -678,7 +678,7 @@ class Service
      */
     public static function getModelByType($type, $source_id = '', $with = [])
     {
-        if (!in_array($type, ['page', 'archives', 'special', 'diyform', 'block', 'channel'])) {
+        if (!in_array($type, ['archives', 'block', 'channel'])) {
             throw new Exception("未找到指定类型");
         }
         $type = ucfirst(strtolower($type));

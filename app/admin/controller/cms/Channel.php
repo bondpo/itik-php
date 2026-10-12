@@ -44,16 +44,12 @@ class Channel extends Backend
         $this->channelList = $this->tree->getTreeList($this->tree->getTreeArray(0), 'name');
         $this->modelList = \app\admin\model\cms\Modelx::order('id asc')->select();
 
-        $config = get_addon_config('cms');
-        $this->assignconfig('spiderRecord', intval($config['spiderrecord'] ?? 0));
-
         $this->view->assign("modelList", $this->modelList);
         $this->view->assign("channelList", $this->channelList);
         $this->assignconfig("flagList", $this->model->getFlagList());
         $this->view->assign("flagList", $this->model->getFlagList());
         $this->view->assign("statusList", ChannelModel::getStatusList());
         $this->view->assign("listtypeList", ChannelModel::getListtypeList());
-        $this->view->assign("vipList", []);
     }
 
     /**
@@ -92,9 +88,6 @@ class Channel extends Backend
                 $v['model_name'] = $v['model_id'] && isset($modelNameArr[$v['model_id']]) ? $modelNameArr[$v['model_id']] : __('None');
             }
             $total = count($list);
-
-            \app\admin\model\cms\SpiderLog::render($list, 'channel');
-
             $this->result('', $list, $total);
         }
 

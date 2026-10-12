@@ -26,7 +26,7 @@ class Archives extends Backend
      * Archives模型对象
      */
     protected $model = null;
-    protected $noNeedRight = ['get_fields_html', 'check_element_available', 'suggestion', 'copy', 'special', 'tags', 'move', 'flag', 'get_channel_model_info'];
+    protected $noNeedRight = ['get_fields_html', 'check_element_available', 'suggestion', 'copy', 'tags', 'move', 'flag', 'get_channel_model_info'];
     protected $channelIds = [];
     protected $isSuperAdmin = false;
     protected $searchFields = 'id,title';
@@ -55,8 +55,8 @@ class Archives extends Backend
             $this->dataLimit = $config['archivesdatalimit'];
         }
 
-        //复制/加入专题/修改标签均检测编辑权限
-        if (in_array($this->request->action(), ['copy', 'special', 'tags', 'move', 'flag']) && !$this->auth->check('cms/archives/edit')) {
+        //复制/修改标签均检测编辑权限
+        if (in_array($this->request->action(), ['copy', 'tags', 'move', 'flag']) && !$this->auth->check('cms/archives/edit')) {
             Event::trigger('admin_nopermission', $this);
             $this->error(__('You have no permission'), '');
         }
@@ -168,7 +168,6 @@ class Archives extends Backend
                 ->limit($offset, $limit)
                 ->select();
 
-            \app\admin\model\cms\SpiderLog::render($list, 'archives');
             $this->result('', $list, $total);
         }
 
@@ -177,9 +176,7 @@ class Archives extends Backend
         $this->assignconfig('fields', $fields);
 
         $modelList = \app\admin\model\cms\Modelx::select();
-        $specialList = \app\admin\model\cms\Special::where('status', 'normal')->select();
         $this->view->assign('modelList', $modelList);
-        $this->view->assign('specialList', $specialList);
         return $this->view->fetch();
     }
 
@@ -427,39 +424,6 @@ class Archives extends Backend
         $this->error(__('Parameter %s can not be empty', 'ids'));
     }
 
-    /**
-     * 加入专题
-     * @param string $ids
-     */
-    public function special($ids = "")
-    {
-        if (!$this->request->isPost()) {
-            $this->error(__("Invalid parameters"));
-        }
-        if ($ids) {
-            $special_id = $this->request->post('special_id');
-            $pk = $this->model->getPk();
-            $adminIds = $this->getDataLimitAdminIds();
-            if (is_array($adminIds)) {
-                $this->model->where($this->dataLimitField, 'in', $adminIds);
-            }
-            $special = \app\admin\model\cms\Special::find($special_id);
-            if ($special) {
-                $archivesList = $this->model->where($pk, 'in', $ids)->select();
-                foreach ($archivesList as $index => $item) {
-                    $special_ids = explode(',', $item['special_ids']);
-                    if (!in_array($special['id'], $special_ids)) {
-                        $special_ids[] = $special['id'];
-                        $item->save(['special_ids' => implode(',', array_unique(array_filter($special_ids)))]);
-                    }
-                }
-                $this->success();
-            } else {
-                $this->error(__('No rows were updated'));
-            }
-        }
-        $this->error(__('Please select at least one row'));
-    }
 
     /**
      * 加入标签
