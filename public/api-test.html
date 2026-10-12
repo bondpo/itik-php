@@ -531,7 +531,7 @@
 
                 <div class="endpoint-row">
                     <span class="method-tag method-get">GET</span>
-                    <div class="endpoint-info">/api/v1/projects/detail <span class="endpoint-desc">项目详情与材料查询</span></div>
+                    <div class="endpoint-info">/api/v1/projects/detail <span class="endpoint-desc">项目详情与材料/时间轴查询</span></div>
                     <button class="btn btn-primary btn-sm" onclick="apiGetProjectDetail()">项目详情</button>
                 </div>
 
@@ -542,33 +542,69 @@
                 </div>
 
                 <div class="endpoint-row">
-                    <span class="method-tag method-get">GET</span>
-                    <div class="endpoint-info">/api/v1/projects/materials <span class="endpoint-desc">项目白皮书/资料列表</span></div>
-                    <button class="btn btn-default btn-sm" onclick="apiGetMaterials()">项目资料</button>
+                    <span class="method-tag method-post">POST</span>
+                    <div class="endpoint-info">/api/v1/projects/update <span class="endpoint-desc">编辑项目基本资料与所属分类</span></div>
+                    <button class="btn btn-warning btn-sm" onclick="apiUpdateProject()">编辑项目</button>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-post">POST</span>
+                    <div class="endpoint-info">/api/v1/projects/submit <span class="endpoint-desc">项目方提交项目审核流</span></div>
+                    <button class="btn btn-info btn-sm" onclick="apiSubmitProject()">提交审核</button>
                 </div>
 
                 <div class="endpoint-row">
                     <span class="method-tag method-get">GET</span>
-                    <div class="endpoint-info">/api/v1/projects/members <span class="endpoint-desc">社区长绑定成员列表</span></div>
+                    <div class="endpoint-info">/api/v1/projects/materials <span class="endpoint-desc">项目白皮书/资质资料列表</span></div>
+                    <button class="btn btn-default btn-sm" onclick="apiGetMaterials()">资料列表</button>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-post">POST</span>
+                    <div class="endpoint-info">/api/v1/projects/materials <span class="endpoint-desc">上传项目资质/品牌材料或白皮书</span></div>
+                    <button class="btn btn-success btn-sm" onclick="apiAddMaterial()">上传资料</button>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-get">GET</span>
+                    <div class="endpoint-info">/api/v1/projects/members <span class="endpoint-desc">项目团队与社区长成员列表</span></div>
                     <button class="btn btn-default btn-sm" onclick="apiGetProjectMembers()">成员列表</button>
                 </div>
 
                 <div class="endpoint-row">
-                    <span class="method-tag method-get">GET</span>
-                    <div class="endpoint-info">/api/v1/projects/stats <span class="endpoint-desc">项目数据大盘与统计</span></div>
-                    <button class="btn btn-primary btn-sm" onclick="apiGetProjectStats()">数据统计</button>
+                    <span class="method-tag method-post">POST</span>
+                    <div class="endpoint-info">/api/v1/projects/members/bind <span class="endpoint-desc">绑定社区长 (001号推荐官)</span></div>
+                    <button class="btn btn-primary btn-sm" onclick="apiBindProjectMember()">绑定推荐官</button>
                 </div>
 
                 <div class="endpoint-row">
                     <span class="method-tag method-get">GET</span>
-                    <div class="endpoint-info">/api/v1/projects/timelines <span class="endpoint-desc">项目发展历程与里程碑列表</span></div>
+                    <div class="endpoint-info">/api/v1/projects/stats <span class="endpoint-desc">项目数据大盘与统计概览</span></div>
+                    <button class="btn btn-primary btn-sm" onclick="apiGetProjectStats()">数据大盘</button>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-get">GET</span>
+                    <div class="endpoint-info">/api/v1/projects/timelines <span class="endpoint-desc">项目发展历程与里程碑时间轴</span></div>
                     <button class="btn btn-primary btn-sm" onclick="apiGetProjectTimelines()">查询时间轴</button>
                 </div>
 
                 <div class="endpoint-row">
                     <span class="method-tag method-post">POST</span>
                     <div class="endpoint-info">/api/v1/projects/timelines <span class="endpoint-desc">项目方发布里程碑节点</span></div>
-                    <button class="btn btn-success btn-sm" onclick="apiAddProjectTimeline()">发布新里程碑</button>
+                    <button class="btn btn-success btn-sm" onclick="apiAddProjectTimeline()">发布里程碑</button>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-post">POST</span>
+                    <div class="endpoint-info">/api/v1/projects/timelines/update <span class="endpoint-desc">项目方编辑修改里程碑节点</span></div>
+                    <button class="btn btn-warning btn-sm" onclick="apiUpdateProjectTimeline()">编辑里程碑</button>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-post">POST</span>
+                    <div class="endpoint-info">/api/v1/projects/timelines/delete <span class="endpoint-desc">项目方删除里程碑节点</span></div>
+                    <button class="btn btn-danger btn-sm" onclick="apiDeleteProjectTimeline()">删除里程碑</button>
                 </div>
             </div>
         </div>
@@ -696,14 +732,20 @@
 
                 <div class="endpoint-row">
                     <span class="method-tag method-get">GET</span>
-                    <div class="endpoint-info">/api/cms/pages <span class="endpoint-desc">单页内容列表</span></div>
-                    <button class="btn btn-primary btn-sm" onclick="apiCmsPages()">单页列表</button>
+                    <div class="endpoint-info">/api/cms/config <span class="endpoint-desc">CMS 系统与站点基础配置</span></div>
+                    <button class="btn btn-default btn-sm" onclick="apiCmsConfig()">站点配置</button>
                 </div>
 
                 <div class="endpoint-row">
                     <span class="method-tag method-get">GET</span>
-                    <div class="endpoint-info">/api/cms/specials <span class="endpoint-desc">精选专题列表</span></div>
-                    <button class="btn btn-primary btn-sm" onclick="apiCmsSpecials()">专题列表</button>
+                    <div class="endpoint-info">/api/cms/navigation <span class="endpoint-desc">全站主导航与菜单结构</span></div>
+                    <button class="btn btn-default btn-sm" onclick="apiCmsNavigation()">导航菜单</button>
+                </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-get">GET</span>
+                    <div class="endpoint-info">/api/cms/friendlink <span class="endpoint-desc">合作伙伴与友情链接</span></div>
+                    <button class="btn btn-default btn-sm" onclick="apiCmsFriendlink()">友情链接</button>
                 </div>
 
                 <div class="endpoint-row">
@@ -1140,33 +1182,113 @@
         });
     }
 
-    async function apiGetMaterials() {
-        return request('/api/v1/projects/materials?project_id=14');
+    async function apiUpdateProject(projId = 0) {
+        if (!projId) {
+            const listRes = await apiGetProjects();
+            projId = listRes.data?.list?.[0]?.id || 14;
+        }
+        return request('/api/v1/projects/update', {
+            method: 'POST',
+            body: {
+                id: projId,
+                name: '更新项目测试 ' + Date.now(),
+                subtitle: '更新后的副标题说明',
+                category_id: 1,
+                region: '亚太',
+                tags: 'Web3,DeFi,Ecosystem',
+                summary: '已更新的项目摘要说明',
+                content: '<p>项目内容已于交互控制台更新成功</p>'
+            }
+        });
     }
 
-    async function apiGetProjectMembers() {
-        return request('/api/v1/projects/members?project_id=14');
+    async function apiSubmitProject(projId = 0) {
+        if (!projId) {
+            const listRes = await apiGetProjects();
+            projId = listRes.data?.list?.[0]?.id || 14;
+        }
+        return request('/api/v1/projects/submit', {
+            method: 'POST',
+            body: { id: projId }
+        });
     }
 
-    async function apiGetProjectStats() {
-        const listRes = await apiGetProjects();
-        const pid = listRes.data?.list?.[0]?.id || 53;
-        return request(`/api/v1/projects/stats?project_id=${pid}`);
+    async function apiGetMaterials(projId = 0) {
+        if (!projId) {
+            const listRes = await apiGetProjects();
+            projId = listRes.data?.list?.[0]?.id || 14;
+        }
+        return request(`/api/v1/projects/materials?project_id=${projId}`);
     }
 
-    async function apiGetProjectTimelines() {
-        const listRes = await apiGetProjects();
-        const pid = listRes.data?.list?.[0]?.id || 53;
-        return request(`/api/v1/projects/timelines?project_id=${pid}`);
+    async function apiAddMaterial(projId = 0) {
+        if (!projId) {
+            const listRes = await apiGetProjects();
+            projId = listRes.data?.list?.[0]?.id || 14;
+        }
+        return request('/api/v1/projects/materials', {
+            method: 'POST',
+            body: {
+                project_id: projId,
+                title: '官方技术白皮书 v2.0',
+                category: 'brand',
+                type: 'whitepaper',
+                storage_key: 'uploads/materials/test_whitepaper.pdf',
+                copyright_owner: 'ITIK 核心基金会',
+                source: '项目官方发布'
+            }
+        });
     }
 
-    async function apiAddProjectTimeline() {
-        const listRes = await apiGetProjects();
-        const pid = listRes.data?.list?.[0]?.id || 53;
+    async function apiGetProjectMembers(projId = 0) {
+        if (!projId) {
+            const listRes = await apiGetProjects();
+            projId = listRes.data?.list?.[0]?.id || 14;
+        }
+        return request(`/api/v1/projects/members?project_id=${projId}`);
+    }
+
+    async function apiBindProjectMember(projId = 0) {
+        if (!projId) {
+            const listRes = await apiGetProjects();
+            projId = listRes.data?.list?.[0]?.id || 14;
+        }
+        return request('/api/v1/projects/members/bind', {
+            method: 'POST',
+            body: {
+                project_id: projId,
+                user_id: 80,
+                serial_no: '001',
+                title: '首席布道师 (001号推荐官)'
+            }
+        });
+    }
+
+    async function apiGetProjectStats(projId = 0) {
+        if (!projId) {
+            const listRes = await apiGetProjects();
+            projId = listRes.data?.list?.[0]?.id || 14;
+        }
+        return request(`/api/v1/projects/stats?project_id=${projId}`);
+    }
+
+    async function apiGetProjectTimelines(projId = 0) {
+        if (!projId) {
+            const listRes = await apiGetProjects();
+            projId = listRes.data?.list?.[0]?.id || 14;
+        }
+        return request(`/api/v1/projects/timelines?project_id=${projId}`);
+    }
+
+    async function apiAddProjectTimeline(projId = 0) {
+        if (!projId) {
+            const listRes = await apiGetProjects();
+            projId = listRes.data?.list?.[0]?.id || 14;
+        }
         return request('/api/v1/projects/timelines', {
             method: 'POST',
             body: {
-                project_id: pid,
+                project_id: projId,
                 title: '自动化交互控制台里程碑测试 ' + new Date().toLocaleTimeString(),
                 tag: '里程碑',
                 event_time: new Date().toISOString().split('T')[0],
@@ -1174,6 +1296,37 @@
                 content: '<p>项目方在控制台成功发布发展历程时间轴！</p>',
                 link_url: 'https://itikecosystem.io'
             }
+        });
+    }
+
+    async function apiUpdateProjectTimeline(timelineId = 0) {
+        if (!timelineId) {
+            const tlRes = await apiGetProjectTimelines();
+            timelineId = tlRes.data?.list?.[0]?.id || 0;
+        }
+        if (!timelineId) {
+            const addRes = await apiAddProjectTimeline();
+            timelineId = addRes.data?.id || 1;
+        }
+        return request('/api/v1/projects/timelines/update', {
+            method: 'POST',
+            body: {
+                id: timelineId,
+                title: '里程碑节点更新测试 ' + new Date().toLocaleTimeString(),
+                tag: '主网上线',
+                summary: '里程碑已成功更新'
+            }
+        });
+    }
+
+    async function apiDeleteProjectTimeline(timelineId = 0) {
+        if (!timelineId) {
+            const addRes = await apiAddProjectTimeline();
+            timelineId = addRes.data?.id || 1;
+        }
+        return request('/api/v1/projects/timelines/delete', {
+            method: 'POST',
+            body: { id: timelineId }
         });
     }
 
@@ -1261,16 +1414,20 @@
         return request('/api/cms/index');
     }
 
+    async function apiCmsConfig() {
+        return request('/api/cms/config');
+    }
+
+    async function apiCmsNavigation() {
+        return request('/api/cms/navigation');
+    }
+
+    async function apiCmsFriendlink() {
+        return request('/api/cms/friendlink');
+    }
+
     async function apiCmsChannels() {
         return request('/api/cms/channels');
-    }
-
-    async function apiCmsPages() {
-        return request('/api/cms/pages');
-    }
-
-    async function apiCmsSpecials() {
-        return request('/api/cms/specials');
     }
 
     async function apiCmsTags() {
@@ -1315,36 +1472,44 @@
 
         // 1. 公开与 CMS 接口
         await testCase('CMS 首页聚合 (/api/cms/index)', apiCmsIndex);
+        await testCase('CMS 站点配置 (/api/cms/config)', apiCmsConfig);
+        await testCase('CMS 导航结构 (/api/cms/navigation)', apiCmsNavigation);
+        await testCase('CMS 友情链接 (/api/cms/friendlink)', apiCmsFriendlink);
         await testCase('CMS 全站栏目树 (/api/cms/channels)', apiCmsChannels);
-        await testCase('CMS 单页列表 (/api/cms/pages)', apiCmsPages);
-        await testCase('CMS 专题精选 (/api/cms/specials)', apiCmsSpecials);
         await testCase('CMS 标签列表 (/api/cms/tags)', apiCmsTags);
         await testCase('CMS 热搜词 (/api/cms/search/hot)', apiCmsHotSearch);
         await testCase('公开套餐列表 (/api/v1/roles/plans)', apiGetPlans);
+
+        // 2. 项目广场与全流程接口
         await testCase('项目赛道分类树形列表 (/api/v1/projects/categories?tree=1)', () => apiGetProjectCategories(1));
         await testCase('项目赛道分类平铺列表 (/api/v1/projects/categories?tree=0)', () => apiGetProjectCategories(0));
         await testCase('公开项目广场 (/api/v1/projects)', apiGetProjects);
-        await testCase('按分类筛选项目 (/api/v1/projects?category_id=1)', () => apiGetProjectsByCategory(1));
+        await testCase('按赛道分类筛选项目 (/api/v1/projects?category_id=1)', () => apiGetProjectsByCategory(1));
         await testCase('项目详情与材料 (/api/v1/projects/detail)', () => apiGetProjectDetail());
+        await testCase('项目资料列表 (/api/v1/projects/materials)', () => apiGetMaterials());
+        await testCase('项目团队成员 (/api/v1/projects/members)', () => apiGetProjectMembers());
+        await testCase('项目数据大盘 (/api/v1/projects/stats)', () => apiGetProjectStats());
         await testCase('项目发展时间轴 (/api/v1/projects/timelines)', apiGetProjectTimelines);
         await testCase('发布时间轴里程碑 (/api/v1/projects/timelines)', apiAddProjectTimeline);
+        await testCase('编辑时间轴里程碑 (/api/v1/projects/timelines/update)', apiUpdateProjectTimeline);
+        await testCase('编辑项目基本资料 (/api/v1/projects/update)', apiUpdateProject);
 
-        // 2. Web3 钱包挑战与签名登录闭环
+        // 3. Web3 钱包挑战与签名登录闭环
         await testCase('获取钱包挑战 (/api/v1/auth/wallet/challenge)', () => apiWalletChallenge());
         await testCase('钱包签名模拟登录与自动注册 (/api/v1/auth/wallet/verify)', apiWalletVerify);
 
-        // 3. 用户鉴权相关
+        // 4. 用户鉴权相关
         await testCase('获取当前用户资料 (/api/v1/users/me)', apiGetMe);
         await testCase('修改用户资料 (/api/v1/users/me)', apiUpdateMe);
         await testCase('获取用户多重身份凭据 (/api/v1/users/me/identities)', apiGetIdentities);
         await testCase('查询我的订阅状态 (/api/v1/users/me/subscription)', apiGetMySub);
 
-        // 4. 商业与订单
+        // 5. 商业与订单
         await testCase('查询我的订单 (/api/v1/billing/orders)', apiGetOrders);
         await testCase('创建订阅订单 (/api/v1/billing/orders)', apiCreateOrder);
         await testCase('查询订阅详情 (/api/v1/billing/subscription)', apiGetBillingSub);
 
-        // 5. 社交互动与推荐
+        // 6. 社交互动与推荐
         await testCase('关注用户 (/api/v1/relations/follow)', () => apiFollow(80));
         await testCase('查询关注列表 (/api/v1/relations/following)', apiGetFollowing);
         await testCase('收藏项目 (/api/v1/relations/favorite)', () => apiFavorite(14));
@@ -1380,14 +1545,26 @@
     }
 
     async function testModuleProject() {
-        log('--- 开始测试 项目广场与赛道分类 ---', 'info');
+        log('--- 开始测试 项目广场全套接口 ---', 'info');
         await apiGetProjectCategories(1);
+        await apiGetProjectCategories(0);
         await apiGetProjects();
         await apiGetProjectsByCategory(1);
         await apiGetProjectDetail();
         await apiGetMaterials();
+        await apiAddMaterial();
+        await apiGetProjectMembers();
+        await apiBindProjectMember();
+        await apiGetProjectStats();
         await apiGetProjectTimelines();
-        await apiAddProjectTimeline();
+        const tlRes = await apiAddProjectTimeline();
+        const tlId = tlRes.data?.id;
+        if (tlId) {
+            await apiUpdateProjectTimeline(tlId);
+            await apiDeleteProjectTimeline(tlId);
+        }
+        await apiUpdateProject();
+        await apiSubmitProject();
     }
 
     async function testModuleRelation() {
@@ -1406,10 +1583,13 @@
     async function testModuleCms() {
         log('--- 开始测试 CMS 门户接口 ---', 'info');
         await apiCmsIndex();
+        await apiCmsConfig();
+        await apiCmsNavigation();
+        await apiCmsFriendlink();
         await apiCmsChannels();
-        await apiCmsPages();
-        await apiCmsSpecials();
         await apiCmsTags();
+        await apiCmsHotSearch();
+        await apiCmsComments();
     }
 
     // 页面初始化
