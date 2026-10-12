@@ -14,6 +14,18 @@
     <button class="layui-btn layui-bg-red btn-disabled disabled {:$auth->check('project.project/del')?'':'hide'}" lay-event="del"><i class="fa fa-trash"></i> {:__('Del')}</button>
 </script>
 
+<!-- 表格自定义适配样式：防止表头标题换行挤压、与排序图标重叠 -->
+<style>
+    .layui-table th {
+        white-space: nowrap !important;
+    }
+    .layui-table-cell {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+</style>
+
 <script>
     layui.use(["badou", "table"], function () {
         var bdTable = layui.bdTable;
@@ -38,22 +50,23 @@
             even: true,
             toolbar: "#toolbar",
             page: true,
+            cellMinWidth: 100,
             cols: [
                 [
-                    { type: "checkbox" },
-                    { field: "id", title: "ID", width: 70, sort: true },
-{ field: "name", title: "项目名称", operate: 'LIKE' },
-                    { field: "owner.nickname", title: "项目方", operate: false },
-{ field: "category_l1", title: "一级栏目", operate: 'LIKE' },
-{ field: "category_l2", title: "二级栏目", operate: 'LIKE' },
-{ field: "category_l3", title: "三级栏目", operate: 'LIKE' },
-{ field: "status", title: "状态", searchList: { draft: '草稿', pending: '待审核', normal: '已通过', rejected: '已驳回', hidden: '已下架', offline: '已下线' }, custom: { draft: 'default', pending: 'orange', normal: 'green', rejected: 'red', hidden: 'default', offline: 'default' }, templet: bdTable.api.formatter.status },
-{ field: "verify_status", title: "认证状态", searchList: { none: '未认证', pending: '认证中', normal: '已认证', rejected: '认证驳回' }, custom: { none: 'default', pending: 'orange', normal: 'green', rejected: 'red' }, templet: bdTable.api.formatter.status },
-                    { field: "certified", title: "认证标识", searchList: { 1: "已认证", 0: "未认证" }, templet: function (d) { return d.certified == 1 ? "<span class=\"layui-badge layui-bg-green\">已认证</span>" : "<span class=\"layui-badge layui-bg-gray\">未认证</span>"; }, operate: false },
-{ field: "views", title: "浏览", operate: 'BETWEEN', sortable: true },
-{ field: "create_time_text", title: "提交时间", templet: bdTable.api.formatter.datetime, operate: false },
+                    { type: "checkbox", width: 50, fixed: "left" },
+                    { field: "id", title: "ID", width: 70, sort: true, fixed: "left" },
+                    { field: "name", title: "项目名称", minWidth: 160, operate: 'LIKE' },
+                    { field: "owner.nickname", title: "项目方", minWidth: 120, operate: false },
+                    { field: "category_l1", title: "一级栏目", minWidth: 100, operate: 'LIKE' },
+                    { field: "category_l2", title: "二级栏目", minWidth: 100, operate: 'LIKE' },
+                    { field: "category_l3", title: "三级栏目", minWidth: 100, operate: 'LIKE' },
+                    { field: "status", title: "状态", width: 90, align: "center", searchList: { draft: '草稿', pending: '待审核', normal: '已通过', rejected: '已驳回', hidden: '已下架', offline: '已下线' }, custom: { draft: 'default', pending: 'orange', normal: 'green', rejected: 'red', hidden: 'default', offline: 'default' }, templet: bdTable.api.formatter.status },
+                    { field: "verify_status", title: "认证状态", width: 100, align: "center", searchList: { none: '未认证', pending: '认证中', normal: '已认证', rejected: '认证驳回' }, custom: { none: 'default', pending: 'orange', normal: 'green', rejected: 'red' }, templet: bdTable.api.formatter.status },
+                    { field: "certified", title: "认证标识", width: 95, align: "center", searchList: { 1: "已认证", 0: "未认证" }, templet: function (d) { return d.certified == 1 ? "<span class=\"layui-badge layui-bg-green\">已认证</span>" : "<span class=\"layui-badge layui-bg-gray\">未认证</span>"; }, operate: false },
+                    { field: "views", title: "浏览", width: 80, align: "center", operate: 'BETWEEN', sortable: true },
+                    { field: "create_time_text", title: "提交时间", minWidth: 165, templet: bdTable.api.formatter.datetime, operate: false },
                     { field: "create_time", title: "提交时间", templet: bdTable.api.formatter.datetime, searchType: 'time', hide: true },
-                    { title: "操作", width: 200, align: "center", templet: bdTable.api.formatter.operate },
+                    { title: "操作", width: 180, align: "center", fixed: "right", templet: bdTable.api.formatter.operate },
                 ],
             ],
         });

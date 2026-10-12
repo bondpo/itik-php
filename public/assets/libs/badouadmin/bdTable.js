@@ -48,6 +48,7 @@ layui.define(['jquery', 'bdHttp', 'tableSearch'], function (exports) {
         // 表格渲染
         render: function (options) {
             options.pk = options.pk || 'id';
+            options.cellMinWidth = options.cellMinWidth || 100;
             options.cols = options.cols || [];
             // 过滤表格列
             if (options.cols.length > 0) {

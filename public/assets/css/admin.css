@@ -564,8 +564,28 @@ body,
 }
 
 .menu-search-list li.this {
-    background-color: #5fb878;
-    color: white;
+/* 搜索面板结束 */
+
+/* 全局表格适配：防止表头标题换行挤压、与排序图标重叠 */
+.layui-table th {
+    white-space: nowrap !important;
 }
 
-/* 搜索面板结束 */
+.layui-table th .layui-table-cell {
+    white-space: nowrap !important;
+    overflow: visible !important;
+    padding: 0 10px;
+    box-sizing: border-box;
+}
+
+/* 包含排序箭头的表头单元格，右侧预留安全间隙，避免遮挡标题文字 */
+.layui-table th[data-sort] .layui-table-cell {
+    padding-right: 28px !important;
+    position: relative;
+}
+
+.layui-table-cell {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

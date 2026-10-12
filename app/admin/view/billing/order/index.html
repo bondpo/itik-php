@@ -14,6 +14,18 @@
     <button class="layui-btn layui-bg-red btn-disabled disabled {:$auth->check('billing.order/del')?'':'hide'}" lay-event="del"><i class="fa fa-trash"></i> {:__('Del')}</button>
 </script>
 
+<!-- 表格自定义适配样式：防止表头标题换行挤压、与排序图标重叠 -->
+<style>
+    .layui-table th {
+        white-space: nowrap !important;
+    }
+    .layui-table-cell {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+</style>
+
 <script>
     layui.use(["badou", "table"], function () {
         var bdTable = layui.bdTable;
@@ -38,23 +50,24 @@
             even: true,
             toolbar: "#toolbar",
             page: true,
+            cellMinWidth: 100,
             cols: [
                 [
-                    { type: "checkbox" },
-                    { field: "id", title: "ID", width: 70, sort: true },
-{ field: "order_no", title: "订单号", operate: 'LIKE' },
-                    { field: "user.nickname", title: "用户", operate: false },
-{ field: "plan_code", title: "套餐", operate: 'LIKE' },
-{ field: "amount", title: "金额", operate: 'BETWEEN', sortable: true },
-{ field: "currency", title: "币种" },
-{ field: "status", title: "状态", searchList: { pending: '待支付', paid: '已支付', closed: '已关闭', refunded: '已退款', partial_refunded: '部分退款' }, custom: { pending: 'orange', paid: 'green', closed: 'default', refunded: 'red', partial_refunded: 'red' }, templet: bdTable.api.formatter.status },
-{ field: "pay_type", title: "支付方式" },
-{ field: "pay_trade_no", title: "交易号", operate: 'LIKE' },
-{ field: "paid_at_text", title: "支付时间", templet: bdTable.api.formatter.datetime, operate: false },
+                    { type: "checkbox", width: 50, fixed: "left" },
+                    { field: "id", title: "ID", width: 70, sort: true, fixed: "left" },
+                    { field: "order_no", title: "订单号", minWidth: 180, operate: 'LIKE' },
+                    { field: "user.nickname", title: "用户", minWidth: 120, operate: false },
+                    { field: "plan_code", title: "套餐", minWidth: 120, operate: 'LIKE' },
+                    { field: "amount", title: "金额", minWidth: 100, operate: 'BETWEEN', sortable: true },
+                    { field: "currency", title: "币种", width: 80, align: "center" },
+                    { field: "status", title: "状态", width: 100, align: "center", searchList: { pending: '待支付', paid: '已支付', closed: '已关闭', refunded: '已退款', partial_refunded: '部分退款' }, custom: { pending: 'orange', paid: 'green', closed: 'default', refunded: 'red', partial_refunded: 'red' }, templet: bdTable.api.formatter.status },
+                    { field: "pay_type", title: "支付方式", minWidth: 100 },
+                    { field: "pay_trade_no", title: "交易号", minWidth: 180, operate: 'LIKE' },
+                    { field: "paid_at_text", title: "支付时间", minWidth: 165, templet: bdTable.api.formatter.datetime, operate: false },
                     { field: "paid_at", title: "支付时间", templet: bdTable.api.formatter.datetime, searchType: 'time', hide: true },
-{ field: "create_time_text", title: "下单时间", templet: bdTable.api.formatter.datetime, operate: false },
+                    { field: "create_time_text", title: "下单时间", minWidth: 165, templet: bdTable.api.formatter.datetime, operate: false },
                     { field: "create_time", title: "下单时间", templet: bdTable.api.formatter.datetime, searchType: 'time', hide: true },
-                    { title: "操作", width: 130, align: "center", templet: bdTable.api.formatter.operate },
+                    { title: "操作", width: 130, align: "center", fixed: "right", templet: bdTable.api.formatter.operate },
                 ],
             ],
         });
