@@ -1,0 +1,52 @@
+/* BadouAdmin 富文本编辑器现代美化样式 */
+.bd-editor-box {
+  border: 1px solid #e6e6e6;
+  border-radius: 4px;
+  background-color: #fff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
+  z-index: 100;
+}
+
+.bd-editor-box:focus-within {
+  border-color: #009688;
+  box-shadow: 0 0 0 2px rgba(0, 150, 136, 0.15);
+}
+
+.bd-editor-toolbar {
+  border-bottom: 1px solid #eee !important;
+  background-color: #fafafa !important;
+  padding: 2px 4px !important;
+}
+
+.bd-editor-content {
+  background-color: #fff;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.w-e-text-container {
+  background-color: transparent !important;
+}
+
+/* 深色模式适配 */
+.dark-theme .bd-editor-box,
+body.dark .bd-editor-box,
+.badouadmin-theme-dark .bd-editor-box {
+  border-color: #3b3f4a;
+  background-color: #242730;
+}
+
+.dark-theme .bd-editor-toolbar,
+body.dark .bd-editor-toolbar,
+.badouadmin-theme-dark .bd-editor-toolbar {
+  border-bottom-color: #333842 !important;
+  background-color: #2b2f3a !important;
+}
+
+.dark-theme .bd-editor-content,
+body.dark .bd-editor-content,
+.badouadmin-theme-dark .bd-editor-content {
+  background-color: #242730;
+  color: #d1d5db;
+}

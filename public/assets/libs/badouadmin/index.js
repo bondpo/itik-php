@@ -24,6 +24,7 @@ layui
       api: "Sortable",
     },
     bdTool: "bdTool", // 工具组件
+    bdEditor: "bdEditor", // 富文本编辑器组件
     xmSelect: {
       src: "/assets/libs/xm-select/xm-select.js",
       api: "xmSelect",

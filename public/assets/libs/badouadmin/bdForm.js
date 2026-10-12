@@ -44,6 +44,19 @@ layui.define(
           bdTool.laydate();
           //绑定fieldlist
           bdForm.events.fieldlist(layform);
+          // 绑定富文本编辑器
+          bdForm.events.editor(layform);
+        },
+        // 绑定富文本编辑器
+        editor: function (layform) {
+          if ($(".editor", layform).length > 0) {
+            layui.use(["bdEditor"], function () {
+              var bdEditor = layui.bdEditor;
+              if (bdEditor && bdEditor.render) {
+                bdEditor.render($(".editor", layform));
+              }
+            });
+          }
         },
         //表单校验事件
         validator: function (layform, success, error, submit) {
@@ -57,6 +70,10 @@ layui.define(
           ).removeClass("disabled");
           //验证通过提交表单
           form.on("submit(" + filter + ")", function (data) {
+            // 同步富文本编辑器内容到 textarea
+            if (layui.bdEditor && typeof layui.bdEditor.syncAll === "function") {
+              layui.bdEditor.syncAll();
+            }
             submitBtn.addClass("disabled");
 
             var submitResult = bdForm.api.submit(
