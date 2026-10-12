@@ -17,6 +17,7 @@ class User extends Validate
         'email'    => 'email|unique:user',
         'mobile'   => 'mobile|unique:user',
         'password' => 'regex:^(?!.*[&<>"\'\n\r]).{6,32}$',
+        'invite_code' => 'regex:^[A-Za-z0-9]{4,16}$|unique:user',
     ];
 
     /**
@@ -33,8 +34,8 @@ class User extends Validate
      * 验证场景
      */
     protected $scene = [
-        'add'  => ['username', 'nickname', 'password', 'email', 'mobile'],
-        'edit' => ['username', 'nickname', 'password', 'email', 'mobile'],
+        'add'  => ['username', 'nickname', 'password', 'email', 'mobile', 'invite_code'],
+        'edit' => ['username', 'nickname', 'password', 'email', 'mobile', 'invite_code'],
     ];
 
     public function __construct()

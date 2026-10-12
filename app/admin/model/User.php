@@ -38,6 +38,13 @@ class User extends Model
         'token',
     ];
 
+    public static function onBeforeInsert($row)
+    {
+        if (empty($row->invite_code)) {
+            $row->invite_code = \app\common\model\User::generateInviteCode();
+        }
+    }
+
     public static function onBeforeWrite($row)
     {
         $changeData = $row->getChangedData();
@@ -116,6 +123,14 @@ class User extends Model
     public function userGroup(): BelongsTo
     {
         return $this->belongsTo(UserGroup::class, 'group_id', 'id');
+    }
+
+    /**
+     * 推荐人关联
+     */
+    public function inviter(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'inviter_id', 'id');
     }
 
 

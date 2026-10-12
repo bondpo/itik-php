@@ -165,17 +165,33 @@ class FrontendAuth
             return false;
         }
 
+        // 处理推荐人邀请码（选填）
+        $inviterId = 0;
+        if (!empty($extend['invite_code'])) {
+            $inviter = User::getByInviteCode(trim((string)$extend['invite_code']));
+            if (!$inviter) {
+                $this->setError('邀请码无效');
+                return false;
+            }
+            $inviterId = (int)$inviter->id;
+            unset($extend['invite_code']);
+        } elseif (!empty($extend['inviter_id'])) {
+            $inviterId = (int)$extend['inviter_id'];
+        }
+
         $ip = request()->ip();
         $time = time();
 
         $data = [
-            'username' => $username,
-            'password' => $password,
-            'email'    => $email,
-            'mobile'   => $mobile,
-            'level'    => 1,
-            'score'    => 0,
-            'avatar'   => '',
+            'username'    => $username,
+            'password'    => $password,
+            'email'       => $email,
+            'mobile'      => $mobile,
+            'invite_code' => User::generateInviteCode(),
+            'inviter_id'  => $inviterId,
+            'level'       => 1,
+            'score'       => 0,
+            'avatar'      => '',
         ];
         $params = array_merge($data, [
             'nickname'  => preg_match("/^1[3-9]{1}\d{9}$/", $username) ? substr_replace($username, '****', 3, 4) : $username,

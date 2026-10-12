@@ -77,6 +77,30 @@
         </div>
     </div>
     <div class="layui-form-item">
+        <label class="layui-form-label">邀请码</label>
+        <div class="layui-input-block">
+            <input
+                type="text"
+                name="row[invite_code]"
+                value="{$row.invite_code|htmlentities}"
+                autocomplete="off"
+                placeholder="会员专属邀请码"
+                class="layui-input" />
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">推荐人ID</label>
+        <div class="layui-input-block">
+            <input
+                type="number"
+                name="row[inviter_id]"
+                value="{$row.inviter_id|default=0}"
+                autocomplete="off"
+                placeholder="推荐人会员ID（0表示无推荐人）"
+                class="layui-input" />
+        </div>
+    </div>
+    <div class="layui-form-item">
         <label class="layui-form-label">{:__('Avatar')}</label>
         <div class="layui-input-block">
             <input

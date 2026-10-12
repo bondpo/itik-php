@@ -82,7 +82,8 @@ class Auth extends Base
         $email    = (string)$this->request->post('email', '');
         $code     = (string)$this->request->post('code', '');
         $password = (string)$this->request->post('password', '');
-        $nickname = (string)$this->request->post('nickname', '');
+        $nickname   = (string)$this->request->post('nickname', '');
+        $inviteCode = trim((string)$this->request->post('invite_code', ''));
 
         if (!$email || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $this->fail('邮箱格式错误', self::CODE_PARAM_INVALID);
@@ -107,10 +108,15 @@ class Auth extends Base
 
         $visitorGroupId = (int)(Db::name('user_group')->where('rules', self::ROLE_VISITOR)->value('id') ?: 0);
 
-        $ret = $this->auth->register($username, $password, $email, '', [
+        $extend = [
             'nickname' => $nickname ?: $username,
             'group_id' => $visitorGroupId,
-        ]);
+        ];
+        if ($inviteCode !== '') {
+            $extend['invite_code'] = $inviteCode;
+        }
+
+        $ret = $this->auth->register($username, $password, $email, '', $extend);
         if (!$ret) {
             $this->fail((string)$this->auth->getError() ?: '注册失败', self::CODE_BIZ_FAIL);
         }
@@ -132,11 +138,13 @@ class Auth extends Base
         }
 
         $this->success('注册成功', [
-            'user_id'  => $userId,
-            'username' => $username,
-            'email'    => $email,
-            'role'     => $this->resolveRole($userId),
-            'token'    => $this->auth->getToken(),
+            'user_id'     => $userId,
+            'username'    => $username,
+            'email'       => $email,
+            'invite_code' => (string)$this->auth->invite_code,
+            'inviter_id'  => (int)$this->auth->inviter_id,
+            'role'        => $this->resolveRole($userId),
+            'token'       => $this->auth->getToken(),
         ]);
     }
 

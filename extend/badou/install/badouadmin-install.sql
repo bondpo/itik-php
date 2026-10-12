@@ -480,6 +480,8 @@ CREATE TABLE `bd_user` (
   `password` varchar(64) DEFAULT '' COMMENT '密码',
   `email` varchar(100) DEFAULT '' COMMENT '电子邮箱',
   `mobile` varchar(11) DEFAULT '' COMMENT '手机号',
+  `invite_code` varchar(16) NOT NULL DEFAULT '' COMMENT '邀请码',
+  `inviter_id` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '推荐人ID',
   `avatar` varchar(255) DEFAULT '' COMMENT '头像',
   `level` tinyint(3) unsigned NOT NULL DEFAULT '0' COMMENT '等级',
   `gender` tinyint(3) unsigned NOT NULL DEFAULT '0' COMMENT '性别',
@@ -504,7 +506,9 @@ CREATE TABLE `bd_user` (
   PRIMARY KEY (`id`),
   KEY `username` (`username`),
   KEY `email` (`email`),
-  KEY `mobile` (`mobile`)
+  KEY `mobile` (`mobile`),
+  KEY `invite_code` (`invite_code`),
+  KEY `inviter_id` (`inviter_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COMMENT='会员表';
 
 -- ----------------------------

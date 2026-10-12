@@ -134,7 +134,12 @@ class User extends Api
         if (!$ret) {
             $this->error(__('Captcha is incorrect'));
         }
-        $ret = $this->auth->register($username, $password, $email, $mobile, []);
+        $inviteCode = trim((string)$this->request->post('invite_code', ''));
+        $extend = [];
+        if ($inviteCode !== '') {
+            $extend['invite_code'] = $inviteCode;
+        }
+        $ret = $this->auth->register($username, $password, $email, $mobile, $extend);
         if ($ret) {
             $data = ['userinfo' => $this->auth->getUserinfo()];
             $this->success(__('Sign up successful'), $data);

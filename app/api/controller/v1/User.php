@@ -31,7 +31,7 @@ class User extends Base
         $userId = $this->userId();
         $user = Db::name('user')
             ->where('id', $userId)
-            ->field('id,username,nickname,email,mobile,avatar,gender,birthday,bio,money,score,level,group_id,logintime')
+            ->field('id,username,nickname,email,mobile,invite_code,inviter_id,avatar,gender,birthday,bio,money,score,level,group_id,logintime')
             ->find();
 
         if (!$user) {
@@ -40,17 +40,19 @@ class User extends Base
 
         $this->success('', [
             'user'         => [
-                'id'       => (int)$user['id'],
-                'username' => $user['username'],
-                'nickname' => $user['nickname'],
-                'email'    => $user['email'],
-                'mobile'   => $user['mobile'],
-                'avatar'   => $user['avatar'],
-                'gender'   => (int)$user['gender'],
-                'bio'      => $user['bio'],
-                'money'    => $user['money'],
-                'score'    => (int)$user['score'],
-                'level'    => (int)$user['level'],
+                'id'          => (int)$user['id'],
+                'username'    => $user['username'],
+                'nickname'    => $user['nickname'],
+                'email'       => $user['email'],
+                'mobile'      => $user['mobile'],
+                'invite_code' => (string)($user['invite_code'] ?? ''),
+                'inviter_id'  => (int)($user['inviter_id'] ?? 0),
+                'avatar'      => $user['avatar'],
+                'gender'      => (int)$user['gender'],
+                'bio'         => $user['bio'],
+                'money'       => $user['money'],
+                'score'       => (int)$user['score'],
+                'level'       => (int)$user['level'],
             ],
             'role'         => $this->role,
             'subscription' => $this->subscription ? [

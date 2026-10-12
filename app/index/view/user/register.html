@@ -231,6 +231,15 @@
                                 class="layui-input" />
                         </div>
                     </div>
+                    <div class="layui-form-item">
+                        <div class="layui-input-wrap">
+                            <div class="layui-input-prefix">
+                                <i class="layui-icon layui-icon-share"></i>
+                            </div>
+                            <input name="invite_code" value="{$invite_code|default=''|htmlentities}" placeholder="邀请码（选填）" autocomplete="off"
+                                class="layui-input" />
+                        </div>
+                    </div>
                     <!--@CaptchaBegin-->
                     {if $captcha_type}
                     <div class="tab-log-verification">

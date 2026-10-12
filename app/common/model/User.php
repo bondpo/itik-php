@@ -20,6 +20,7 @@ use think\facade\Db;
  * @method static mixed getByNickname($str) 通过昵称查询用户
  * @method static mixed getByMobile($str) 通过手机查询用户
  * @method static mixed getByEmail($str) 通过邮箱查询用户
+ * @method static mixed getByInviteCode($str) 通过邀请码查询用户
  * Class User
  * @package app\common\model
  * Author: Wusn <958342972@qq.com>
@@ -35,6 +36,38 @@ class User extends Model
     protected $append = [
         'url'
     ];
+
+    public static function onBeforeInsert($user): void
+    {
+        if (empty($user->invite_code)) {
+            $user->invite_code = self::generateInviteCode();
+        }
+    }
+
+    /**
+     * 生成唯一邀请码
+     * @param int $length 邀请码长度
+     * @return string
+     */
+    public static function generateInviteCode(int $length = 8): string
+    {
+        $chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+        do {
+            $code = '';
+            for ($i = 0; $i < $length; $i++) {
+                $code .= $chars[random_int(0, strlen($chars) - 1)];
+            }
+        } while (self::where('invite_code', $code)->find());
+        return $code;
+    }
+
+    /**
+     * 推荐人关联
+     */
+    public function inviter()
+    {
+        return $this->belongsTo(self::class, 'inviter_id', 'id');
+    }
 
     public function getUrlAttr($value, $data)
     {

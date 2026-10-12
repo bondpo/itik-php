@@ -123,7 +123,7 @@ class User extends Frontend
             $this->success(__('You\'ve logged in, do not login again'), $url ? $url : url('user/index'));
         }
         if ($this->request->isPost()) {
-            $params = $this->request->post(['email', 'mobile', 'username', 'password', 'captcha']);
+            $params = $this->request->post(['email', 'mobile', 'username', 'password', 'captcha', 'invite_code']);
             $captcha = $params['captcha'];
             $mobile = $params['mobile'];
             $email = $params['email'];
@@ -152,7 +152,12 @@ class User extends Frontend
                 $this->error($e->getMessage());
             }
 
-            $res = $this->auth->register($params['username'], $params['password'], $params['email'], $params['mobile']);
+            $extend = [];
+            if (!empty($params['invite_code'])) {
+                $extend['invite_code'] = trim((string)$params['invite_code']);
+            }
+
+            $res = $this->auth->register($params['username'], $params['password'], $params['email'], $params['mobile'], $extend);
 
             if (isset($res) && $res === true) {
                 Event::trigger('user_register_successed', $this->auth->getUserInfo());
@@ -171,6 +176,7 @@ class User extends Frontend
             $url = $referer;
         }
         $this->view->assign('captcha_type', config('badouadmin.user_register_captcha'));
+        $this->view->assign('invite_code', $this->request->get('invite_code', ''));
         $this->view->assign('url', $url);
         $this->view->assign('title', __('Register'));
         return $this->fetch();
