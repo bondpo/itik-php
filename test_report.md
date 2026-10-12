@@ -1,6 +1,6 @@
 # ITIK API 全接口自动化测试报告
 
-> **测试执行时间**: `2026-10-13 02:06:52`  
+> **测试执行时间**: `2026-10-13 02:13:58`  
 > **测试目标服务器**: `http://127.0.0.1:8000`  
 > **接口总数**: **81** 个 | **通过数**: <font color='green'>**81**</font> | **失败数**: <font color='red'>**0**</font> | **测试通过率**: **100%**
 
@@ -24,86 +24,86 @@
 
 | 序号 | 所属模块 | 接口描述 | HTTP Method | 请求路径 (Path) | 耗时 | HTTP状态 | 业务码 | 测试判定 |
 | :--- | :--- | :--- | :---: | :--- | :---: | :---: | :---: | :---: |
-| 1 | Auth | 发送邮箱验证码 | `POST` | `/api/v1/auth/email/send-code` | 495ms | 200 | 1 | ✅ PASS |
-| 2 | Auth | 钱包挑战 (Challenge) | `POST` | `/api/v1/auth/wallet/challenge` | 30ms | 200 | 1 | ✅ PASS |
-| 3 | Auth | 钱包验签登录 (Verify) | `POST` | `/api/v1/auth/wallet/verify` | 32ms | 200 | 1 | ✅ PASS |
+| 1 | Auth | 发送邮箱验证码 | `POST` | `/api/v1/auth/email/send-code` | 517ms | 200 | 1 | ✅ PASS |
+| 2 | Auth | 钱包挑战 (Challenge) | `POST` | `/api/v1/auth/wallet/challenge` | 22ms | 200 | 1 | ✅ PASS |
+| 3 | Auth | 钱包验签登录 (Verify) | `POST` | `/api/v1/auth/wallet/verify` | 31ms | 200 | 1 | ✅ PASS |
 | 4 | User | 获取个人信息 | `GET` | `/api/v1/users/me` | 22ms | 200 | 1 | ✅ PASS |
-| 5 | User | 更新个人信息 | `PUT` | `/api/v1/users/me` | 24ms | 200 | 1 | ✅ PASS |
-| 6 | User | 查询身份凭证 | `GET` | `/api/v1/users/me/identities` | 24ms | 200 | 1 | ✅ PASS |
-| 7 | User | 查询用户订阅 | `GET` | `/api/v1/users/me/subscription` | 22ms | 200 | 1 | ✅ PASS |
-| 8 | Billing | 获取角色套餐列表 | `GET` | `/api/v1/roles/plans` | 23ms | 200 | 1 | ✅ PASS |
-| 9 | Billing | 查询订单列表 | `GET` | `/api/v1/billing/orders` | 51ms | 200 | 1 | ✅ PASS |
-| 10 | Billing | 创建新订单 | `POST` | `/api/v1/billing/orders` | 42ms | 200 | 1 | ✅ PASS |
-| 11 | Billing | 查询当前订阅态 | `GET` | `/api/v1/billing/subscription` | 26ms | 200 | 1 | ✅ PASS |
-| 12 | Billing | 续费下单 | `POST` | `/api/v1/billing/subscription/renew` | 49ms | 200 | 1 | ✅ PASS |
-| 13 | Project | 获取项目分类树形列表 | `GET` | `/api/v1/projects/categories?tree=1` | 33ms | 200 | 1 | ✅ PASS |
-| 14 | Project | 获取项目分类平铺列表 | `GET` | `/api/v1/projects/categories?tree=0` | 31ms | 200 | 1 | ✅ PASS |
-| 15 | Project | 项目广场公开列表 | `GET` | `/api/v1/projects` | 26ms | 200 | 1 | ✅ PASS |
-| 16 | Project | 按分类赛道筛选项目列表 | `GET` | `/api/v1/projects?category_id=73` | 23ms | 200 | 1 | ✅ PASS |
-| 17 | Project | 项目详情查询(含关联分类) | `GET` | `/api/v1/projects/detail` | 31ms | 200 | 1 | ✅ PASS |
-| 18 | Project | 创建项目草稿(绑定分类) | `POST` | `/api/v1/projects` | 43ms | 200 | 1 | ✅ PASS |
-| 19 | Project | 修改项目资料 | `POST` | `/api/v1/projects/update` | 35ms | 200 | 1 | ✅ PASS |
-| 20 | Project | 查询项目资料库 | `GET` | `/api/v1/projects/materials` | 32ms | 200 | 1 | ✅ PASS |
-| 21 | Project | 上传新增项目资料 | `POST` | `/api/v1/projects/materials` | 33ms | 200 | 1 | ✅ PASS |
-| 22 | Project | 查询项目成员列表 | `GET` | `/api/v1/projects/members` | 33ms | 200 | 1 | ✅ PASS |
-| 23 | Project | 查询项目数据看板 | `GET` | `/api/v1/projects/stats` | 50ms | 200 | 1 | ✅ PASS |
-| 24 | Project | 查询项目发展历程时间轴 | `GET` | `/api/v1/projects/timelines` | 61ms | 200 | 1 | ✅ PASS |
-| 25 | Project | 项目方发布时间轴里程碑 | `POST` | `/api/v1/projects/timelines` | 136ms | 200 | 1 | ✅ PASS |
-| 26 | Project | 项目方更新时间轴节点 | `POST` | `/api/v1/projects/timelines/update` | 68ms | 200 | 1 | ✅ PASS |
-| 27 | Project | 项目方删除时间轴节点 | `POST` | `/api/v1/projects/timelines/delete` | 42ms | 200 | 1 | ✅ PASS |
-| 28 | Content | 资讯公开列表 | `GET` | `/api/v1/contents` | 26ms | 200 | 1 | ✅ PASS |
-| 29 | Content | 我的发布列表 | `GET` | `/api/v1/contents/mine` | 29ms | 200 | 1 | ✅ PASS |
-| 30 | Content | 创建资讯草稿 | `POST` | `/api/v1/contents` | 38ms | 200 | 1 | ✅ PASS |
-| 31 | Content | 查看资讯详情 | `GET` | `/api/v1/contents/detail` | 24ms | 200 | 1 | ✅ PASS |
+| 5 | User | 更新个人信息 | `PUT` | `/api/v1/users/me` | 21ms | 200 | 1 | ✅ PASS |
+| 6 | User | 查询身份凭证 | `GET` | `/api/v1/users/me/identities` | 20ms | 200 | 1 | ✅ PASS |
+| 7 | User | 查询用户订阅 | `GET` | `/api/v1/users/me/subscription` | 26ms | 200 | 1 | ✅ PASS |
+| 8 | Billing | 获取角色套餐列表 | `GET` | `/api/v1/roles/plans` | 16ms | 200 | 1 | ✅ PASS |
+| 9 | Billing | 查询订单列表 | `GET` | `/api/v1/billing/orders` | 23ms | 200 | 1 | ✅ PASS |
+| 10 | Billing | 创建新订单 | `POST` | `/api/v1/billing/orders` | 30ms | 200 | 1 | ✅ PASS |
+| 11 | Billing | 查询当前订阅态 | `GET` | `/api/v1/billing/subscription` | 19ms | 200 | 1 | ✅ PASS |
+| 12 | Billing | 续费下单 | `POST` | `/api/v1/billing/subscription/renew` | 29ms | 200 | 1 | ✅ PASS |
+| 13 | Project | 获取项目分类树形列表 | `GET` | `/api/v1/projects/categories?tree=1` | 25ms | 200 | 1 | ✅ PASS |
+| 14 | Project | 获取项目分类平铺列表 | `GET` | `/api/v1/projects/categories?tree=0` | 19ms | 200 | 1 | ✅ PASS |
+| 15 | Project | 项目广场公开列表 | `GET` | `/api/v1/projects` | 20ms | 200 | 1 | ✅ PASS |
+| 16 | Project | 按分类赛道筛选项目列表 | `GET` | `/api/v1/projects?category_id=73` | 20ms | 200 | 1 | ✅ PASS |
+| 17 | Project | 项目详情查询(含关联分类) | `GET` | `/api/v1/projects/detail` | 27ms | 200 | 1 | ✅ PASS |
+| 18 | Project | 创建项目草稿(绑定分类) | `POST` | `/api/v1/projects` | 31ms | 200 | 1 | ✅ PASS |
+| 19 | Project | 修改项目资料 | `POST` | `/api/v1/projects/update` | 25ms | 200 | 1 | ✅ PASS |
+| 20 | Project | 查询项目资料库 | `GET` | `/api/v1/projects/materials` | 23ms | 200 | 1 | ✅ PASS |
+| 21 | Project | 上传新增项目资料 | `POST` | `/api/v1/projects/materials` | 25ms | 200 | 1 | ✅ PASS |
+| 22 | Project | 查询项目成员列表 | `GET` | `/api/v1/projects/members` | 22ms | 200 | 1 | ✅ PASS |
+| 23 | Project | 查询项目数据看板 | `GET` | `/api/v1/projects/stats` | 31ms | 200 | 1 | ✅ PASS |
+| 24 | Project | 查询项目发展历程时间轴 | `GET` | `/api/v1/projects/timelines` | 16ms | 200 | 1 | ✅ PASS |
+| 25 | Project | 项目方发布时间轴里程碑 | `POST` | `/api/v1/projects/timelines` | 28ms | 200 | 1 | ✅ PASS |
+| 26 | Project | 项目方更新时间轴节点 | `POST` | `/api/v1/projects/timelines/update` | 28ms | 200 | 1 | ✅ PASS |
+| 27 | Project | 项目方删除时间轴节点 | `POST` | `/api/v1/projects/timelines/delete` | 37ms | 200 | 1 | ✅ PASS |
+| 28 | Content | 资讯公开列表 | `GET` | `/api/v1/contents` | 20ms | 200 | 1 | ✅ PASS |
+| 29 | Content | 我的发布列表 | `GET` | `/api/v1/contents/mine` | 28ms | 200 | 1 | ✅ PASS |
+| 30 | Content | 创建资讯草稿 | `POST` | `/api/v1/contents` | 37ms | 200 | 1 | ✅ PASS |
+| 31 | Content | 查看资讯详情 | `GET` | `/api/v1/contents/detail` | 28ms | 200 | 1 | ✅ PASS |
 | 32 | Content | 更新资讯内容 | `POST` | `/api/v1/contents/update` | 27ms | 200 | 1 | ✅ PASS |
-| 33 | Content | 提交资讯审核 | `POST` | `/api/v1/contents/submit` | 31ms | 200 | 1 | ✅ PASS |
-| 34 | Relation | 关注用户 | `POST` | `/api/v1/relations/follow` | 30ms | 200 | 1 | ✅ PASS |
-| 35 | Relation | 获取关注列表 | `GET` | `/api/v1/relations/following` | 25ms | 200 | 1 | ✅ PASS |
-| 36 | Relation | 获取粉丝列表 | `GET` | `/api/v1/relations/followers` | 30ms | 200 | 1 | ✅ PASS |
-| 37 | Relation | 取消关注 | `POST` | `/api/v1/relations/unfollow` | 57ms | 200 | 1 | ✅ PASS |
-| 38 | Relation | 收藏项目 | `POST` | `/api/v1/relations/favorite` | 161ms | 200 | 1 | ✅ PASS |
-| 39 | Relation | 获取收藏列表 | `GET` | `/api/v1/relations/favorites` | 49ms | 200 | 1 | ✅ PASS |
-| 40 | Relation | 取消收藏项目 | `POST` | `/api/v1/relations/unfavorite` | 44ms | 200 | 1 | ✅ PASS |
-| 41 | Relation | 拉黑用户 | `POST` | `/api/v1/relations/block` | 33ms | 200 | 1 | ✅ PASS |
-| 42 | Relation | 查看黑名单列表 | `GET` | `/api/v1/relations/blocks` | 28ms | 200 | 1 | ✅ PASS |
-| 43 | Relation | 解除拉黑 | `POST` | `/api/v1/relations/unblock` | 29ms | 200 | 1 | ✅ PASS |
-| 44 | Relation | 举报反馈 | `POST` | `/api/v1/relations/reports` | 26ms | 200 | 30004 | ✅ PASS |
-| 45 | Recommend | 查询今日推荐配额 | `GET` | `/api/v1/recommendations/quota` | 28ms | 200 | 1 | ✅ PASS |
+| 33 | Content | 提交资讯审核 | `POST` | `/api/v1/contents/submit` | 35ms | 200 | 1 | ✅ PASS |
+| 34 | Relation | 关注用户 | `POST` | `/api/v1/relations/follow` | 36ms | 200 | 1 | ✅ PASS |
+| 35 | Relation | 获取关注列表 | `GET` | `/api/v1/relations/following` | 26ms | 200 | 1 | ✅ PASS |
+| 36 | Relation | 获取粉丝列表 | `GET` | `/api/v1/relations/followers` | 24ms | 200 | 1 | ✅ PASS |
+| 37 | Relation | 取消关注 | `POST` | `/api/v1/relations/unfollow` | 25ms | 200 | 1 | ✅ PASS |
+| 38 | Relation | 收藏项目 | `POST` | `/api/v1/relations/favorite` | 27ms | 200 | 1 | ✅ PASS |
+| 39 | Relation | 获取收藏列表 | `GET` | `/api/v1/relations/favorites` | 28ms | 200 | 1 | ✅ PASS |
+| 40 | Relation | 取消收藏项目 | `POST` | `/api/v1/relations/unfavorite` | 26ms | 200 | 1 | ✅ PASS |
+| 41 | Relation | 拉黑用户 | `POST` | `/api/v1/relations/block` | 24ms | 200 | 1 | ✅ PASS |
+| 42 | Relation | 查看黑名单列表 | `GET` | `/api/v1/relations/blocks` | 24ms | 200 | 1 | ✅ PASS |
+| 43 | Relation | 解除拉黑 | `POST` | `/api/v1/relations/unblock` | 21ms | 200 | 1 | ✅ PASS |
+| 44 | Relation | 举报反馈 | `POST` | `/api/v1/relations/reports` | 22ms | 200 | 30004 | ✅ PASS |
+| 45 | Recommend | 查询今日推荐配额 | `GET` | `/api/v1/recommendations/quota` | 24ms | 200 | 1 | ✅ PASS |
 | 46 | Recommend | 撮合生成智能推荐 | `POST` | `/api/v1/recommendations/generate` | 22ms | 200 | 40002 | ✅ PASS |
-| 47 | Recommend | 获取推荐列表 | `GET` | `/api/v1/recommendations` | 29ms | 200 | 1 | ✅ PASS |
-| 48 | Recommend | 标记推荐已浏览 | `POST` | `/api/v1/recommendations/view` | 25ms | 200 | 1 | ✅ PASS |
-| 49 | Recommend | 响应推荐结果 | `POST` | `/api/v1/recommendations/respond` | 26ms | 200 | 1 | ✅ PASS |
-| 50 | Recommend | 提交推荐满意度反馈 | `POST` | `/api/v1/recommendations/feedback` | 34ms | 200 | 1 | ✅ PASS |
-| 51 | Promotion | 查询推流投放套餐 | `GET` | `/api/v1/promotions/packages` | 19ms | 200 | 1 | ✅ PASS |
-| 52 | Promotion | 查询当前活跃推流展位 | `GET` | `/api/v1/promotions/active` | 26ms | 200 | 1 | ✅ PASS |
-| 53 | Promotion | 查询推流投放计划 | `GET` | `/api/v1/promotions/campaigns` | 26ms | 200 | 1 | ✅ PASS |
-| 54 | Promotion | 推流数据上报埋点 | `POST` | `/api/v1/promotions/track` | 21ms | 200 | 30001 | ✅ PASS |
-| 55 | Consult | 发起业务咨询 | `POST` | `/api/v1/consultations` | 36ms | 200 | 1 | ✅ PASS |
-| 56 | Consult | 查询咨询会话列表 | `GET` | `/api/v1/consultations` | 38ms | 200 | 1 | ✅ PASS |
-| 57 | Consult | 发送咨询消息 | `POST` | `/api/v1/consultations/messages` | 36ms | 200 | 1 | ✅ PASS |
-| 58 | Consult | 查询咨询消息记录 | `GET` | `/api/v1/consultations/messages` | 28ms | 200 | 1 | ✅ PASS |
-| 59 | Consult | 标记会话已读 | `POST` | `/api/v1/consultations/read` | 28ms | 200 | 1 | ✅ PASS |
-| 60 | Consult | 结束咨询会话 | `POST` | `/api/v1/consultations/close` | 29ms | 200 | 1 | ✅ PASS |
-| 61 | CMS | CMS 首页数据聚合 | `GET` | `/api/cms/index` | 35ms | 200 | 1 | ✅ PASS |
-| 62 | CMS | CMS 站点全局配置 | `GET` | `/api/cms/config` | 35ms | 200 | 1 | ✅ PASS |
-| 63 | CMS | 主导航菜单列表 | `GET` | `/api/cms/navigation` | 19ms | 200 | 1 | ✅ PASS |
-| 64 | CMS | 友情链接列表 | `GET` | `/api/cms/friendlink` | 25ms | 200 | 1 | ✅ PASS |
-| 65 | CMS | 栏目分类列表 | `GET` | `/api/cms/channels` | 39ms | 200 | 1 | ✅ PASS |
-| 66 | CMS | 栏目详情查询 | `GET` | `/api/cms/channels/detail` | 39ms | 200 | 1 | ✅ PASS |
-| 67 | CMS | 栏目下文章列表 | `GET` | `/api/cms/channels/archives` | 39ms | 200 | 1 | ✅ PASS |
-| 68 | CMS | 文章正文详情 | `GET` | `/api/cms/archives/detail` | 39ms | 200 | 1 | ✅ PASS |
-| 69 | CMS | 相关推荐文章 | `GET` | `/api/cms/archives/relative` | 20ms | 200 | 1 | ✅ PASS |
-| 70 | CMS | 文章点赞 | `POST` | `/api/cms/archives/like` | 28ms | 200 | 1 | ✅ PASS |
-| 71 | CMS | 文章浏览数计数 | `POST` | `/api/cms/archives/view` | 21ms | 200 | 1 | ✅ PASS |
-| 72 | CMS | 热门标签列表 | `GET` | `/api/cms/tags` | 21ms | 200 | 1 | ✅ PASS |
-| 73 | CMS | 按标签索引文章 | `GET` | `/api/cms/tags/archives` | 27ms | 200 | 1 | ✅ PASS |
-| 74 | CMS | 全文关键字搜索 | `GET` | `/api/cms/search` | 25ms | 200 | 1 | ✅ PASS |
-| 75 | CMS | 热门搜索词 | `GET` | `/api/cms/search/hot` | 28ms | 200 | 1 | ✅ PASS |
-| 76 | CMS | 搜索关键字联想 | `GET` | `/api/cms/search/suggest` | 26ms | 200 | 1 | ✅ PASS |
-| 77 | CMS | 获取文章评论列表 | `GET` | `/api/cms/comments` | 22ms | 200 | 1 | ✅ PASS |
+| 47 | Recommend | 获取推荐列表 | `GET` | `/api/v1/recommendations` | 26ms | 200 | 1 | ✅ PASS |
+| 48 | Recommend | 标记推荐已浏览 | `POST` | `/api/v1/recommendations/view` | 26ms | 200 | 1 | ✅ PASS |
+| 49 | Recommend | 响应推荐结果 | `POST` | `/api/v1/recommendations/respond` | 28ms | 200 | 1 | ✅ PASS |
+| 50 | Recommend | 提交推荐满意度反馈 | `POST` | `/api/v1/recommendations/feedback` | 32ms | 200 | 1 | ✅ PASS |
+| 51 | Promotion | 查询推流投放套餐 | `GET` | `/api/v1/promotions/packages` | 20ms | 200 | 1 | ✅ PASS |
+| 52 | Promotion | 查询当前活跃推流展位 | `GET` | `/api/v1/promotions/active` | 29ms | 200 | 1 | ✅ PASS |
+| 53 | Promotion | 查询推流投放计划 | `GET` | `/api/v1/promotions/campaigns` | 32ms | 200 | 1 | ✅ PASS |
+| 54 | Promotion | 推流数据上报埋点 | `POST` | `/api/v1/promotions/track` | 20ms | 200 | 30001 | ✅ PASS |
+| 55 | Consult | 发起业务咨询 | `POST` | `/api/v1/consultations` | 37ms | 200 | 1 | ✅ PASS |
+| 56 | Consult | 查询咨询会话列表 | `GET` | `/api/v1/consultations` | 39ms | 200 | 1 | ✅ PASS |
+| 57 | Consult | 发送咨询消息 | `POST` | `/api/v1/consultations/messages` | 33ms | 200 | 1 | ✅ PASS |
+| 58 | Consult | 查询咨询消息记录 | `GET` | `/api/v1/consultations/messages` | 36ms | 200 | 1 | ✅ PASS |
+| 59 | Consult | 标记会话已读 | `POST` | `/api/v1/consultations/read` | 29ms | 200 | 1 | ✅ PASS |
+| 60 | Consult | 结束咨询会话 | `POST` | `/api/v1/consultations/close` | 38ms | 200 | 1 | ✅ PASS |
+| 61 | CMS | CMS 首页数据聚合 | `GET` | `/api/cms/index` | 39ms | 200 | 1 | ✅ PASS |
+| 62 | CMS | CMS 站点全局配置 | `GET` | `/api/cms/config` | 25ms | 200 | 1 | ✅ PASS |
+| 63 | CMS | 主导航菜单列表 | `GET` | `/api/cms/navigation` | 23ms | 200 | 1 | ✅ PASS |
+| 64 | CMS | 友情链接列表 | `GET` | `/api/cms/friendlink` | 21ms | 200 | 1 | ✅ PASS |
+| 65 | CMS | 栏目分类列表 | `GET` | `/api/cms/channels` | 22ms | 200 | 1 | ✅ PASS |
+| 66 | CMS | 栏目详情查询 | `GET` | `/api/cms/channels/detail` | 29ms | 200 | 1 | ✅ PASS |
+| 67 | CMS | 栏目下文章列表 | `GET` | `/api/cms/channels/archives` | 23ms | 200 | 1 | ✅ PASS |
+| 68 | CMS | 文章正文详情 | `GET` | `/api/cms/archives/detail` | 30ms | 200 | 1 | ✅ PASS |
+| 69 | CMS | 相关推荐文章 | `GET` | `/api/cms/archives/relative` | 22ms | 200 | 1 | ✅ PASS |
+| 70 | CMS | 文章点赞 | `POST` | `/api/cms/archives/like` | 24ms | 200 | 1 | ✅ PASS |
+| 71 | CMS | 文章浏览数计数 | `POST` | `/api/cms/archives/view` | 18ms | 200 | 1 | ✅ PASS |
+| 72 | CMS | 热门标签列表 | `GET` | `/api/cms/tags` | 19ms | 200 | 1 | ✅ PASS |
+| 73 | CMS | 按标签索引文章 | `GET` | `/api/cms/tags/archives` | 39ms | 200 | 1 | ✅ PASS |
+| 74 | CMS | 全文关键字搜索 | `GET` | `/api/cms/search` | 30ms | 200 | 1 | ✅ PASS |
+| 75 | CMS | 热门搜索词 | `GET` | `/api/cms/search/hot` | 22ms | 200 | 1 | ✅ PASS |
+| 76 | CMS | 搜索关键字联想 | `GET` | `/api/cms/search/suggest` | 25ms | 200 | 1 | ✅ PASS |
+| 77 | CMS | 获取文章评论列表 | `GET` | `/api/cms/comments` | 25ms | 200 | 1 | ✅ PASS |
 | 78 | CMS | 发表互动评论 | `POST` | `/api/cms/comments` | 30ms | 200 | 1 | ✅ PASS |
-| 79 | CMS | CMS 会员概览 | `GET` | `/api/cms/user/overview` | 38ms | 200 | 1 | ✅ PASS |
-| 80 | CMS | CMS 会员收藏列表 | `GET` | `/api/cms/user/favorites` | 31ms | 200 | 1 | ✅ PASS |
+| 79 | CMS | CMS 会员概览 | `GET` | `/api/cms/user/overview` | 33ms | 200 | 1 | ✅ PASS |
+| 80 | CMS | CMS 会员收藏列表 | `GET` | `/api/cms/user/favorites` | 29ms | 200 | 1 | ✅ PASS |
 | 81 | Auth | 退出登录 | `POST` | `/api/v1/auth/logout` | 29ms | 200 | 1 | ✅ PASS |
 
 ## 三、重点接口返回值抽检
@@ -116,12 +116,12 @@
     "msg": "挑战生成成功",
     "data": {
         "address": "0x380d7f00d4bb7870cad919837269636c8420d3bd",
-        "nonce": "dbbf20e05a67e56b4c4816411476d94c",
-        "message": "127.0.0.1:8000 wants you to sign in with your Ethereum account:\n0x380d7f00d4bb7870cad919837269636c8420d3bd\n\nSign in to ITIK with your decentralized wallet.\n\nURI: http://127.0.0.1:8000\nVersion: 1\nChain ID: 1\nNonce: dbbf20e05a67e56b4c4816411476d94c\nIssued At: 2026-10-12T18:06:49Z",
+        "nonce": "c4b415e26143a240c18ca5d2190f4f99",
+        "message": "127.0.0.1:8000 wants you to sign in with your Ethereum account:\n0x380d7f00d4bb7870cad919837269636c8420d3bd\n\nSign in to ITIK with your decentralized wallet.\n\nURI: http://127.0.0.1:8000\nVersion: 1\nChain ID: 1\nNonce: c4b415e26143a240c18ca5d2190f4f99\nIssued At: 2026-10-12T18:13:56Z",
         "expire": 300
     },
-    "request_id": "bd98d71743b5d909e6b971b7829c37be",
-    "time": 1791828409
+    "request_id": "46a8390c9d6c86e2015cb0eb4eea829d",
+    "time": 1791828836
 }
 ```
 
@@ -140,10 +140,10 @@
         "inviter_id": 0,
         "is_new_user": false,
         "role": "OWNER",
-        "token": "fae2c1c9-eb8a-48c2-a00b-c291b13b28f2"
+        "token": "95ba5574-40c8-424b-93f3-699cfc238ba7"
     },
-    "request_id": "ad67358d94af3290b5299986a345083e",
-    "time": 1791828409
+    "request_id": "8ca74161ad55bfb70e6f9c5dd85b6048",
+    "time": 1791828836
 }
 ```
 
@@ -164,7 +164,7 @@
             "inviter_id": 0,
             "avatar": "/assets/img/avatar.png",
             "gender": 0,
-            "bio": "自动化测试写入的个人简介 02:03:50",
+            "bio": "自动化测试写入的个人简介 02:06:49",
             "money": "28888.88",
             "score": 9999,
             "level": 1
@@ -180,8 +180,8 @@
             "active": true
         }
     },
-    "request_id": "a985dd8f8d0973b8efa53147c447c364",
-    "time": 1791828409
+    "request_id": "68d00b7f438fd1b1dca79e05e3bf8938",
+    "time": 1791828836
 }
 ```
 
@@ -244,8 +244,8 @@
             }
         ]
     },
-    "request_id": "61dfcd739c17c2374f066c8a53b22c8f",
-    "time": 1791828409
+    "request_id": "532240678afb037eb96f5cd89458bc95",
+    "time": 1791828836
 }
 ```
 
@@ -266,7 +266,7 @@
                 "region": "全球",
                 "tags": "DEX,去中心化交易,闪兑,流动性",
                 "certified": 1,
-                "views": 15620,
+                "views": 15621,
                 "follows": 3210,
                 "sort_weight": 79,
                 "create_time": "2026-10-10 04:09:23",
@@ -367,8 +367,8 @@
         "page": 1,
         "limit": 5
     },
-    "request_id": "b0782aa5cbd3077f083d78a121b5cfcd",
-    "time": 1791828409
+    "request_id": "8b5728097022e2faa8d32f418b9572c9",
+    "time": 1791828836
 }
 ```
 
@@ -379,11 +379,11 @@
     "code": 1,
     "msg": "咨询已发送",
     "data": {
-        "conversation_id": 35,
-        "message_id": 70
+        "conversation_id": 36,
+        "message_id": 72
     },
-    "request_id": "02a347aa2dab6906bd9482cc394c7196",
-    "time": 1791828411
+    "request_id": "3d771cdc4cbe77b2c479ae46967f8da4",
+    "time": 1791828837
 }
 ```
 
@@ -554,8 +554,8 @@
                 "title": "奥睿科ORICO HU3温室加湿器",
                 "image": "/assets/addons/cms/img/800x600-3.png",
                 "description": "加湿器可以说是目前家里比较常见的生活用品之一了，特别是爱美的女性朋友们，为了能保持容颜润泽，经常会在身旁备用一台。其实对于更多的用户来说，加湿器的主要作用还是放在空调房里，用来调节房间湿度",
-                "views": 6025,
-                "likes": 178,
+                "views": 6026,
+                "likes": 179,
                 "comments": 0,
                 "publishtime": 1553702400
             },
@@ -634,13 +634,13 @@
                 "title": "奥睿科ORICO HU3温室加湿器",
                 "image": "/assets/addons/cms/img/800x600-3.png",
                 "description": "加湿器可以说是目前家里比较常见的生活用品之一了，特别是爱美的女性朋友们，为了能保持容颜润泽，经常会在身旁备用一台。其实对于更多的用户来说，加湿器的主要作用还是放在空调房里，用来调节房间湿度",
-                "views": 6025,
+                "views": 6026,
                 "publishtime": 1553702400
             }
         ]
     },
-    "request_id": "cd761fa3f31707ee88fdd6e6a83e0310",
-    "time": 1791828411
+    "request_id": "91a75a0f8a0201e8d5a7e428e525a053",
+    "time": 1791828837
 }
 ```
 
