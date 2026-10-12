@@ -1,6 +1,7 @@
 {layout name="layout/form" /}
 <form class="layui-form" method="post">
     {:token_field()}
+    {if isset($row)}<input type="hidden" name="row[id]" value="{$row.id}">{/if}
 
     <div class="layui-form-item">
         <label class="layui-form-label">{:__('Name')}</label>
@@ -8,21 +9,9 @@
             <input
                 type="text"
                 name="row[name]"
-                value="{$row.name|htmlentities}"
+                value="{$row.name|default=''|htmlentities}"
                 lay-verify="required"
                 placeholder="{:__('Name')}"
-                autocomplete="off"
-                class="layui-input" />
-        </div>
-    </div>
-
-    <div class="layui-form-item">
-        <label class="layui-form-label">{:__('Nums')}</label>
-        <div class="layui-input-block">
-            <input
-                type="number"
-                name="row[nums]"
-                value="{$row.nums|default=0}"
                 autocomplete="off"
                 class="layui-input" />
         </div>
@@ -34,7 +23,7 @@
             <input
                 type="text"
                 name="row[seotitle]"
-                value="{$row.seotitle|htmlentities}"
+                value="{$row.seotitle|default=''|htmlentities}"
                 placeholder="{:__('Seotitle')}"
                 autocomplete="off"
                 class="layui-input" />
@@ -47,7 +36,7 @@
             <input
                 type="text"
                 name="row[keywords]"
-                value="{$row.keywords|htmlentities}"
+                value="{$row.keywords|default=''|htmlentities}"
                 placeholder="{:__('Keywords')}"
                 autocomplete="off"
                 class="layui-input" />
@@ -57,15 +46,7 @@
     <div class="layui-form-item layui-form-text">
         <label class="layui-form-label">{:__('Description')}</label>
         <div class="layui-input-block">
-            <textarea name="row[description]" placeholder="{:__('Description')}" class="layui-textarea">{$row.description|htmlentities}</textarea>
-        </div>
-    </div>
-
-    <div class="layui-form-item">
-        <label class="layui-form-label">{:__('Autolink')}</label>
-        <div class="layui-input-block">
-            <input type="hidden" name="row[autolink]" value="0" />
-            <input type="checkbox" name="row[autolink]" value="1" lay-skin="switch" lay-text="开启|关闭" {if $row.autolink}checked{/if} />
+            <textarea name="row[description]" placeholder="{:__('Description')}" class="layui-textarea">{$row.description|default=''|htmlentities}</textarea>
         </div>
     </div>
 

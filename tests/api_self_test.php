@@ -690,14 +690,14 @@ class ApiTester
         $resCh = $this->request('GET', '/api/cms/channels');
         $this->record('CMS', '栏目分类列表', 'GET', '/api/cms/channels', $resCh);
 
-        $chId = $resCh['json']['data'][0]['id'] ?? 1;
+        $chId = $resCh['json']['data']['list'][0]['id'] ?? ($resCh['json']['data'][0]['id'] ?? 2);
         $res = $this->request('GET', '/api/cms/channels/detail', ['id' => $chId]);
         $this->record('CMS', '栏目详情查询', 'GET', '/api/cms/channels/detail', $res);
 
         $resArch = $this->request('GET', '/api/cms/channels/archives', ['channel_id' => $chId, 'page' => 1, 'limit' => 5]);
         $this->record('CMS', '栏目下文章列表', 'GET', '/api/cms/channels/archives', $resArch);
 
-        $archId = $resArch['json']['data']['list'][0]['id'] ?? 1;
+        $archId = $resArch['json']['data']['list'][0]['id'] ?? (int)(Db::name('cms_archives')->where('status', 'normal')->value('id') ?: 1);
         $res = $this->request('GET', '/api/cms/archives/detail', ['id' => $archId]);
         $this->record('CMS', '文章正文详情', 'GET', '/api/cms/archives/detail', $res);
 

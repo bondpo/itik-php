@@ -1,43 +1,30 @@
 {layout name="layout/form" /}
 <form class="layui-form" method="post">
     {:token_field()}
+    <input type="hidden" name="row[type]" value="archives" />
 
     <div class="layui-form-item">
         <label class="layui-form-label">{:__('User_id')}</label>
         <div class="layui-input-block">
-            <input type="number" name="row[user_id]" value="{$row.user_id|default=''}" placeholder="{:__('User_id')}" class="layui-input" />
-        </div>
-    </div>
-    <div class="layui-form-item">
-        <label class="layui-form-label">{:__('Type')}</label>
-        <div class="layui-input-block">
-            <input type="radio" name="row[type]" value="archives" title="archives" {if $row.type=='archives'}checked{/if} />
-            <input type="radio" name="row[type]" value="page" title="page" {if $row.type=='page'}checked{/if} />
-            <input type="radio" name="row[type]" value="special" title="special" {if $row.type=='special'}checked{/if} />
+            <input type="number" name="row[user_id]" value="{$row.user_id|default='0'}" placeholder="{:__('User_id')}" class="layui-input" />
         </div>
     </div>
     <div class="layui-form-item">
         <label class="layui-form-label">{:__('Aid')}</label>
         <div class="layui-input-block">
-            <input type="number" name="row[aid]" value="{$row.aid|default=''}" placeholder="{:__('Aid')}" class="layui-input" />
+            <input type="number" name="row[aid]" value="{$row.aid|default=''}" placeholder="{:__('Aid')}" class="layui-input" lay-verify="required" />
         </div>
     </div>
     <div class="layui-form-item">
         <label class="layui-form-label">{:__('Pid')}</label>
         <div class="layui-input-block">
-            <input type="number" name="row[pid]" value="{$row.pid|default=''}" placeholder="{:__('Pid')}" class="layui-input" />
+            <input type="number" name="row[pid]" value="{$row.pid|default='0'}" placeholder="{:__('Pid')}" class="layui-input" />
         </div>
     </div>
     <div class="layui-form-item layui-form-text">
         <label class="layui-form-label">{:__('Content')}</label>
         <div class="layui-input-block">
-            <textarea name="row[content]" placeholder="{:__('Content')}" class="layui-textarea">{$row.content|default=''}</textarea>
-        </div>
-    </div>
-    <div class="layui-form-item">
-        <label class="layui-form-label">{:__('Comments')}</label>
-        <div class="layui-input-block">
-            <input type="number" name="row[comments]" value="{$row.comments|default=''}" placeholder="{:__('Comments')}" class="layui-input" />
+            <textarea name="row[content]" placeholder="{:__('Content')}" class="layui-textarea" lay-verify="required">{$row.content|default=''}</textarea>
         </div>
     </div>
     <div class="layui-form-item">
@@ -50,13 +37,6 @@
         <label class="layui-form-label">{:__('Useragent')}</label>
         <div class="layui-input-block">
             <input type="text" name="row[useragent]" value="{$row.useragent|default=''}" placeholder="{:__('Useragent')}" class="layui-input" />
-        </div>
-    </div>
-    <div class="layui-form-item">
-        <label class="layui-form-label">{:__('Subscribe')}</label>
-        <div class="layui-input-block">
-            <input type="hidden" name="row[subscribe]" value="0" />
-            <input type="checkbox" name="row[subscribe]" value="1" lay-skin="switch" lay-text="开启|关闭" {if $row.subscribe}checked{/if} />
         </div>
     </div>
     <div class="layui-form-item">

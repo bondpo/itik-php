@@ -1,6 +1,6 @@
 # ITIK API 全接口自动化测试报告
 
-> **测试执行时间**: `2026-10-13 00:55:42`  
+> **测试执行时间**: `2026-10-13 01:06:28`  
 > **测试目标服务器**: `http://127.0.0.1:8000`  
 > **接口总数**: **81** 个 | **通过数**: <font color='green'>**81**</font> | **失败数**: <font color='red'>**0**</font> | **测试通过率**: **100%**
 
@@ -24,86 +24,86 @@
 
 | 序号 | 所属模块 | 接口描述 | HTTP Method | 请求路径 (Path) | 耗时 | HTTP状态 | 业务码 | 测试判定 |
 | :--- | :--- | :--- | :---: | :--- | :---: | :---: | :---: | :---: |
-| 1 | Auth | 发送邮箱验证码 | `POST` | `/api/v1/auth/email/send-code` | 170ms | 200 | 30001 | ✅ PASS |
-| 2 | Auth | 钱包挑战 (Challenge) | `POST` | `/api/v1/auth/wallet/challenge` | 20ms | 200 | 1 | ✅ PASS |
+| 1 | Auth | 发送邮箱验证码 | `POST` | `/api/v1/auth/email/send-code` | 20ms | 200 | 40002 | ✅ PASS |
+| 2 | Auth | 钱包挑战 (Challenge) | `POST` | `/api/v1/auth/wallet/challenge` | 15ms | 200 | 1 | ✅ PASS |
 | 3 | Auth | 钱包验签登录 (Verify) | `POST` | `/api/v1/auth/wallet/verify` | 33ms | 200 | 1 | ✅ PASS |
-| 4 | User | 获取个人信息 | `GET` | `/api/v1/users/me` | 21ms | 200 | 1 | ✅ PASS |
-| 5 | User | 更新个人信息 | `PUT` | `/api/v1/users/me` | 24ms | 200 | 1 | ✅ PASS |
-| 6 | User | 查询身份凭证 | `GET` | `/api/v1/users/me/identities` | 23ms | 200 | 1 | ✅ PASS |
-| 7 | User | 查询用户订阅 | `GET` | `/api/v1/users/me/subscription` | 22ms | 200 | 1 | ✅ PASS |
+| 4 | User | 获取个人信息 | `GET` | `/api/v1/users/me` | 25ms | 200 | 1 | ✅ PASS |
+| 5 | User | 更新个人信息 | `PUT` | `/api/v1/users/me` | 25ms | 200 | 1 | ✅ PASS |
+| 6 | User | 查询身份凭证 | `GET` | `/api/v1/users/me/identities` | 25ms | 200 | 1 | ✅ PASS |
+| 7 | User | 查询用户订阅 | `GET` | `/api/v1/users/me/subscription` | 23ms | 200 | 1 | ✅ PASS |
 | 8 | Billing | 获取角色套餐列表 | `GET` | `/api/v1/roles/plans` | 17ms | 200 | 1 | ✅ PASS |
-| 9 | Billing | 查询订单列表 | `GET` | `/api/v1/billing/orders` | 24ms | 200 | 1 | ✅ PASS |
-| 10 | Billing | 创建新订单 | `POST` | `/api/v1/billing/orders` | 29ms | 200 | 1 | ✅ PASS |
-| 11 | Billing | 查询当前订阅态 | `GET` | `/api/v1/billing/subscription` | 20ms | 200 | 1 | ✅ PASS |
-| 12 | Billing | 续费下单 | `POST` | `/api/v1/billing/subscription/renew` | 29ms | 200 | 1 | ✅ PASS |
-| 13 | Project | 获取项目分类树形列表 | `GET` | `/api/v1/projects/categories?tree=1` | 18ms | 200 | 1 | ✅ PASS |
+| 9 | Billing | 查询订单列表 | `GET` | `/api/v1/billing/orders` | 26ms | 200 | 1 | ✅ PASS |
+| 10 | Billing | 创建新订单 | `POST` | `/api/v1/billing/orders` | 27ms | 200 | 1 | ✅ PASS |
+| 11 | Billing | 查询当前订阅态 | `GET` | `/api/v1/billing/subscription` | 21ms | 200 | 1 | ✅ PASS |
+| 12 | Billing | 续费下单 | `POST` | `/api/v1/billing/subscription/renew` | 28ms | 200 | 1 | ✅ PASS |
+| 13 | Project | 获取项目分类树形列表 | `GET` | `/api/v1/projects/categories?tree=1` | 19ms | 200 | 1 | ✅ PASS |
 | 14 | Project | 获取项目分类平铺列表 | `GET` | `/api/v1/projects/categories?tree=0` | 19ms | 200 | 1 | ✅ PASS |
 | 15 | Project | 项目广场公开列表 | `GET` | `/api/v1/projects` | 21ms | 200 | 1 | ✅ PASS |
-| 16 | Project | 按分类赛道筛选项目列表 | `GET` | `/api/v1/projects?category_id=73` | 21ms | 200 | 1 | ✅ PASS |
-| 17 | Project | 项目详情查询(含关联分类) | `GET` | `/api/v1/projects/detail` | 25ms | 200 | 1 | ✅ PASS |
-| 18 | Project | 创建项目草稿(绑定分类) | `POST` | `/api/v1/projects` | 30ms | 200 | 1 | ✅ PASS |
-| 19 | Project | 修改项目资料 | `POST` | `/api/v1/projects/update` | 193ms | 200 | 1 | ✅ PASS |
-| 20 | Project | 查询项目资料库 | `GET` | `/api/v1/projects/materials` | 26ms | 200 | 1 | ✅ PASS |
-| 21 | Project | 上传新增项目资料 | `POST` | `/api/v1/projects/materials` | 27ms | 200 | 1 | ✅ PASS |
-| 22 | Project | 查询项目成员列表 | `GET` | `/api/v1/projects/members` | 49ms | 200 | 1 | ✅ PASS |
-| 23 | Project | 查询项目数据看板 | `GET` | `/api/v1/projects/stats` | 31ms | 200 | 1 | ✅ PASS |
-| 24 | Project | 查询项目发展历程时间轴 | `GET` | `/api/v1/projects/timelines` | 21ms | 200 | 1 | ✅ PASS |
-| 25 | Project | 项目方发布时间轴里程碑 | `POST` | `/api/v1/projects/timelines` | 27ms | 200 | 1 | ✅ PASS |
-| 26 | Project | 项目方更新时间轴节点 | `POST` | `/api/v1/projects/timelines/update` | 26ms | 200 | 1 | ✅ PASS |
-| 27 | Project | 项目方删除时间轴节点 | `POST` | `/api/v1/projects/timelines/delete` | 25ms | 200 | 1 | ✅ PASS |
-| 28 | Content | 资讯公开列表 | `GET` | `/api/v1/contents` | 17ms | 200 | 1 | ✅ PASS |
-| 29 | Content | 我的发布列表 | `GET` | `/api/v1/contents/mine` | 24ms | 200 | 1 | ✅ PASS |
-| 30 | Content | 创建资讯草稿 | `POST` | `/api/v1/contents` | 30ms | 200 | 1 | ✅ PASS |
-| 31 | Content | 查看资讯详情 | `GET` | `/api/v1/contents/detail` | 22ms | 200 | 1 | ✅ PASS |
-| 32 | Content | 更新资讯内容 | `POST` | `/api/v1/contents/update` | 25ms | 200 | 1 | ✅ PASS |
-| 33 | Content | 提交资讯审核 | `POST` | `/api/v1/contents/submit` | 26ms | 200 | 1 | ✅ PASS |
-| 34 | Relation | 关注用户 | `POST` | `/api/v1/relations/follow` | 31ms | 200 | 1 | ✅ PASS |
-| 35 | Relation | 获取关注列表 | `GET` | `/api/v1/relations/following` | 24ms | 200 | 1 | ✅ PASS |
-| 36 | Relation | 获取粉丝列表 | `GET` | `/api/v1/relations/followers` | 22ms | 200 | 1 | ✅ PASS |
-| 37 | Relation | 取消关注 | `POST` | `/api/v1/relations/unfollow` | 24ms | 200 | 1 | ✅ PASS |
-| 38 | Relation | 收藏项目 | `POST` | `/api/v1/relations/favorite` | 25ms | 200 | 1 | ✅ PASS |
+| 16 | Project | 按分类赛道筛选项目列表 | `GET` | `/api/v1/projects?category_id=73` | 20ms | 200 | 1 | ✅ PASS |
+| 17 | Project | 项目详情查询(含关联分类) | `GET` | `/api/v1/projects/detail` | 27ms | 200 | 1 | ✅ PASS |
+| 18 | Project | 创建项目草稿(绑定分类) | `POST` | `/api/v1/projects` | 32ms | 200 | 1 | ✅ PASS |
+| 19 | Project | 修改项目资料 | `POST` | `/api/v1/projects/update` | 25ms | 200 | 1 | ✅ PASS |
+| 20 | Project | 查询项目资料库 | `GET` | `/api/v1/projects/materials` | 24ms | 200 | 1 | ✅ PASS |
+| 21 | Project | 上传新增项目资料 | `POST` | `/api/v1/projects/materials` | 24ms | 200 | 1 | ✅ PASS |
+| 22 | Project | 查询项目成员列表 | `GET` | `/api/v1/projects/members` | 25ms | 200 | 1 | ✅ PASS |
+| 23 | Project | 查询项目数据看板 | `GET` | `/api/v1/projects/stats` | 37ms | 200 | 1 | ✅ PASS |
+| 24 | Project | 查询项目发展历程时间轴 | `GET` | `/api/v1/projects/timelines` | 18ms | 200 | 1 | ✅ PASS |
+| 25 | Project | 项目方发布时间轴里程碑 | `POST` | `/api/v1/projects/timelines` | 33ms | 200 | 1 | ✅ PASS |
+| 26 | Project | 项目方更新时间轴节点 | `POST` | `/api/v1/projects/timelines/update` | 25ms | 200 | 1 | ✅ PASS |
+| 27 | Project | 项目方删除时间轴节点 | `POST` | `/api/v1/projects/timelines/delete` | 26ms | 200 | 1 | ✅ PASS |
+| 28 | Content | 资讯公开列表 | `GET` | `/api/v1/contents` | 19ms | 200 | 1 | ✅ PASS |
+| 29 | Content | 我的发布列表 | `GET` | `/api/v1/contents/mine` | 26ms | 200 | 1 | ✅ PASS |
+| 30 | Content | 创建资讯草稿 | `POST` | `/api/v1/contents` | 34ms | 200 | 1 | ✅ PASS |
+| 31 | Content | 查看资讯详情 | `GET` | `/api/v1/contents/detail` | 27ms | 200 | 1 | ✅ PASS |
+| 32 | Content | 更新资讯内容 | `POST` | `/api/v1/contents/update` | 29ms | 200 | 1 | ✅ PASS |
+| 33 | Content | 提交资讯审核 | `POST` | `/api/v1/contents/submit` | 33ms | 200 | 1 | ✅ PASS |
+| 34 | Relation | 关注用户 | `POST` | `/api/v1/relations/follow` | 34ms | 200 | 1 | ✅ PASS |
+| 35 | Relation | 获取关注列表 | `GET` | `/api/v1/relations/following` | 26ms | 200 | 1 | ✅ PASS |
+| 36 | Relation | 获取粉丝列表 | `GET` | `/api/v1/relations/followers` | 26ms | 200 | 1 | ✅ PASS |
+| 37 | Relation | 取消关注 | `POST` | `/api/v1/relations/unfollow` | 34ms | 200 | 1 | ✅ PASS |
+| 38 | Relation | 收藏项目 | `POST` | `/api/v1/relations/favorite` | 28ms | 200 | 1 | ✅ PASS |
 | 39 | Relation | 获取收藏列表 | `GET` | `/api/v1/relations/favorites` | 26ms | 200 | 1 | ✅ PASS |
-| 40 | Relation | 取消收藏项目 | `POST` | `/api/v1/relations/unfavorite` | 25ms | 200 | 1 | ✅ PASS |
-| 41 | Relation | 拉黑用户 | `POST` | `/api/v1/relations/block` | 25ms | 200 | 1 | ✅ PASS |
-| 42 | Relation | 查看黑名单列表 | `GET` | `/api/v1/relations/blocks` | 22ms | 200 | 1 | ✅ PASS |
-| 43 | Relation | 解除拉黑 | `POST` | `/api/v1/relations/unblock` | 24ms | 200 | 1 | ✅ PASS |
-| 44 | Relation | 举报反馈 | `POST` | `/api/v1/relations/reports` | 22ms | 200 | 30004 | ✅ PASS |
-| 45 | Recommend | 查询今日推荐配额 | `GET` | `/api/v1/recommendations/quota` | 25ms | 200 | 1 | ✅ PASS |
-| 46 | Recommend | 撮合生成智能推荐 | `POST` | `/api/v1/recommendations/generate` | 23ms | 200 | 40002 | ✅ PASS |
-| 47 | Recommend | 获取推荐列表 | `GET` | `/api/v1/recommendations` | 26ms | 200 | 1 | ✅ PASS |
-| 48 | Recommend | 标记推荐已浏览 | `POST` | `/api/v1/recommendations/view` | 23ms | 200 | 1 | ✅ PASS |
+| 40 | Relation | 取消收藏项目 | `POST` | `/api/v1/relations/unfavorite` | 29ms | 200 | 1 | ✅ PASS |
+| 41 | Relation | 拉黑用户 | `POST` | `/api/v1/relations/block` | 24ms | 200 | 1 | ✅ PASS |
+| 42 | Relation | 查看黑名单列表 | `GET` | `/api/v1/relations/blocks` | 24ms | 200 | 1 | ✅ PASS |
+| 43 | Relation | 解除拉黑 | `POST` | `/api/v1/relations/unblock` | 26ms | 200 | 1 | ✅ PASS |
+| 44 | Relation | 举报反馈 | `POST` | `/api/v1/relations/reports` | 31ms | 200 | 30004 | ✅ PASS |
+| 45 | Recommend | 查询今日推荐配额 | `GET` | `/api/v1/recommendations/quota` | 27ms | 200 | 1 | ✅ PASS |
+| 46 | Recommend | 撮合生成智能推荐 | `POST` | `/api/v1/recommendations/generate` | 35ms | 200 | 40002 | ✅ PASS |
+| 47 | Recommend | 获取推荐列表 | `GET` | `/api/v1/recommendations` | 38ms | 200 | 1 | ✅ PASS |
+| 48 | Recommend | 标记推荐已浏览 | `POST` | `/api/v1/recommendations/view` | 21ms | 200 | 1 | ✅ PASS |
 | 49 | Recommend | 响应推荐结果 | `POST` | `/api/v1/recommendations/respond` | 23ms | 200 | 1 | ✅ PASS |
-| 50 | Recommend | 提交推荐满意度反馈 | `POST` | `/api/v1/recommendations/feedback` | 25ms | 200 | 1 | ✅ PASS |
-| 51 | Promotion | 查询推流投放套餐 | `GET` | `/api/v1/promotions/packages` | 16ms | 200 | 1 | ✅ PASS |
-| 52 | Promotion | 查询当前活跃推流展位 | `GET` | `/api/v1/promotions/active` | 17ms | 200 | 1 | ✅ PASS |
-| 53 | Promotion | 查询推流投放计划 | `GET` | `/api/v1/promotions/campaigns` | 23ms | 200 | 1 | ✅ PASS |
-| 54 | Promotion | 推流数据上报埋点 | `POST` | `/api/v1/promotions/track` | 17ms | 200 | 30001 | ✅ PASS |
-| 55 | Consult | 发起业务咨询 | `POST` | `/api/v1/consultations` | 32ms | 200 | 1 | ✅ PASS |
-| 56 | Consult | 查询咨询会话列表 | `GET` | `/api/v1/consultations` | 31ms | 200 | 1 | ✅ PASS |
-| 57 | Consult | 发送咨询消息 | `POST` | `/api/v1/consultations/messages` | 32ms | 200 | 1 | ✅ PASS |
-| 58 | Consult | 查询咨询消息记录 | `GET` | `/api/v1/consultations/messages` | 31ms | 200 | 1 | ✅ PASS |
-| 59 | Consult | 标记会话已读 | `POST` | `/api/v1/consultations/read` | 29ms | 200 | 1 | ✅ PASS |
-| 60 | Consult | 结束咨询会话 | `POST` | `/api/v1/consultations/close` | 28ms | 200 | 1 | ✅ PASS |
+| 50 | Recommend | 提交推荐满意度反馈 | `POST` | `/api/v1/recommendations/feedback` | 34ms | 200 | 1 | ✅ PASS |
+| 51 | Promotion | 查询推流投放套餐 | `GET` | `/api/v1/promotions/packages` | 17ms | 200 | 1 | ✅ PASS |
+| 52 | Promotion | 查询当前活跃推流展位 | `GET` | `/api/v1/promotions/active` | 22ms | 200 | 1 | ✅ PASS |
+| 53 | Promotion | 查询推流投放计划 | `GET` | `/api/v1/promotions/campaigns` | 25ms | 200 | 1 | ✅ PASS |
+| 54 | Promotion | 推流数据上报埋点 | `POST` | `/api/v1/promotions/track` | 16ms | 200 | 30001 | ✅ PASS |
+| 55 | Consult | 发起业务咨询 | `POST` | `/api/v1/consultations` | 34ms | 200 | 1 | ✅ PASS |
+| 56 | Consult | 查询咨询会话列表 | `GET` | `/api/v1/consultations` | 38ms | 200 | 1 | ✅ PASS |
+| 57 | Consult | 发送咨询消息 | `POST` | `/api/v1/consultations/messages` | 29ms | 200 | 1 | ✅ PASS |
+| 58 | Consult | 查询咨询消息记录 | `GET` | `/api/v1/consultations/messages` | 28ms | 200 | 1 | ✅ PASS |
+| 59 | Consult | 标记会话已读 | `POST` | `/api/v1/consultations/read` | 27ms | 200 | 1 | ✅ PASS |
+| 60 | Consult | 结束咨询会话 | `POST` | `/api/v1/consultations/close` | 24ms | 200 | 1 | ✅ PASS |
 | 61 | CMS | CMS 首页数据聚合 | `GET` | `/api/cms/index` | 31ms | 200 | 1 | ✅ PASS |
 | 62 | CMS | CMS 站点全局配置 | `GET` | `/api/cms/config` | 20ms | 200 | 1 | ✅ PASS |
-| 63 | CMS | 主导航菜单列表 | `GET` | `/api/cms/navigation` | 26ms | 200 | 1 | ✅ PASS |
-| 64 | CMS | 友情链接列表 | `GET` | `/api/cms/friendlink` | 19ms | 200 | 1 | ✅ PASS |
-| 65 | CMS | 栏目分类列表 | `GET` | `/api/cms/channels` | 18ms | 200 | 1 | ✅ PASS |
-| 66 | CMS | 栏目详情查询 | `GET` | `/api/cms/channels/detail` | 24ms | 200 | 1 | ✅ PASS |
-| 67 | CMS | 栏目下文章列表 | `GET` | `/api/cms/channels/archives` | 23ms | 200 | 1 | ✅ PASS |
-| 68 | CMS | 文章正文详情 | `GET` | `/api/cms/archives/detail` | 31ms | 200 | 1 | ✅ PASS |
-| 69 | CMS | 相关推荐文章 | `GET` | `/api/cms/archives/relative` | 19ms | 200 | 1 | ✅ PASS |
-| 70 | CMS | 文章点赞 | `POST` | `/api/cms/archives/like` | 27ms | 200 | 1 | ✅ PASS |
+| 63 | CMS | 主导航菜单列表 | `GET` | `/api/cms/navigation` | 19ms | 200 | 1 | ✅ PASS |
+| 64 | CMS | 友情链接列表 | `GET` | `/api/cms/friendlink` | 21ms | 200 | 1 | ✅ PASS |
+| 65 | CMS | 栏目分类列表 | `GET` | `/api/cms/channels` | 19ms | 200 | 1 | ✅ PASS |
+| 66 | CMS | 栏目详情查询 | `GET` | `/api/cms/channels/detail` | 27ms | 200 | 1 | ✅ PASS |
+| 67 | CMS | 栏目下文章列表 | `GET` | `/api/cms/channels/archives` | 27ms | 200 | 1 | ✅ PASS |
+| 68 | CMS | 文章正文详情 | `GET` | `/api/cms/archives/detail` | 30ms | 200 | 1 | ✅ PASS |
+| 69 | CMS | 相关推荐文章 | `GET` | `/api/cms/archives/relative` | 21ms | 200 | 1 | ✅ PASS |
+| 70 | CMS | 文章点赞 | `POST` | `/api/cms/archives/like` | 34ms | 200 | 1 | ✅ PASS |
 | 71 | CMS | 文章浏览数计数 | `POST` | `/api/cms/archives/view` | 19ms | 200 | 1 | ✅ PASS |
-| 72 | CMS | 热门标签列表 | `GET` | `/api/cms/tags` | 18ms | 200 | 1 | ✅ PASS |
-| 73 | CMS | 按标签索引文章 | `GET` | `/api/cms/tags/archives` | 26ms | 200 | 1 | ✅ PASS |
-| 74 | CMS | 全文关键字搜索 | `GET` | `/api/cms/search` | 21ms | 200 | 1 | ✅ PASS |
+| 72 | CMS | 热门标签列表 | `GET` | `/api/cms/tags` | 20ms | 200 | 1 | ✅ PASS |
+| 73 | CMS | 按标签索引文章 | `GET` | `/api/cms/tags/archives` | 24ms | 200 | 1 | ✅ PASS |
+| 74 | CMS | 全文关键字搜索 | `GET` | `/api/cms/search` | 23ms | 200 | 1 | ✅ PASS |
 | 75 | CMS | 热门搜索词 | `GET` | `/api/cms/search/hot` | 16ms | 200 | 1 | ✅ PASS |
-| 76 | CMS | 搜索关键字联想 | `GET` | `/api/cms/search/suggest` | 20ms | 200 | 1 | ✅ PASS |
-| 77 | CMS | 获取文章评论列表 | `GET` | `/api/cms/comments` | 22ms | 200 | 1 | ✅ PASS |
-| 78 | CMS | 发表互动评论 | `POST` | `/api/cms/comments` | 29ms | 200 | 1 | ✅ PASS |
-| 79 | CMS | CMS 会员概览 | `GET` | `/api/cms/user/overview` | 31ms | 200 | 1 | ✅ PASS |
-| 80 | CMS | CMS 会员收藏列表 | `GET` | `/api/cms/user/favorites` | 24ms | 200 | 1 | ✅ PASS |
+| 76 | CMS | 搜索关键字联想 | `GET` | `/api/cms/search/suggest` | 17ms | 200 | 1 | ✅ PASS |
+| 77 | CMS | 获取文章评论列表 | `GET` | `/api/cms/comments` | 18ms | 200 | 1 | ✅ PASS |
+| 78 | CMS | 发表互动评论 | `POST` | `/api/cms/comments` | 27ms | 200 | 1 | ✅ PASS |
+| 79 | CMS | CMS 会员概览 | `GET` | `/api/cms/user/overview` | 33ms | 200 | 1 | ✅ PASS |
+| 80 | CMS | CMS 会员收藏列表 | `GET` | `/api/cms/user/favorites` | 26ms | 200 | 1 | ✅ PASS |
 | 81 | Auth | 退出登录 | `POST` | `/api/v1/auth/logout` | 22ms | 200 | 1 | ✅ PASS |
 
 ## 三、重点接口返回值抽检
@@ -116,12 +116,12 @@
     "msg": "挑战生成成功",
     "data": {
         "address": "0x380d7f00d4bb7870cad919837269636c8420d3bd",
-        "nonce": "33c3d0b20e5fae7a847ffa61c5517408",
-        "message": "127.0.0.1:8000 wants you to sign in with your Ethereum account:\n0x380d7f00d4bb7870cad919837269636c8420d3bd\n\nSign in to ITIK with your decentralized wallet.\n\nURI: http://127.0.0.1:8000\nVersion: 1\nChain ID: 1\nNonce: 33c3d0b20e5fae7a847ffa61c5517408\nIssued At: 2026-10-12T16:55:40Z",
+        "nonce": "643b757cabff4857986c60a222494567",
+        "message": "127.0.0.1:8000 wants you to sign in with your Ethereum account:\n0x380d7f00d4bb7870cad919837269636c8420d3bd\n\nSign in to ITIK with your decentralized wallet.\n\nURI: http://127.0.0.1:8000\nVersion: 1\nChain ID: 1\nNonce: 643b757cabff4857986c60a222494567\nIssued At: 2026-10-12T17:06:26Z",
         "expire": 300
     },
-    "request_id": "9a26e9c74dabaccaa8cd2710d90508f1",
-    "time": 1791824140
+    "request_id": "f93984d05a7901170bee2f4d62aab133",
+    "time": 1791824786
 }
 ```
 
@@ -140,10 +140,10 @@
         "inviter_id": 0,
         "is_new_user": false,
         "role": "OWNER",
-        "token": "930e7bf4-dcf3-46ea-b317-ff53258c10aa"
+        "token": "6b24cc04-2f28-4d7b-bb53-e8c86c825a1c"
     },
-    "request_id": "bbef13c584d038eae6e7593d5339fcd9",
-    "time": 1791824140
+    "request_id": "d93cd4fc29c6f3897d5fc1d6bf55292f",
+    "time": 1791824786
 }
 ```
 
@@ -164,7 +164,7 @@
             "inviter_id": 0,
             "avatar": "/assets/img/avatar.png",
             "gender": 0,
-            "bio": "自动化测试写入的个人简介 00:51:31",
+            "bio": "自动化测试写入的个人简介 01:05:55",
             "money": "28888.88",
             "score": 9999,
             "level": 1
@@ -180,8 +180,8 @@
             "active": true
         }
     },
-    "request_id": "0852996ed60316cbf86dc2c5d0693b41",
-    "time": 1791824140
+    "request_id": "3bed089085bc362deda97dafbde783d4",
+    "time": 1791824786
 }
 ```
 
@@ -244,8 +244,8 @@
             }
         ]
     },
-    "request_id": "fa99e1e2594904736d342078e3ae8009",
-    "time": 1791824140
+    "request_id": "4b23f4fb211c306169cc696b0417f15e",
+    "time": 1791824786
 }
 ```
 
@@ -266,7 +266,7 @@
                 "region": "全球",
                 "tags": "DEX,去中心化交易,闪兑,流动性",
                 "certified": 1,
-                "views": 15608,
+                "views": 15610,
                 "follows": 3210,
                 "sort_weight": 79,
                 "create_time": "2026-10-10 04:09:23",
@@ -367,8 +367,8 @@
         "page": 1,
         "limit": 5
     },
-    "request_id": "dd7951d5288cef8187364b4e958f7851",
-    "time": 1791824140
+    "request_id": "496f3874b7edfeb650651fff9647be74",
+    "time": 1791824787
 }
 ```
 
@@ -379,11 +379,11 @@
     "code": 1,
     "msg": "咨询已发送",
     "data": {
-        "conversation_id": 23,
-        "message_id": 46
+        "conversation_id": 25,
+        "message_id": 50
     },
-    "request_id": "a4b0a1896f40c257f0e95ed62a680b99",
-    "time": 1791824141
+    "request_id": "7727cd1ad2ac225825a4e82e3f7dd9d8",
+    "time": 1791824788
 }
 ```
 
@@ -415,151 +415,6 @@
             }
         },
         "channels": [
-            {
-                "id": 22,
-                "parent_id": 0,
-                "type": "link",
-                "model_id": 1,
-                "name": "首页",
-                "image": "",
-                "flag": "",
-                "seotitle": "",
-                "keywords": "",
-                "description": "",
-                "diyname": "index",
-                "outlink": "__INDEX__/cms/",
-                "linktype": "",
-                "linkid": 0,
-                "items": 0,
-                "weigh": 10,
-                "pagesize": 10,
-                "vip": 0,
-                "listtype": 0,
-                "iscontribute": 0,
-                "isnav": 1,
-                "children": []
-            },
-            {
-                "id": 1,
-                "parent_id": 0,
-                "type": "channel",
-                "model_id": 1,
-                "name": "新闻中心",
-                "image": "",
-                "flag": "",
-                "seotitle": "",
-                "keywords": "",
-                "description": "",
-                "diyname": "news",
-                "outlink": "",
-                "linktype": "",
-                "linkid": 0,
-                "items": 0,
-                "weigh": 9,
-                "pagesize": 10,
-                "vip": 0,
-                "listtype": 0,
-                "iscontribute": 1,
-                "isnav": 1,
-                "children": [
-                    {
-                        "id": 3,
-                        "parent_id": 1,
-                        "type": "list",
-                        "model_id": 1,
-                        "name": "互联网",
-                        "image": "",
-                        "flag": "recommend",
-                        "seotitle": "",
-                        "keywords": "",
-                        "description": "",
-                        "diyname": "internet",
-                        "outlink": "",
-                        "linktype": "",
-                        "linkid": 0,
-                        "items": 5,
-                        "weigh": 0,
-                        "pagesize": 10,
-                        "vip": 0,
-                        "listtype": 0,
-                        "iscontribute": 1,
-                        "isnav": 1,
-                        "children": []
-                    },
-                    {
-                        "id": 4,
-                        "parent_id": 1,
-                        "type": "list",
-                        "model_id": 1,
-                        "name": "安全",
-                        "image": "",
-                        "flag": "recommend",
-                        "seotitle": "",
-                        "keywords": "",
-                        "description": "",
-                        "diyname": "security",
-                        "outlink": "",
-                        "linktype": "",
-                        "linkid": 0,
-                        "items": 3,
-                        "weigh": 0,
-                        "pagesize": 10,
-                        "vip": 0,
-                        "listtype": 0,
-                        "iscontribute": 1,
-                        "isnav": 1,
-                        "children": []
-                    },
-                    {
-                        "id": 5,
-                        "parent_id": 1,
-                        "type": "list",
-                        "model_id": 1,
-                        "name": "投资",
-                        "image": "",
-                        "flag": "recommend",
-                        "seotitle": "",
-                        "keywords": "",
-                        "description": "",
-                        "diyname": "investment",
-                        "outlink": "",
-                        "linktype": "",
-                        "linkid": 0,
-                        "items": 5,
-                        "weigh": 0,
-                        "pagesize": 10,
-                        "vip": 0,
-                        "listtype": 0,
-                        "iscontribute": 1,
-                        "isnav": 1,
-                        "children": []
-                    },
-                    {
-                        "id": 6,
-                        "parent_id": 1,
-                        "type": "list",
-                        "model_id": 1,
-                        "name": "硬件",
-                        "image": "",
-                        "flag": "recommend",
-                        "seotitle": "",
-                        "keywords": "",
-                        "description": "",
-                        "diyname": "hardware",
-                        "outlink": "",
-                        "linktype": "",
-                        "linkid": 0,
-                        "items": 8,
-                        "weigh": 0,
-                        "pagesize": 10,
-                        "vip": 0,
-                        "listtype": 0,
-                        "iscontribute": 1,
-                        "isnav": 1,
-                        "children": []
-                    }
-                ]
-            },
             {
                 "id": 2,
                 "parent_id": 0,
@@ -656,305 +511,78 @@
                         "children": []
                     }
                 ]
-            },
-            {
-                "id": 11,
-                "parent_id": 0,
-                "type": "channel",
-                "model_id": 3,
-                "name": "下载中心",
-                "image": "",
-                "flag": "",
-                "seotitle": "",
-                "keywords": "",
-                "description": "",
-                "diyname": "download",
-                "outlink": "",
-                "linktype": "",
-                "linkid": 0,
-                "items": 0,
-                "weigh": 7,
-                "pagesize": 10,
-                "vip": 0,
-                "listtype": 0,
-                "iscontribute": 1,
-                "isnav": 1,
-                "children": [
-                    {
-                        "id": 12,
-                        "parent_id": 11,
-                        "type": "list",
-                        "model_id": 3,
-                        "name": "应用软件",
-                        "image": "",
-                        "flag": "",
-                        "seotitle": "",
-                        "keywords": "",
-                        "description": "",
-                        "diyname": "app",
-                        "outlink": "",
-                        "linktype": "",
-                        "linkid": 0,
-                        "items": 18,
-                        "weigh": 0,
-                        "pagesize": 10,
-                        "vip": 0,
-                        "listtype": 0,
-                        "iscontribute": 1,
-                        "isnav": 1,
-                        "children": []
-                    },
-                    {
-                        "id": 13,
-                        "parent_id": 11,
-                        "type": "list",
-                        "model_id": 3,
-                        "name": "媒体工具",
-                        "image": "",
-                        "flag": "",
-                        "seotitle": "",
-                        "keywords": "",
-                        "description": "",
-                        "diyname": "media",
-                        "outlink": "",
-                        "linktype": "",
-                        "linkid": 0,
-                        "items": 18,
-                        "weigh": 0,
-                        "pagesize": 10,
-                        "vip": 0,
-                        "listtype": 0,
-                        "iscontribute": 1,
-                        "isnav": 1,
-                        "children": []
-                    },
-                    {
-                        "id": 14,
-                        "parent_id": 11,
-                        "type": "list",
-                        "model_id": 3,
-                        "name": "网络工具",
-                        "image": "",
-                        "flag": "",
-                        "seotitle": "",
-                        "keywords": "",
-                        "description": "",
-                        "diyname": "network",
-                        "outlink": "",
-                        "linktype": "",
-                        "linkid": 0,
-                        "items": 20,
-                        "weigh": 0,
-                        "pagesize": 10,
-                        "vip": 0,
-                        "listtype": 0,
-                        "iscontribute": 1,
-                        "isnav": 1,
-                        "children": []
-                    }
-                ]
-            },
-            {
-                "id": 15,
-                "parent_id": 0,
-                "type": "link",
-                "model_id": 1,
-                "name": "自定义表单",
-                "image": "",
-                "flag": "",
-                "seotitle": "",
-                "keywords": "",
-                "description": "",
-                "diyname": "message",
-                "outlink": "__INDEX__/cms/d/message.html",
-                "linktype": "",
-                "linkid": 0,
-                "items": 0,
-                "weigh": 6,
-                "pagesize": 10,
-                "vip": 0,
-                "listtype": 0,
-                "iscontribute": 0,
-                "isnav": 1,
-                "children": []
-            },
-            {
-                "id": 16,
-                "parent_id": 0,
-                "type": "link",
-                "model_id": 1,
-                "name": "单页",
-                "image": "",
-                "flag": "",
-                "seotitle": "",
-                "keywords": "",
-                "description": "",
-                "diyname": "page",
-                "outlink": "__INDEX__/cms/p/aboutus.html",
-                "linktype": "",
-                "linkid": 0,
-                "items": 0,
-                "weigh": 5,
-                "pagesize": 10,
-                "vip": 0,
-                "listtype": 0,
-                "iscontribute": 0,
-                "isnav": 1,
-                "children": []
-            },
-            {
-                "id": 23,
-                "parent_id": 0,
-                "type": "link",
-                "model_id": 1,
-                "name": "专题",
-                "image": "",
-                "flag": "",
-                "seotitle": "",
-                "keywords": "",
-                "description": "",
-                "diyname": "special",
-                "outlink": "__INDEX__/cms/special/it.html",
-                "linktype": "",
-                "linkid": 0,
-                "items": 0,
-                "weigh": 4,
-                "pagesize": 10,
-                "vip": 0,
-                "listtype": 0,
-                "iscontribute": 0,
-                "isnav": 1,
-                "children": []
-            },
-            {
-                "id": 17,
-                "parent_id": 0,
-                "type": "link",
-                "model_id": 1,
-                "name": "更多",
-                "image": "",
-                "flag": "",
-                "seotitle": "",
-                "keywords": "",
-                "description": "",
-                "diyname": "morelink",
-                "outlink": "javascript:",
-                "linktype": "",
-                "linkid": 0,
-                "items": 0,
-                "weigh": 3,
-                "pagesize": 10,
-                "vip": 0,
-                "listtype": 0,
-                "iscontribute": 0,
-                "isnav": 1,
-                "children": [
-                    {
-                        "id": 18,
-                        "parent_id": 17,
-                        "type": "link",
-                        "model_id": 1,
-                        "name": "百度",
-                        "image": "",
-                        "flag": "",
-                        "seotitle": "",
-                        "keywords": "",
-                        "description": "",
-                        "diyname": "baidu",
-                        "outlink": "https://www.baidu.com",
-                        "linktype": "",
-                        "linkid": 0,
-                        "items": 0,
-                        "weigh": 4,
-                        "pagesize": 10,
-                        "vip": 0,
-                        "listtype": 0,
-                        "iscontribute": 0,
-                        "isnav": 1,
-                        "children": []
-                    }
-                ]
             }
         ],
         "blocks": [],
         "hot": [
             {
-                "id": 41,
-                "channel_id": 12,
-                "title": "Sublime Text 3.2 Build 3202",
-                "image": "/assets/addons/cms/img/800x600-3.png",
-                "description": "Sublime Text被称作Mac下的TextMate，而根据其官网介绍，Sublime Text的特点如下：拥有高效、没有干扰的界面，在编辑方面的多选、宏、代码片段等功能，以及很有特色的Minimap。",
-                "views": 9992,
-                "likes": 11,
-                "comments": 0,
-                "publishtime": 1553443200
-            },
-            {
-                "id": 80,
-                "channel_id": 14,
-                "title": "Jump Desktop 8.2.14 远程桌面",
-                "image": "/assets/addons/cms/img/800x600-2.png",
-                "description": "Jump Desktop 是MAC OS平台上的一款远程控制程序，支持Windows和Mac 双平台，通过邮件关联即可帮助设备自动找到桌面并进行操作。",
-                "views": 9870,
-                "likes": 219,
+                "id": 98,
+                "channel_id": 9,
+                "title": "Samsung Galaxy 智能手机",
+                "image": "/assets/addons/cms/img/800x600-4.png",
+                "description": "据外媒最新消息，美国权威消费者杂志《消费者报告》对全球最新智能手机进行了评比，三星Galaxy S10+以90分拿下榜单第一。而苹果iPhone XS Max和三星Galaxy S10虽分数同样也是90分，但却以小数点的差距，分别位列第二位和第三位。",
+                "views": 8472,
+                "likes": 112,
                 "comments": 0,
                 "publishtime": 1553616000
             },
             {
-                "id": 40,
-                "channel_id": 12,
-                "title": "Qbserve 1.82 追踪你在 Mac 上的时间消耗",
+                "id": 92,
+                "channel_id": 9,
+                "title": "Macbook Pro Retina 笔记本",
+                "image": "/assets/addons/cms/img/800x600-2.png",
+                "description": "MacBook Pro Retina拥有更先进的元件，更先进的技术——最新的第四代双核与四核Intel处理器、速度高达700MB/s 的基于PCIe闪存、被称为5G网络的802.11ac无线网络技术、高达20Gb/s速度的Thunderbolt 2端口。",
+                "views": 7035,
+                "likes": 289,
+                "comments": 0,
+                "publishtime": 1553616000
+            },
+            {
+                "id": 81,
+                "channel_id": 9,
+                "title": "无线WIFI智能机器人",
                 "image": "/assets/addons/cms/img/800x600-1.png",
-                "description": "创建多页PDF文档 多功能3D建模器 Rhinoceros 5.5 多功能3D建模器 不受限制的自由形式三维建模工具。可以创建，编辑，分析，文档，渲染，动画和翻译NURBS曲线，曲面和实体",
-                "views": 9783,
+                "description": "WiFi是一种无线局域网运用技术，其出现以来，凭借组网方便、易于扩展等特点，有着广泛的应用前景。而无线接入和高速传输是WiFi的主要技术优点，WiFi技术与机器人技术的结合便产生了WiFiRobot。",
+                "views": 6738,
+                "likes": 57,
+                "comments": 0,
+                "publishtime": 1553616000
+            },
+            {
+                "id": 109,
+                "channel_id": 8,
+                "title": "奥睿科ORICO HU3温室加湿器",
+                "image": "/assets/addons/cms/img/800x600-3.png",
+                "description": "加湿器可以说是目前家里比较常见的生活用品之一了，特别是爱美的女性朋友们，为了能保持容颜润泽，经常会在身旁备用一台。其实对于更多的用户来说，加湿器的主要作用还是放在空调房里，用来调节房间湿度",
+                "views": 6015,
+                "likes": 168,
+                "comments": 0,
+                "publishtime": 1553702400
+            },
+            {
+                "id": 104,
+                "channel_id": 10,
+                "title": "智能游戏WIFI无线手柄",
+                "image": "/assets/addons/cms/img/800x600-1.png",
+                "description": "游戏手柄品种琳琅满目，而游戏手柄除了可以在电脑上进行有线连接以外，很多手柄厂商也设计出了无线连接的手柄，毕竟厂商和消费者心知肚明：无线才是未来。与手机去除掉耳机孔不同，手柄的无线设计非常受欢迎。",
+                "views": 5668,
                 "likes": 296,
                 "comments": 0,
-                "publishtime": 1553443200
+                "publishtime": 1553702400
             },
             {
-                "id": 75,
-                "channel_id": 12,
-                "title": "eZip 粉丝力荐的压缩软件",
-                "image": "/assets/addons/cms/img/800x600-1.png",
-                "description": "eZip是一款功能上跟 Betterzip 差不多，支持格式很多，支持不解压预览，支持QuickLook，支持拖拽解压。",
-                "views": 9442,
-                "likes": 276,
-                "comments": 0,
-                "publishtime": 1553616000
-            },
-            {
-                "id": 82,
-                "channel_id": 14,
-                "title": "WiFi Explorer Pro 2.1.6 Mac上强大的WiFi无线扫描和管理工具",
-                "image": "/assets/addons/cms/img/800x600-2.png",
-                "description": "WiFi Explorer Pro是一款运行在Mac平台上的WiFi资源管理器专业版，可以帮助用户监控和排除无线网络故障，还具备信息元素解码、注释和自定义颜色、频谱分析整合、增强过滤等实用的功能。",
-                "views": 9190,
-                "likes": 10,
-                "comments": 0,
-                "publishtime": 1553616000
-            },
-            {
-                "id": 74,
-                "channel_id": 12,
-                "title": "Banktivity 7.1.2 财务管理软件",
-                "image": "/assets/addons/cms/img/800x600-1.png",
-                "description": "Banktivity是一款Mac上强大专业的财务管理软件，具有丰富的数据导入和导出功能、多账户管理、预算管理、数据同步、智能的报表等等功能",
-                "views": 9101,
+                "id": 96,
+                "channel_id": 9,
+                "title": "GoPro Hero4 Silver 高清摄像机",
+                "image": "/assets/addons/cms/img/800x600-4.png",
+                "description": "玩自拍，玩高清摄影，玩极限摄影，有一个牌子不得不提，这就是GoPro，也就是近期这个玩具开始时兴起来，无论是一些孩子通过GoPro拍到了外太空上地球的影像，还是飞行员用GoPro玩自拍搞得机毁人亡，还是100岁老太跳伞，都有GoPro的身影，同样越来越多的人开始发掘GoPro的潜力和可玩性。",
+                "views": 5325,
                 "likes": 281,
                 "comments": 0,
                 "publishtime": 1553616000
             }
         ],
         "latest": [
-            {
-                "id": 107,
-                "channel_id": 8,
-                "title": "米家无线投影仪青春版",
-                "image": "/assets/addons/cms/img/800x600-3.png",
-                "description": "从2017年推出首款激光电视以来，小米正式“扎根”智能微投领域，目前已经推出了三款家用投影产品，其中9999元的激光电视主要针对的还是高端家庭用户，而米家投影仪系列的两款产品则更多的面向普通家庭和年轻消费群体",
-                "views": 381,
-                "publishtime": 1553702400
-            },
             {
                 "id": 108,
                 "channel_id": 8,
@@ -992,6 +620,15 @@
                 "publishtime": 1553702400
             },
             {
+                "id": 107,
+                "channel_id": 8,
+                "title": "米家无线投影仪青春版",
+                "image": "/assets/addons/cms/img/800x600-3.png",
+                "description": "从2017年推出首款激光电视以来，小米正式“扎根”智能微投领域，目前已经推出了三款家用投影产品，其中9999元的激光电视主要针对的还是高端家庭用户，而米家投影仪系列的两款产品则更多的面向普通家庭和年轻消费群体",
+                "views": 381,
+                "publishtime": 1553702400
+            },
+            {
                 "id": 109,
                 "channel_id": 8,
                 "title": "奥睿科ORICO HU3温室加湿器",
@@ -1002,8 +639,8 @@
             }
         ]
     },
-    "request_id": "397599459932d34d9cce9eddf30196d4",
-    "time": 1791824141
+    "request_id": "43201874145c414bb0dfc6714f5c8a75",
+    "time": 1791824788
 }
 ```
 

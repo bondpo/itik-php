@@ -44,14 +44,9 @@
         </div>
     </div>
     <div class="layui-form-item">
-        <label class="layui-form-label">{:__('Parsetpl')}</label>
-        <div class="layui-input-block">
-        </div>
-    </div>
-    <div class="layui-form-item">
         <label class="layui-form-label">{:__('Weigh')}</label>
         <div class="layui-input-block">
-            <input type="number" name="row[weigh]" value="{$row.weigh|default=''}" placeholder="{:__('Weigh')}" class="layui-input" />
+            <input type="number" name="row[weigh]" value="{$row.weigh|default='0'}" placeholder="{:__('Weigh')}" class="layui-input" />
         </div>
     </div>
     <div class="layui-form-item">

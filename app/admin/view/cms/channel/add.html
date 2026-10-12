@@ -2,29 +2,34 @@
 <form class="layui-form" method="post">
     {:token_field()}
 
-
-    <div class="layui-form-item">
-        <label class="layui-form-label">{:__('Model_id')}</label>
-        <div class="layui-input-block">
-            <input type="number" name="row[model_id]" value="{$row.model_id|default=''}" placeholder="{:__('Model_id')}" class="layui-input" />
-        </div>
-    </div>
     <div class="layui-form-item">
         <label class="layui-form-label">{:__('Parent_id')}</label>
         <div class="layui-input-block">
-            <input type="number" name="row[parent_id]" value="{$row.parent_id|default=''}" placeholder="{:__('Parent_id')}" class="layui-input" />
+            <select name="row[parent_id]" lay-search>
+                <option value="0">无（顶级栏目）</option>
+                {$channelOptions|raw}
+            </select>
         </div>
     </div>
+
     <div class="layui-form-item">
         <label class="layui-form-label">{:__('Name')}</label>
         <div class="layui-input-block">
-            <input type="text" name="row[name]" value="{$row.name|default=''}" placeholder="{:__('Name')}" class="layui-input" />
+            <input type="text" name="row[name]" value="" lay-verify="required" placeholder="{:__('Name')}" class="layui-input" autocomplete="off" />
         </div>
     </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Diyname')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[diyname]" value="" placeholder="自定义英文别名/标识（如 news，可选）" class="layui-input" autocomplete="off" />
+        </div>
+    </div>
+
     <div class="layui-form-item">
         <label class="layui-form-label">{:__('Image')}</label>
         <div class="layui-input-block">
-            <input type="text" id="c-image" name="row[image]" value="{$row.image|default=''}" placeholder="{:__('Image')}" class="layui-input" style="width:70%" />
+            <input type="text" id="c-image" name="row[image]" value="" placeholder="{:__('Image')}" class="layui-input" style="width:70%" />
             <div class="layui-input-suffix" style="width:30%">
                 <button type="button" data-input-id="c-image" data-preview-id="p-image" class="layui-btn btn-bdupload"><i class="fa fa-upload"></i> 上传</button>
                 <button type="button" data-input-id="c-image" class="layui-btn layui-bg-green btn-bdchoose"><i class="fa fa-list"></i> 选择</button>
@@ -32,120 +37,40 @@
             <div class="layui-upload-list" id="p-image"></div>
         </div>
     </div>
-    <div class="layui-form-item">
-        <label class="layui-form-label">{:__('Flag')}</label>
-        <div class="layui-input-block">
-            <input type="text" name="row[flag]" value="{$row.flag|default=''}" placeholder="{:__('Flag')}" class="layui-input" />
-        </div>
-    </div>
-    <div class="layui-form-item">
-        <label class="layui-form-label">{:__('Seotitle')}</label>
-        <div class="layui-input-block">
-            <input type="text" name="row[seotitle]" value="{$row.seotitle|default=''}" placeholder="{:__('Seotitle')}" class="layui-input" />
-        </div>
-    </div>
-    <div class="layui-form-item">
-        <label class="layui-form-label">{:__('Keywords')}</label>
-        <div class="layui-input-block">
-            <input type="text" name="row[keywords]" value="{$row.keywords|default=''}" placeholder="{:__('Keywords')}" class="layui-input" />
-        </div>
-    </div>
-    <div class="layui-form-item layui-form-text">
-        <label class="layui-form-label">{:__('Description')}</label>
-        <div class="layui-input-block">
-            <textarea name="row[description]" placeholder="{:__('Description')}" class="layui-textarea">{$row.description|default=''}</textarea>
-        </div>
-    </div>
-    <div class="layui-form-item">
-        <label class="layui-form-label">{:__('Diyname')}</label>
-        <div class="layui-input-block">
-            <input type="text" name="row[diyname]" value="{$row.diyname|default=''}" placeholder="{:__('Diyname')}" class="layui-input" />
-        </div>
-    </div>
-    <div class="layui-form-item">
-        <label class="layui-form-label">{:__('Outlink')}</label>
-        <div class="layui-input-block">
-            <input type="text" name="row[outlink]" value="{$row.outlink|default=''}" placeholder="{:__('Outlink')}" class="layui-input" />
-        </div>
-    </div>
-    <div class="layui-form-item">
-        <label class="layui-form-label">{:__('Linktype')}</label>
-        <div class="layui-input-block">
-            <input type="text" name="row[linktype]" value="{$row.linktype|default=''}" placeholder="{:__('Linktype')}" class="layui-input" />
-        </div>
-    </div>
-    <div class="layui-form-item">
-        <label class="layui-form-label">{:__('Linkid')}</label>
-        <div class="layui-input-block">
-            <input type="number" name="row[linkid]" value="{$row.linkid|default=''}" placeholder="{:__('Linkid')}" class="layui-input" />
-        </div>
-    </div>
-    <div class="layui-form-item">
-        <label class="layui-form-label">{:__('Items')}</label>
-        <div class="layui-input-block">
-            <input type="text" name="row[items]" value="{$row.items|default=''}" placeholder="{:__('Items')}" class="layui-input" />
-        </div>
-    </div>
+
     <div class="layui-form-item">
         <label class="layui-form-label">{:__('Weigh')}</label>
         <div class="layui-input-block">
-            <input type="number" name="row[weigh]" value="{$row.weigh|default=''}" placeholder="{:__('Weigh')}" class="layui-input" />
+            <input type="number" name="row[weigh]" value="0" placeholder="{:__('Weigh')}" class="layui-input" />
         </div>
     </div>
+
     <div class="layui-form-item">
-        <label class="layui-form-label">{:__('Channeltpl')}</label>
+        <label class="layui-form-label">{:__('Seotitle')}</label>
         <div class="layui-input-block">
+            <input type="text" name="row[seotitle]" value="" placeholder="SEO 标题（为空时使用栏目名称）" class="layui-input" autocomplete="off" />
         </div>
     </div>
+
     <div class="layui-form-item">
-        <label class="layui-form-label">{:__('Listtpl')}</label>
+        <label class="layui-form-label">{:__('Keywords')}</label>
         <div class="layui-input-block">
+            <input type="text" name="row[keywords]" value="" placeholder="SEO 关键字" class="layui-input" autocomplete="off" />
         </div>
     </div>
-    <div class="layui-form-item">
-        <label class="layui-form-label">{:__('Showtpl')}</label>
+
+    <div class="layui-form-item layui-form-text">
+        <label class="layui-form-label">{:__('Description')}</label>
         <div class="layui-input-block">
+            <textarea name="row[description]" placeholder="SEO 描述 / 栏目简介" class="layui-textarea"></textarea>
         </div>
     </div>
-    <div class="layui-form-item">
-        <label class="layui-form-label">{:__('Pagesize')}</label>
-        <div class="layui-input-block">
-            <input type="number" name="row[pagesize]" value="{$row.pagesize|default=''}" placeholder="{:__('Pagesize')}" class="layui-input" />
-        </div>
-    </div>
-    <div class="layui-form-item">
-        <label class="layui-form-label">{:__('Vip')}</label>
-        <div class="layui-input-block">
-            <input type="hidden" name="row[vip]" value="0" />
-            <input type="checkbox" name="row[vip]" value="1" lay-skin="switch" lay-text="开启|关闭" {if $row.vip}checked{/if} />
-        </div>
-    </div>
-    <div class="layui-form-item">
-        <label class="layui-form-label">{:__('Listtype')}</label>
-        <div class="layui-input-block">
-            <input type="hidden" name="row[listtype]" value="0" />
-            <input type="checkbox" name="row[listtype]" value="1" lay-skin="switch" lay-text="开启|关闭" {if $row.listtype}checked{/if} />
-        </div>
-    </div>
-    <div class="layui-form-item">
-        <label class="layui-form-label">{:__('Iscontribute')}</label>
-        <div class="layui-input-block">
-            <input type="hidden" name="row[iscontribute]" value="0" />
-            <input type="checkbox" name="row[iscontribute]" value="1" lay-skin="switch" lay-text="开启|关闭" {if $row.iscontribute}checked{/if} />
-        </div>
-    </div>
-    <div class="layui-form-item">
-        <label class="layui-form-label">{:__('Isnav')}</label>
-        <div class="layui-input-block">
-            <input type="hidden" name="row[isnav]" value="0" />
-            <input type="checkbox" name="row[isnav]" value="1" lay-skin="switch" lay-text="开启|关闭" {if $row.isnav}checked{/if} />
-        </div>
-    </div>
+
     <div class="layui-form-item">
         <label class="layui-form-label">{:__('Status')}</label>
         <div class="layui-input-block">
-            <input type="radio" name="row[status]" value="normal" title="normal" {if $row.status=='normal'}checked{/if} />
-            <input type="radio" name="row[status]" value="hidden" title="hidden" {if $row.status=='hidden'}checked{/if} />
+            <input type="radio" name="row[status]" value="normal" title="{:__('Normal')}" checked />
+            <input type="radio" name="row[status]" value="hidden" title="{:__('Hidden')}" />
         </div>
     </div>
 
