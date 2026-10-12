@@ -2,7 +2,7 @@
 
 namespace app\admin\controller\cms;
 
-use modules\cms\library\Service;
+use app\common\library\cms\Service;
 use app\common\controller\Backend;
 
 /**
@@ -31,7 +31,7 @@ class Diydata extends Backend
         if (!$this->diyform) {
             $this->error('未找到对应自定义表单');
         }
-        $this->model = new \app\index\model\cms\Diydata([], $this->diyform);
+        $this->model = new \app\common\model\cms\Diydata([], $this->diyform);
         $this->assignconfig('diyform_id', $diyform_id);
         $this->assignconfig('diyform', $this->diyform);
     }

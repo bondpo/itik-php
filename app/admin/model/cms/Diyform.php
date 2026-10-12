@@ -5,7 +5,7 @@ namespace app\admin\model\cms;
 use think\facade\Config;
 use think\facade\Db;
 use think\Exception;
-use modules\cms\library\Model;
+use app\common\library\cms\Model;
 
 class Diyform extends Model
 {

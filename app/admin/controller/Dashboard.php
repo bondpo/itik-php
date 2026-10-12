@@ -53,8 +53,7 @@ class Dashboard extends Backend
         }
 
         $dbTableList = Db::query("SHOW TABLE STATUS");
-        $installedModules = Server::getInstalldModuleList();
-        $totalmodule = count($installedModules);
+        $totalproject = Db::name('app_project')->whereNull('deletetime')->count();
         $quickmenu = $this->auth->getOriginAuthRules($this->auth->id);
         $quickmenu = array_values(array_filter($quickmenu, static function ($item) {
             return (int)($item['ismenu'] ?? 0) === 1
@@ -65,7 +64,8 @@ class Dashboard extends Backend
 
         $this->view->assign([
             'totaluser'         => User::count(),
-            'totalmodule'        => $totalmodule,
+            'totalproject'      => $totalproject,
+            'totalmodule'       => $totalproject,
             'totaladmin'        => Admin::count(),
             'dbtablenums'       => count($dbTableList),
             'dbsize'            => array_sum(array_map(function ($item) {

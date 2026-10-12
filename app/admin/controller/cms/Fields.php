@@ -2,9 +2,9 @@
 
 namespace app\admin\controller\cms;
 
-use modules\cms\library\Service;
+use app\common\library\cms\Service;
 use app\common\controller\Backend;
-use modules\cms\library\Config;
+use app\common\library\cms\Config;
 use think\facade\Db;
 
 /**

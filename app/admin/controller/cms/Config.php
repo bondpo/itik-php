@@ -46,7 +46,6 @@ class Config extends Backend
                 try {
                     //更新配置文件
                     set_addon_fullconfig($name, $config);
-                    \badou\Server::refresh();
                     $this->success();
                 } catch (Exception $e) {
                     $this->error(__($e->getMessage()));

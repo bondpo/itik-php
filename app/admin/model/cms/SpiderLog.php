@@ -3,7 +3,7 @@
 namespace app\admin\model\cms;
 
 use badou\Date;
-use modules\cms\library\Model;
+use app\common\library\cms\Model;
 
 /**
  * 搜索引擎来访

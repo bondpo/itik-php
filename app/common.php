@@ -1102,3 +1102,8 @@ if (!function_exists('live_log')) {
         file_put_contents($name . '.txt', '[' . date('Y-m-d H:i:s', time()) . ']' . print_r($data, true) . "\r\n", $type);
     }
 }
+
+// 加载 CMS 公共函数库
+if (is_file(__DIR__ . '/cms.php')) {
+    include_once __DIR__ . '/cms.php';
+}

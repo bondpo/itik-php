@@ -69,7 +69,7 @@ class Block extends Backend
     public function add()
     {
         $values = [];
-        $fields = \modules\cms\library\Service::getCustomFields('block', 0, $values);
+        $fields = \app\common\library\cms\Service::getCustomFields('block', 0, $values);
 
         $this->view->assign('fields', $fields);
         $this->view->assign('values', $values);
@@ -83,7 +83,7 @@ class Block extends Backend
             $this->error(__('No Results were found'));
         }
         $values = $values->toArray();
-        $fields = \modules\cms\library\Service::getCustomFields('block', 0, $values);
+        $fields = \app\common\library\cms\Service::getCustomFields('block', 0, $values);
 
         $this->view->assign('fields', $fields);
         $this->view->assign('values', $values);

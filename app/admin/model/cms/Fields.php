@@ -2,13 +2,13 @@
 
 namespace app\admin\model\cms;
 
-use modules\cms\library\Alter;
-use modules\cms\library\Service;
-use modules\cms\library\Config;
+use app\common\library\cms\Alter;
+use app\common\library\cms\Service;
+use app\common\library\cms\Config;
 use think\facade\Db;
 use think\Exception;
 use think\exception\PDOException;
-use modules\cms\library\Model;
+use app\common\library\cms\Model;
 
 class Fields extends Model
 {

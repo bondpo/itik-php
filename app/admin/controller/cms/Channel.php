@@ -8,7 +8,7 @@ use app\admin\model\AdminGroupAccess;
 use app\admin\model\cms\ChannelAdmin;
 use app\common\controller\Backend;
 use app\admin\model\cms\Channel as ChannelModel;
-use modules\cms\library\Tree;
+use app\common\library\cms\Tree;
 use think\Exception;
 
 /**
@@ -151,7 +151,7 @@ class Channel extends Backend
         }
 
         $values = [];
-        $fields = \modules\cms\library\Service::getCustomFields('channel', 0, $values);
+        $fields = \app\common\library\cms\Service::getCustomFields('channel', 0, $values);
 
         $this->view->assign('fields', $fields);
         $this->view->assign('values', $values);
@@ -169,7 +169,7 @@ class Channel extends Backend
         }
         $linkdata = $channel['linkdata'];
         $channel = $channel->toArray();
-        $fields = \modules\cms\library\Service::getCustomFields('channel', 0, $channel);
+        $fields = \app\common\library\cms\Service::getCustomFields('channel', 0, $channel);
 
         $childrenIds = $this->tree->getChildrenIds($channel['id'], true);
         $hasArchives = \app\admin\model\cms\Archives::withTrashed()->where('channel_id', $channel['id'])->whereOr('FIND_IN_SET(:id, `channel_ids`)', ['id' => $channel['id']])->count();

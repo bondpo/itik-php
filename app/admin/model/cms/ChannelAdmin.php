@@ -3,7 +3,7 @@
 namespace app\admin\model\cms;
 
 use app\admin\library\Auth;
-use modules\cms\library\Model;
+use app\common\library\cms\Model;
 
 class ChannelAdmin extends Model
 {

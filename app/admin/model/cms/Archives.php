@@ -2,10 +2,10 @@
 
 namespace app\admin\model\cms;
 
-use modules\cms\library\IntCode;
-use modules\cms\library\Service;
+use app\common\library\cms\IntCode;
+use app\common\library\cms\Service;
 use app\common\model\User;
-use modules\cms\library\Model;
+use app\common\library\cms\Model;
 use think\model\concern\SoftDelete;
 
 class Archives extends Model

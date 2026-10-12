@@ -1,2 +1,0 @@
-<?php /*a:0:{}*/ ?>
-<?php $__QtP9Mj4UfK__ = \app\index\model\cms\Archives::getArchivesList(["id"=>"item","row"=>"2"]); if(is_array($__QtP9Mj4UfK__) || $__QtP9Mj4UfK__ instanceof \think\Collection || $__QtP9Mj4UfK__ instanceof \think\Paginator): $i = 0; $__LIST__ = $__QtP9Mj4UfK__;if( count($__LIST__)==0 ) : echo "" ;else: foreach($__LIST__ as $key=>$item): $mod = ($i % 2 );++$i;?><?php echo htmlentities((string) $item['title']); ?>|<?php endforeach; endif; else: echo "" ;endif; $__LASTLIST__=$__QtP9Mj4UfK__; ?>

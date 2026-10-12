@@ -2,8 +2,8 @@
 
 namespace app\admin\model\cms;
 
-use modules\cms\library\Service;
-use modules\cms\library\Model;
+use app\common\library\cms\Service;
+use app\common\library\cms\Model;
 use think\model\concern\SoftDelete;
 
 

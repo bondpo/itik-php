@@ -12,7 +12,7 @@ use think\facade\Event;
  */
 class Page extends Backend
 {
-    use \modules\cms\library\traits\RecycleBin;
+    use \app\common\library\cms\traits\RecycleBin;
 
 
     /**
@@ -80,7 +80,7 @@ class Page extends Backend
     public function add()
     {
         $values = [];
-        $fields = \modules\cms\library\Service::getCustomFields('page', 0, $values);
+        $fields = \app\common\library\cms\Service::getCustomFields('page', 0, $values);
 
         $this->view->assign('fields', $fields);
         $this->view->assign('values', $values);
@@ -97,7 +97,7 @@ class Page extends Backend
             $this->error(__('No Results were found'));
         }
         $values = $values->toArray();
-        $fields = \modules\cms\library\Service::getCustomFields('page', 0, $values);
+        $fields = \app\common\library\cms\Service::getCustomFields('page', 0, $values);
 
         $this->view->assign('fields', $fields);
         $this->view->assign('values', $values);

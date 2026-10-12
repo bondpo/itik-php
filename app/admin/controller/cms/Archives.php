@@ -7,7 +7,7 @@ use app\admin\model\cms\ChannelAdmin;
 use app\admin\model\cms\Modelx;
 use app\common\controller\Backend;
 use app\common\model\User;
-use modules\cms\library\Tree;
+use app\common\library\cms\Tree;
 use think\facade\Db;
 use think\db\Query;
 use think\facade\Event;
@@ -19,7 +19,7 @@ use think\facade\Event;
  */
 class Archives extends Backend
 {
-    use \modules\cms\library\traits\RecycleBin;
+    use \app\common\library\cms\traits\RecycleBin;
 
 
     /**
@@ -196,7 +196,7 @@ class Archives extends Backend
     public function add()
     {
         $values = [];
-        $fields = \modules\cms\library\Service::getCustomFields('archives', 0, $values);
+        $fields = \app\common\library\cms\Service::getCustomFields('archives', 0, $values);
 
         $this->view->assign('fields', $fields);
         $this->view->assign('values', $values);
@@ -258,7 +258,7 @@ class Archives extends Backend
         $fields = [];
         $contentModel = $channel ? Modelx::find($channel['model_id']) : null;
         if ($contentModel) {
-            $fields = \modules\cms\library\Service::getCustomFields('model', $contentModel['id'], $row->toArray());
+            $fields = \app\common\library\cms\Service::getCustomFields('model', $contentModel['id'], $row->toArray());
         }
 
         $this->view->assign('fields', $fields);
@@ -559,7 +559,7 @@ class Archives extends Backend
                 $model_id = $archives ? $archives['model_id'] : $model_id;
             }
 
-            $fields = \modules\cms\library\Service::getCustomFields('model', $model_id, $values);
+            $fields = \app\common\library\cms\Service::getCustomFields('model', $model_id, $values);
 
             $model = Modelx::find($model_id);
 

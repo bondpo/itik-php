@@ -12,7 +12,14 @@ use think\facade\Event;
  */
 class AppService extends Service
 {
-    public function register() {}
+    public function register()
+    {
+        $cmsHelper = root_path() . 'app' . DIRECTORY_SEPARATOR . 'common' . DIRECTORY_SEPARATOR . 'cms.php';
+        if (is_file($cmsHelper)) {
+            include_once $cmsHelper;
+        }
+        bind('think\Paginator', 'app\common\library\cms\Bootstrap');
+    }
 
     public function boot()
     {

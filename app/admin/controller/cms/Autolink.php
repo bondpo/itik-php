@@ -11,7 +11,7 @@ use app\common\controller\Backend;
  */
 class Autolink extends Backend
 {
-    use \modules\cms\library\traits\RecycleBin;
+    use \app\common\library\cms\traits\RecycleBin;
 
 
     /**

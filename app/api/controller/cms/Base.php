@@ -15,7 +15,7 @@ use app\api\controller\v1\Base as ApiBase;
  *
  * 设计要点：
  * 1. 前后端分离：本层只输出 JSON，不加载 view_path / taglib / 模板替换字符串；
- * 2. 数据逻辑复用 app\index\model\cms\* 与 modules\cms\library\Service；
+ * 2. 数据逻辑复用 app\common\model\cms\* 与 app\common\library\cms\Service；
  * 3. 只读接口为主，写操作（评论/表单/订单/会员）走各自控制器。
  */
 class Base extends ApiBase
@@ -37,7 +37,7 @@ class Base extends ApiBase
         Config::set([
             'indexurl' => $this->request->root() . '/api/cms/index',
         ], 'cms');
-        Config::set(['type' => '\\modules\\cms\\library\\Bootstrap'], 'paginate');
+        Config::set(['type' => '\\app\\common\\library\\cms\\Bootstrap'], 'paginate');
 
         $this->request->filter('trim,strip_tags,htmlspecialchars');
     }

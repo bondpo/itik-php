@@ -1220,7 +1220,7 @@ class Server
      */
     protected static function getServerUrl()
     {
-        return config('badouadmin.api_url');
+        return config('badouadmin.api_url', '');
     }
 
     /**

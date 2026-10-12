@@ -2,7 +2,7 @@
 
 namespace app\admin\model\cms;
 
-use modules\cms\library\Model;
+use app\common\library\cms\Model;
 use think\model\concern\SoftDelete;
 
 class Page extends Model

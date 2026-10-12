@@ -6,7 +6,7 @@ use think\facade\Config;
 use think\facade\Db;
 use think\Exception;
 use think\exception\PDOException;
-use modules\cms\library\Model;
+use app\common\library\cms\Model;
 
 class Modelx extends Model
 {

@@ -2,7 +2,7 @@
 
 namespace app\admin\controller\cms;
 
-use modules\cms\library\Service;
+use app\common\library\cms\Service;
 use app\common\controller\Backend;
 use think\facade\Db;
 use think\Exception;

@@ -4,7 +4,7 @@ namespace app\admin\model\cms;
 
 use app\common\model\User;
 use think\facade\Db;
-use modules\cms\library\Model;
+use app\common\library\cms\Model;
 use think\model\concern\SoftDelete;
 
 class Comment extends Model

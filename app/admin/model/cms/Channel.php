@@ -2,10 +2,10 @@
 
 namespace app\admin\model\cms;
 
-use modules\cms\library\Service;
+use app\common\library\cms\Service;
 use think\facade\Db;
 use think\Exception;
-use modules\cms\library\Model;
+use app\common\library\cms\Model;
 
 class Channel extends Model
 {
@@ -232,7 +232,7 @@ class Channel extends Model
     {
         static $tree;
         if (!$tree) {
-            $tree = \modules\cms\library\Tree::instance();
+            $tree = \app\common\library\cms\Tree::instance();
             $tree->init(collection(Channel::order('weigh desc,id desc')->field('id,parent_id,name,type,diyname,status')->select())->toArray(), 'parent_id');
         }
         $childIds = $tree->getChildrenIds($id, $withself);
@@ -249,7 +249,7 @@ class Channel extends Model
     {
         static $tree;
         if (!$tree) {
-            $tree = \modules\cms\library\Tree::instance();
+            $tree = \app\common\library\cms\Tree::instance();
             $tree->init(collection(Channel::order('weigh desc,id desc')->field('id,parent_id,name,type,diyname,status')->select())->toArray(), 'parent_id');
         }
         $childIds = $tree->getParentsIds($id, $withself);

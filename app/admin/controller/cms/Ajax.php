@@ -2,9 +2,9 @@
 
 namespace app\admin\controller\cms;
 
-use modules\cms\library\aip\AipContentCensor;
-use modules\cms\library\SensitiveHelper;
-use modules\cms\library\Service;
+use app\common\library\cms\aip\AipContentCensor;
+use app\common\library\cms\SensitiveHelper;
+use app\common\library\cms\Service;
 use app\common\controller\Backend;
 use think\facade\Cache;
 use think\facade\Config;
@@ -42,19 +42,21 @@ class Ajax extends Backend
             //设置过滤方法
             $this->request->filter(['strip_tags']);
             $config = get_addon_config('cms');
-            $themeDir = MODULE_PATH . 'cms' . DS . 'view' . DS . $config['theme'] . DS;
-            $dh = opendir($themeDir);
-            while (false !== ($filename = readdir($dh))) {
-                if ($filename == '.' || $filename == '..') {
-                    continue;
-                }
-                if ($type) {
-                    $rule = $type == 'channel' ? '(channel|list)' : $type;
-                    if (!preg_match("/^{$rule}(.*)/i", $filename)) {
+            $themeDir = root_path() . 'public' . DS . 'assets' . DS . 'addons' . DS . 'cms' . DS;
+            if (is_dir($themeDir) && ($dh = opendir($themeDir))) {
+                while (false !== ($filename = readdir($dh))) {
+                    if ($filename == '.' || $filename == '..') {
                         continue;
                     }
+                    if ($type) {
+                        $rule = $type == 'channel' ? '(channel|list)' : $type;
+                        if (!preg_match("/^{$rule}(.*)/i", $filename)) {
+                            continue;
+                        }
+                    }
+                    $files[] = ['name' => $filename];
                 }
-                $files[] = ['name' => $filename];
+                closedir($dh);
             }
         } else {
             $files[] = ['name' => $keyValue];
@@ -76,7 +78,8 @@ class Ajax extends Backend
         }
         if ($config['audittype'] == 'local') {
             // 敏感词过滤
-            $handle = SensitiveHelper::init()->setTreeByFile(MODULE_PATH . 'cms/data/words.dic');
+            $wordsFile = app_path('common/data/cms/words.dic');
+            $handle = SensitiveHelper::init()->setTreeByFile($wordsFile);
             //首先检测是否合法
             $arr = $handle->getBadWord($content);
             if ($arr) {
@@ -169,7 +172,7 @@ class Ajax extends Backend
             $values = \think\facade\Db::name("cms_{$source}")->where('id', $id)->find();
             $values = $values ? $values : [];
 
-            $fields = \modules\cms\library\Service::getCustomFields($source, 0, $values);
+            $fields = \app\common\library\cms\Service::getCustomFields($source, 0, $values);
 
             $this->view->assign('fields', $fields);
             $this->view->assign('values', $values);
@@ -321,9 +324,6 @@ class Ajax extends Backend
         if ($name == 'theme') {
             if (!preg_match("/^([a-zA-Z0-9\-_]+)$/i", $value)) {
                 $this->error("只支持字母数字下划线");
-            }
-            if (!is_dir(MODULE_PATH . 'cms' . DS . 'view' . DS . $value . DS)) {
-                $this->error("皮肤目录不存在");
             }
         } elseif ($name == 'archivesratio') {
             $valueArr = explode(':', $value);
