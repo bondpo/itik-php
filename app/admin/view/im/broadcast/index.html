@@ -10,11 +10,15 @@
     <a href="{:url('im.broadcast/send')}" class="layui-btn layui-bg-green">
         <i class="fa fa-plus"></i> 新建广播推送
     </a>
+    <button class="layui-btn layui-bg-blue" lay-event="refresh">
+        <i class="fa fa-refresh"></i> 刷新列表
+    </button>
 </script>
 
 <script>
-layui.use(['badou', 'table'], function () {
+layui.use(['badou', 'layer', 'table'], function () {
     var bdTable = layui.bdTable;
+    var layer = layui.layer;
     var table = layui.table;
 
     bdTable.api.init({
@@ -23,6 +27,7 @@ layui.use(['badou', 'table'], function () {
 
     bdTable.render({
         elem: '#broadcastTable',
+        id: 'broadcastTable',
         url: '{:url("im.broadcast/index")}',
         toolbar: '#toolbar',
         page: true,
@@ -51,6 +56,13 @@ layui.use(['badou', 'table'], function () {
             }},
             { field: 'create_time', title: '发布时间', width: 165, templet: bdTable.api.formatter.datetime }
         ]]
+    });
+
+    table.on('toolbar(broadcastTable)', function(obj) {
+        if (obj.event === 'refresh') {
+            table.reload('broadcastTable');
+            layer.msg('已刷新列表', {icon: 1, time: 800});
+        }
     });
 });
 </script>
