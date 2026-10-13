@@ -42,6 +42,7 @@ layui.use(['badou', 'layer', 'table'], function () {
 
     bdTable.render({
         elem: '#roomTable',
+        id: 'roomTable',
         url: '{:url("im.room/index")}',
         toolbar: '#toolbar',
         page: true,
@@ -73,7 +74,10 @@ layui.use(['badou', 'layer', 'table'], function () {
 
     // 头部工具栏事件
     table.on('toolbar(roomTable)', function(obj) {
-        if (obj.event === 'sync') {
+        if (obj.event === 'refresh') {
+            table.reload('roomTable');
+            layer.msg('已刷新列表', {icon: 1, time: 800});
+        } else if (obj.event === 'sync') {
             var loadIndex = layer.load(1, {shade: [0.2, '#000']});
             $.post('{:url("im.room/sync")}', function(res) {
                 layer.close(loadIndex);
