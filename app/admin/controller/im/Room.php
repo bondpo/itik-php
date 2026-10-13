@@ -30,11 +30,11 @@ class Room extends Backend
         if ($this->request->isAjax()) {
             [$where, $sort, $order, $offset, $limit] = $this->buildparams();
 
-            $total = $this->model
+            $total = Db::name('im_room')
                 ->where($where)
                 ->count();
 
-            $list = $this->model
+            $list = Db::name('im_room')
                 ->where($where)
                 ->order($sort ?: 'id', $order ?: 'desc')
                 ->limit($offset, $limit)
@@ -144,16 +144,16 @@ class Room extends Backend
                 $memberCount = (int) ($r['joined_members'] ?? 0);
                 $isPublic = ($r['public'] ?? false) ? 1 : 0;
 
-                $exist = $this->model->where('room_id', $roomId)->find();
+                $exist = Db::name('im_room')->where('room_id', $roomId)->find();
                 if ($exist) {
-                    $this->model->where('id', $exist['id'])->update([
+                    Db::name('im_room')->where('id', $exist['id'])->update([
                         'name'         => $name,
                         'member_count' => $memberCount,
                         'is_public'    => $isPublic,
                         'update_time'  => $now,
                     ]);
                 } else {
-                    $this->model->insert([
+                    Db::name('im_room')->replace()->insert([
                         'room_id'      => $roomId,
                         'type'         => $isPublic ? 'public' : 'group',
                         'name'         => $name,
