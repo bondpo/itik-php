@@ -13,15 +13,19 @@
                         <div class="layui-form-item">
                             <label class="layui-form-label">推送目标</label>
                             <div class="layui-input-block">
-                                <input type="radio" name="target_type" value="all" title="全员/所有正常群" checked lay-filter="targetType">
-                                <input type="radio" name="target_type" value="room" title="指定房间ID" lay-filter="targetType">
+                                <input type="radio" name="target_type" value="all" title="全员用户 (官方小助手私聊)" checked lay-filter="targetType">
+                                <input type="radio" name="target_type" value="user" title="指定用户ID (私聊)" lay-filter="targetType">
+                                <input type="radio" name="target_type" value="room" title="指定群聊房间" lay-filter="targetType">
+                            </div>
+                            <div class="layui-word-aux" id="targetTypeTip" style="margin-left: 110px; margin-top: 5px; font-size: 12px; color: #888;">
+                                <i class="fa fa-info-circle"></i> 系统官方小助手将向全站所有已激活 IM 的用户发送 1 对 1 私聊通知。
                             </div>
                         </div>
 
                         <div class="layui-form-item" id="targetIdBox" style="display: none;">
-                            <label class="layui-form-label">目标房间</label>
+                            <label class="layui-form-label" id="targetIdLabel">目标ID</label>
                             <div class="layui-input-block">
-                                <input type="text" name="target_id" placeholder="输入房间ID，多个以英文逗号分隔，如 !abc:domain,!xyz:domain" class="layui-input">
+                                <input type="text" name="target_id" id="inputTargetId" placeholder="输入用户 UID 或 Matrix User ID，多个以逗号分隔" class="layui-input">
                             </div>
                         </div>
 
@@ -112,10 +116,19 @@ layui.use(['form', 'layer'], function () {
     });
 
     form.on('radio(targetType)', function (data) {
-        if (data.value === 'room') {
-            $('#targetIdBox').show();
-        } else {
+        if (data.value === 'all') {
             $('#targetIdBox').hide();
+            $('#targetTypeTip').html('<i class="fa fa-info-circle"></i> 系统官方小助手将向全站所有已激活 IM 的用户发送 1 对 1 私聊通知。');
+        } else if (data.value === 'user') {
+            $('#targetIdBox').show();
+            $('#targetIdLabel').text('目标用户');
+            $('#inputTargetId').attr('placeholder', '输入用户 UID 或 Matrix User ID，多个以逗号分隔，如 144, 8888 或 @u_144:domain');
+            $('#targetTypeTip').html('<i class="fa fa-info-circle"></i> 向指定的特定用户发送官方小助手 1v1 私信通知。');
+        } else if (data.value === 'room') {
+            $('#targetIdBox').show();
+            $('#targetIdLabel').text('目标房间');
+            $('#inputTargetId').attr('placeholder', '输入房间ID，多个以英文逗号分隔，如 !abc:domain,!xyz:domain');
+            $('#targetTypeTip').html('<i class="fa fa-warning" style="color:#fa8c16;"></i> 请确保系统机器人 @bot 已加入目标群聊，否则 Matrix 会因权限拒绝投递。');
         }
     });
 
