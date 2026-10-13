@@ -34,11 +34,21 @@ layui.use(['badou', 'table'], function () {
                 if (d.msg_type === 'html') return '<span class="layui-badge layui-bg-blue">富文本</span>';
                 return '<span class="layui-badge layui-bg-gray">纯文本</span>';
             }},
-            { field: 'target_type', title: '目标', width: 100, templet: function(d) {
-                return d.target_type === 'all' ? '全员广播' : '指定房间';
+            { field: 'target_type', title: '目标类型', width: 110, templet: function(d) {
+                if (d.target_type === 'all') return '<span class="layui-badge layui-bg-green">全员私信</span>';
+                if (d.target_type === 'user') return '<span class="layui-badge layui-bg-cyan">指定用户</span>';
+                return '<span class="layui-badge layui-bg-orange">指定群聊</span>';
             }},
-            { field: 'content', title: '正文/载荷', minWidth: 240 },
-            { field: 'sent_count', title: '成功投递数', width: 110, align: 'center' },
+            { field: 'target_id', title: '目标详情', width: 180, templet: function(d) {
+                return '<span style="font-size:12px;color:#666;" title="' + (d.target_id || '') + '">' + (d.target_id || '-') + '</span>';
+            }},
+            { field: 'content', title: '正文/载荷', minWidth: 220 },
+            { field: 'sent_count', title: '成功投递数', width: 110, align: 'center', templet: function(d) {
+                if (d.sent_count > 0) {
+                    return '<span style="color:#52c41a;font-weight:bold;">' + d.sent_count + '</span>';
+                }
+                return '<span style="color:#ff4d4f;font-weight:bold;">0</span>';
+            }},
             { field: 'create_time', title: '发布时间', width: 165, templet: bdTable.api.formatter.datetime }
         ]]
     });
