@@ -57,7 +57,13 @@ class User extends Backend
             $this->error($res['error'] ?? '查询设备失败');
         }
 
-        $this->success('', ['devices' => $res['devices']]);
+        return json([
+            'code' => 1,
+            'msg'  => 'ok',
+            'data' => [
+                'devices' => $res['devices'],
+            ],
+        ]);
     }
 
     /**

@@ -50,12 +50,6 @@
             </div>
         </div>
         <div class="layui-col-md3">
-            <div class="im-stat-card" style="background: linear-gradient(135deg, #722ed1, #531dab);">
-                <div class="im-stat-title"><i class="fa fa-bullhorn"></i> 广播推送任务历史</div>
-                <div class="im-stat-num">{$stats.total_broadcast}</div>
-            </div>
-        </div>
-        <div class="layui-col-md3">
             <div class="im-stat-card" style="background: linear-gradient(135deg, #fa8c16, #d46b08);">
                 <div class="im-stat-title"><i class="fa fa-server"></i> 服务端运行状态</div>
                 <div class="im-stat-num" style="font-size: 20px; line-height: 38px;">
@@ -67,11 +61,24 @@
                 </div>
             </div>
         </div>
+        <div class="layui-col-md3">
+            <div class="im-stat-card" style="background: linear-gradient(135deg, #722ed1, #531dab);">
+                <div class="im-stat-title"><i class="fa fa-android"></i> 系统机器人 (Bot) 状态</div>
+                <div class="im-stat-num" style="font-size: 20px; line-height: 38px;">
+                    {if $stats.bot.valid}
+                        <span class="im-status-dot im-dot-green"></span> 正常在线
+                    {else}
+                        <span class="im-status-dot im-dot-red"></span> {$stats.bot.status|default='未就绪'}
+                    {/if}
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- 配置详情与自动化检测 -->
     <div class="layui-row layui-col-space15" style="margin-top: 5px;">
         <div class="layui-col-md6">
+            <!-- Matrix Synapse 配置 -->
             <div class="layui-card">
                 <div class="layui-card-header"><i class="fa fa-cogs"></i> Matrix Synapse 环境配置</div>
                 <div class="layui-card-body">
@@ -109,7 +116,45 @@
                     </table>
                     <div style="margin-top: 15px;">
                         <button type="button" class="layui-btn layui-btn-sm layui-bg-blue" id="btnPing">
-                            <i class="fa fa-refresh"></i> 重新测试连通性
+                            <i class="fa fa-refresh"></i> 重新测试服务端连通性
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 系统机器人 (Bot) 详情 -->
+            <div class="layui-card" style="margin-top: 15px;">
+                <div class="layui-card-header"><i class="fa fa-android"></i> 系统官方机器人 (Bot) 治理与凭据</div>
+                <div class="layui-card-body">
+                    <table class="layui-table" lay-skin="nob">
+                        <tbody>
+                            <tr>
+                                <td style="width: 140px; color: #888;">Bot 账号 (User ID)</td>
+                                <td><code>{$stats.bot.user_id|default='未配置'}</code></td>
+                            </tr>
+                            <tr>
+                                <td style="color: #888;">运行状态</td>
+                                <td id="botStatusBadge">
+                                    {if $stats.bot.valid}
+                                        <span class="layui-badge layui-bg-green"><i class="fa fa-check"></i> {$stats.bot.status}</span>
+                                    {else}
+                                        <span class="layui-badge layui-bg-red"><i class="fa fa-close"></i> {$stats.bot.status|default='离线'}</span>
+                                    {/if}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="color: #888;">已绑定设备 (Device ID)</td>
+                                <td id="botDeviceId"><code>{$stats.bot.device_id|default='-'}</code></td>
+                            </tr>
+                            <tr>
+                                <td style="color: #888;">应用职责</td>
+                                <td style="color: #666; font-size: 13px;">承担全站官方公告下发、系统群通知广播、自动化接待等特权下发逻辑</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div style="margin-top: 15px;">
+                        <button type="button" class="layui-btn layui-btn-sm layui-bg-cyan" id="btnBotPing">
+                            <i class="fa fa-refresh"></i> 探测机器人在线状态
                         </button>
                     </div>
                 </div>
@@ -131,7 +176,7 @@
                             <div class="layui-progress-bar layui-bg-blue" lay-percent="0%"></div>
                         </div>
                     </div>
-                    <div id="checkResultBox" style="margin-top: 15px; max-height: 240px; overflow-y: auto;"></div>
+                    <div id="checkResultBox" style="margin-top: 15px; max-height: 480px; overflow-y: auto;"></div>
                 </div>
             </div>
         </div>
@@ -150,6 +195,23 @@ layui.use(['layer', 'element'], function () {
             if (res.code === 1) {
                 layer.msg(res.msg + ' 延迟: ' + res.data.cost_ms + 'ms', {icon: 1});
             } else {
+                layer.alert(res.msg, {icon: 2});
+            }
+        });
+    });
+
+    $('#btnBotPing').on('click', function () {
+        var loadIndex = layer.load(2);
+        $.post('{:url("im.dashboard/botPing")}', function (res) {
+            layer.close(loadIndex);
+            if (res.code === 1) {
+                $('#botStatusBadge').html('<span class="layui-badge layui-bg-green"><i class="fa fa-check"></i> ' + (res.data.status || '正常在线') + '</span>');
+                if (res.data.device_id) {
+                    $('#botDeviceId').html('<code>' + res.data.device_id + '</code>');
+                }
+                layer.msg(res.msg + (res.data.device_id ? ' (设备: ' + res.data.device_id + ')' : ''), {icon: 1});
+            } else {
+                $('#botStatusBadge').html('<span class="layui-badge layui-bg-red"><i class="fa fa-close"></i> ' + (res.data ? res.data.status : '异常') + '</span>');
                 layer.alert(res.msg, {icon: 2});
             }
         });

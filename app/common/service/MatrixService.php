@@ -1519,7 +1519,59 @@ class MatrixService
             return ['success' => false, 'error' => $e->getMessage(), 'count' => 0];
         }
     }
+
+    /**
+     * 检测系统机器人 (Bot) 的存活状态与配置
+     */
+    public function getBotStatus(): array
+    {
+        if (empty($this->botToken) || empty($this->botUserId)) {
+            return [
+                'configured' => false,
+                'user_id'    => $this->botUserId,
+                'valid'      => false,
+                'status'     => '未配置',
+                'device_id'  => '',
+            ];
+        }
+
+        try {
+            $response = $this->client->get('/_matrix/client/v3/account/whoami', [
+                'headers' => ['Authorization' => "Bearer {$this->botToken}"],
+            ]);
+            $body = json_decode((string) $response->getBody(), true) ?? [];
+
+            if ($response->getStatusCode() === 200 && !empty($body['user_id'])) {
+                return [
+                    'configured' => true,
+                    'user_id'    => $body['user_id'],
+                    'valid'      => true,
+                    'status'     => '正常在线',
+                    'device_id'  => $body['device_id'] ?? '',
+                ];
+            }
+
+            return [
+                'configured' => true,
+                'user_id'    => $this->botUserId,
+                'valid'      => false,
+                'status'     => 'Token 失效',
+                'error'      => $body['error'] ?? 'Authentication failed',
+                'device_id'  => '',
+            ];
+        } catch (GuzzleException $e) {
+            return [
+                'configured' => true,
+                'user_id'    => $this->botUserId,
+                'valid'      => false,
+                'status'     => '连接超时',
+                'error'      => $e->getMessage(),
+                'device_id'  => '',
+            ];
+        }
+    }
 }
+
 
 
 

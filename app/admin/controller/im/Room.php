@@ -82,7 +82,14 @@ class Room extends Backend
             $this->error($res['error'] ?? '拉取成员失败');
         }
 
-        $this->success('', ['members' => $res['members']]);
+        return json([
+            'code' => 1,
+            'msg'  => 'ok',
+            'data' => [
+                'members' => $res['members'],
+                'total'   => $res['total'] ?? count($res['members']),
+            ],
+        ]);
     }
 
     /**
