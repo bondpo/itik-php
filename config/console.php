@@ -9,5 +9,6 @@ return [
         'subscription:expire' => 'app\\command\\SubscriptionExpire',
         'recommend:generate' => 'app\\command\\RecommendGenerate',
         'seed:fake' => 'app\\command\\FakeData',
+        'matrix:test' => 'app\\command\\TestMatrix',
     ],
 ];

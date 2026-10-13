@@ -20,6 +20,7 @@ use think\facade\Config;
 use think\facade\Validate;
 use app\common\library\Ems;
 use app\common\library\Sms;
+use app\common\service\MatrixService;
 
 class User extends Api
 {
@@ -58,7 +59,12 @@ class User extends Api
         }
         $ret = $this->auth->login($account, $password);
         if ($ret) {
-            $data = ['userinfo' => $this->auth->getUserinfo()];
+            $userinfo = $this->auth->getUserinfo();
+            $matrixAuth = (new MatrixService())->syncUserOnAuth($userinfo['id'], $password, $userinfo['nickname'] ?? $userinfo['username'] ?? '');
+            $data = [
+                'userinfo' => $userinfo,
+                'matrix'   => $matrixAuth,
+            ];
             $this->success(__('Logged in successful'), $data);
         } else {
             $this->error($this->auth->getError());
@@ -97,7 +103,12 @@ class User extends Api
         }
         if ($ret) {
             Sms::flush($mobile, 'mobilelogin');
-            $data = ['userinfo' => $this->auth->getUserinfo()];
+            $userinfo = $this->auth->getUserinfo();
+            $matrixAuth = (new MatrixService())->syncUserOnAuth($userinfo['id'], '', $userinfo['nickname'] ?? $userinfo['username'] ?? '');
+            $data = [
+                'userinfo' => $userinfo,
+                'matrix'   => $matrixAuth,
+            ];
             $this->success(__('Logged in successful'), $data);
         } else {
             $this->error($this->auth->getError());
@@ -141,7 +152,12 @@ class User extends Api
         }
         $ret = $this->auth->register($username, $password, $email, $mobile, $extend);
         if ($ret) {
-            $data = ['userinfo' => $this->auth->getUserinfo()];
+            $userinfo = $this->auth->getUserinfo();
+            $matrixAuth = (new MatrixService())->syncUserOnAuth($userinfo['id'], $password, $userinfo['nickname'] ?? $username);
+            $data = [
+                'userinfo' => $userinfo,
+                'matrix'   => $matrixAuth,
+            ];
             $this->success(__('Sign up successful'), $data);
         } else {
             $this->error($this->auth->getError());

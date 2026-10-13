@@ -10,6 +10,7 @@ use think\facade\Db;
 use app\common\library\Ems;
 use app\common\library\Wallet;
 use app\common\model\User as UserModel;
+use app\common\service\MatrixService;
 
 /**
  * 认证接口
@@ -139,6 +140,8 @@ class Auth extends Base
             // 已存在则忽略（幂等）
         }
 
+        $matrixAuth = (new MatrixService())->syncUserOnAuth($userId, $password, $nickname ?: $username);
+
         $this->success('注册成功', [
             'user_id'     => $userId,
             'username'    => $username,
@@ -147,6 +150,7 @@ class Auth extends Base
             'inviter_id'  => (int)$this->auth->inviter_id,
             'role'        => $this->resolveRole($userId),
             'token'       => $this->auth->getToken(),
+            'matrix'      => $matrixAuth,
         ]);
     }
 
@@ -184,11 +188,15 @@ class Auth extends Base
         // 直接登录（验证码已校验，无需密码）
         $this->auth->direct($userId);
 
+        $nickname = (string)Db::name('user')->where('id', $userId)->value('nickname');
+        $matrixAuth = (new MatrixService())->syncUserOnAuth($userId, '', $nickname);
+
         $this->success('登录成功', [
             'user_id'  => $userId,
-            'nickname' => (string)Db::name('user')->where('id', $userId)->value('nickname'),
+            'nickname' => $nickname,
             'role'     => $this->resolveRole($userId),
             'token'    => $this->auth->getToken(),
+            'matrix'   => $matrixAuth,
         ]);
     }
 
@@ -321,6 +329,8 @@ class Auth extends Base
             $user = $this->auth->getUser();
         }
 
+        $matrixAuth = (new MatrixService())->syncUserOnAuth($userId, '', (string)($user->nickname ?? ''));
+
         $this->success($isNewUser ? '钱包注册并登录成功' : '钱包登录成功', [
             'user_id'        => $userId,
             'username'       => (string)$user->username,
@@ -331,6 +341,8 @@ class Auth extends Base
             'is_new_user'    => $isNewUser,
             'role'           => $this->resolveRole($userId),
             'token'          => $this->auth->getToken(),
+            'matrix'         => $matrixAuth,
         ]);
     }
 }
+
