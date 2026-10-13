@@ -574,12 +574,45 @@ class MatrixService
 
     /**
      * 获取房间成员列表（用于后台展示成员或群聊详情）
+     * 优先使用 Synapse Admin API（支持管理员无需在群内也能查看全量成员）
      */
     public function getRoomMembers(string $userToken, string $roomId): array
     {
+        $token = $userToken ?: $this->adminToken;
+
+        // 1. 优先尝试 Synapse Admin API（上帝视角，无需在房间内）
+        if (!empty($this->adminToken)) {
+            try {
+                $response = $this->client->get("/_synapse/admin/v1/rooms/{$roomId}/members", [
+                    'headers' => ['Authorization' => "Bearer {$this->adminToken}"],
+                ]);
+
+                if ($response->getStatusCode() === 200) {
+                    $body = json_decode((string) $response->getBody(), true) ?? [];
+                    $memberIds = $body['members'] ?? [];
+                    $members = [];
+                    foreach ($memberIds as $mId) {
+                        $members[] = [
+                            'user_id'     => $mId,
+                            'displayname' => $mId,
+                            'avatar_url'  => '',
+                        ];
+                    }
+                    return [
+                        'success' => true,
+                        'members' => $members,
+                        'total'   => $body['total'] ?? count($members),
+                    ];
+                }
+            } catch (\Throwable) {
+                // 忽略异常，降级尝试 Client API
+            }
+        }
+
+        // 2. 降级尝试 Client-Server API（要求调用者在房间内）
         try {
             $response = $this->client->get("/_matrix/client/v3/rooms/{$roomId}/members", [
-                'headers' => ['Authorization' => "Bearer {$userToken}"],
+                'headers' => ['Authorization' => "Bearer {$token}"],
             ]);
             $body = json_decode((string) $response->getBody(), true) ?? [];
             $members = [];
@@ -587,7 +620,7 @@ class MatrixService
                 if (($event['type'] ?? '') === 'm.room.member' && ($event['content']['membership'] ?? '') === 'join') {
                     $members[] = [
                         'user_id'     => $event['state_key'] ?? '',
-                        'displayname' => $event['content']['displayname'] ?? '',
+                        'displayname' => $event['content']['displayname'] ?? ($event['state_key'] ?? ''),
                         'avatar_url'  => $event['content']['avatar_url'] ?? '',
                     ];
                 }
@@ -595,6 +628,7 @@ class MatrixService
             return [
                 'success' => $response->getStatusCode() === 200,
                 'members' => $members,
+                'total'   => count($members),
             ];
         } catch (GuzzleException $e) {
             return ['success' => false, 'error' => $e->getMessage(), 'members' => []];
@@ -1428,7 +1462,65 @@ class MatrixService
             'steps'         => $steps,
         ];
     }
+
+    /**
+     * 【反向对账】获取 Matrix 上的全量房间列表（Synapse Admin API）
+     */
+    public function getAllRoomsAdmin(int $limit = 100, ?string $from = null, string $searchTerm = ''): array
+    {
+        $query = ['limit' => $limit];
+        if ($from) {
+            $query['from'] = $from;
+        }
+        if ($searchTerm !== '') {
+            $query['search_term'] = $searchTerm;
+        }
+
+        try {
+            $response = $this->client->get('/_synapse/admin/v1/rooms', [
+                'headers' => ['Authorization' => "Bearer {$this->adminToken}"],
+                'query'   => $query,
+            ]);
+            $body = json_decode((string) $response->getBody(), true) ?? [];
+            return [
+                'success'     => $response->getStatusCode() === 200,
+                'rooms'       => $body['rooms'] ?? [],
+                'total_rooms' => $body['total_rooms'] ?? 0,
+                'next_batch'  => $body['next_batch'] ?? '',
+            ];
+        } catch (GuzzleException $e) {
+            return ['success' => false, 'error' => $e->getMessage(), 'rooms' => []];
+        }
+    }
+
+    /**
+     * 【风控强化】一键下线指定用户的所有设备会话
+     */
+    public function revokeAllDevicesAdmin(string|int $identifier): array
+    {
+        $matrixUserId = $this->buildUserId($identifier);
+        try {
+            $devicesRes = $this->getUserDevicesAdmin($identifier);
+            $deviceIds = array_column($devicesRes['devices'] ?? [], 'device_id');
+            if (empty($deviceIds)) {
+                return ['success' => true, 'count' => 0];
+            }
+
+            $response = $this->client->post("/_synapse/admin/v2/users/{$matrixUserId}/delete_devices", [
+                'headers' => ['Authorization' => "Bearer {$this->adminToken}"],
+                'json'    => ['devices' => $deviceIds],
+            ]);
+
+            return [
+                'success' => $response->getStatusCode() === 200,
+                'count'   => count($deviceIds),
+            ];
+        } catch (GuzzleException $e) {
+            return ['success' => false, 'error' => $e->getMessage(), 'count' => 0];
+        }
+    }
 }
+
 
 
 

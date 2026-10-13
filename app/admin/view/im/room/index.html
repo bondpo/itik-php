@@ -1,0 +1,155 @@
+{layout name="layout/default" /}
+
+<div class="layui-card">
+    <div class="layui-card-body">
+        <table class="layui-hide" id="roomTable" lay-filter="roomTable"></table>
+    </div>
+</div>
+
+<!-- 顶部工具栏 -->
+<script type="text/html" id="toolbar">
+    <button class="layui-btn layui-bg-blue" lay-event="refresh">
+        <i class="fa fa-refresh"></i> 刷新列表
+    </button>
+    <button class="layui-btn layui-bg-purple" lay-event="sync">
+        <i class="fa fa-exchange"></i> 从 Matrix 深度对账同步
+    </button>
+</script>
+
+<!-- 操作列 -->
+<script type="text/html" id="actionTpl">
+    <a class="layui-btn layui-btn-xs layui-btn-normal" lay-event="members">
+        <i class="fa fa-users"></i> 成员
+    </a>
+    <a class="layui-btn layui-btn-xs layui-btn-warm" lay-event="mute">
+        <i class="fa fa-bell-slash"></i> 禁言
+    </a>
+    <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="delete">
+        <i class="fa fa-trash"></i> 解散
+    </a>
+</script>
+
+<script>
+layui.use(['badou', 'layer', 'table'], function () {
+    var bdTable = layui.bdTable;
+    var layer = layui.layer;
+    var table = layui.table;
+    var $ = layui.$;
+
+    bdTable.api.init({
+        table: table
+    });
+
+    bdTable.render({
+        elem: '#roomTable',
+        url: '{:url("im.room/index")}',
+        toolbar: '#toolbar',
+        page: true,
+        cols: [[
+            { field: 'id', title: 'ID', width: 70, sort: true },
+            { field: 'name', title: '房间名称', minWidth: 160 },
+            { field: 'room_id', title: 'Matrix 房间 ID', minWidth: 220, templet: function(d) {
+                return '<span style="font-family:monospace;color:#1e9fff;">' + d.room_id + '</span>';
+            }},
+            { field: 'type', title: '类型', width: 90, templet: function(d) {
+                if (d.type === 'direct') return '<span class="layui-badge layui-bg-gray">私聊</span>';
+                if (d.type === 'public') return '<span class="layui-badge layui-bg-green">公开群</span>';
+                return '<span class="layui-badge layui-bg-blue">群聊</span>';
+            }},
+            { field: 'creator_name', title: '创建人', width: 120 },
+            { field: 'member_count', title: '成员数', width: 90, align: 'center' },
+            { field: 'biz_type', title: '业务归属', width: 120, templet: function(d) {
+                return d.biz_type === 'general' ? '通用群' : d.biz_type + '#' + d.biz_id;
+            }},
+            { field: 'status', title: '状态', width: 90, align: 'center', templet: function(d) {
+                return d.status === 'normal' 
+                    ? '<span class="layui-badge layui-bg-green">正常</span>'
+                    : '<span class="layui-badge layui-bg-gray">已解散</span>';
+            }},
+            { field: 'create_time', title: '创建时间', width: 165, templet: bdTable.api.formatter.datetime },
+            { title: '操作', width: 210, align: 'center', fixed: 'right', toolbar: '#actionTpl' }
+        ]]
+    });
+
+    // 头部工具栏事件
+    table.on('toolbar(roomTable)', function(obj) {
+        if (obj.event === 'sync') {
+            var loadIndex = layer.load(1, {shade: [0.2, '#000']});
+            $.post('{:url("im.room/sync")}', function(res) {
+                layer.close(loadIndex);
+                if (res.code === 1) {
+                    layer.msg(res.msg, {icon: 1});
+                    table.reload('roomTable');
+                } else {
+                    layer.alert(res.msg, {icon: 2});
+                }
+            });
+        }
+    });
+
+    // 行操作事件
+    table.on('tool(roomTable)', function(obj) {
+        var data = obj.data;
+        if (obj.event === 'members') {
+            // 打开成员查看抽屉
+            var loadIndex = layer.load(2);
+            $.get('{:url("im.room/members")}', {room_id: data.room_id}, function(res) {
+                layer.close(loadIndex);
+                if (res.code === 1) {
+                    var members = res.data.members || [];
+                    var mHtml = '<div style="padding:15px;"><table class="layui-table"><thead><tr><th>User ID</th><th>昵称</th></tr></thead><tbody>';
+                    if (members.length === 0) {
+                        mHtml += '<tr><td colspan="2" style="text-align:center;color:#999;">暂无成员或全员已退出</td></tr>';
+                    } else {
+                        members.forEach(function(m) {
+                            mHtml += '<tr><td style="font-family:monospace;">' + m.user_id + '</td><td>' + (m.displayname || '-') + '</td></tr>';
+                        });
+                    }
+                    mHtml += '</tbody></table></div>';
+                    layer.open({
+                        type: 1,
+                        title: '房间成员列表 (' + members.length + '人) - ' + data.name,
+                        area: ['520px', '460px'],
+                        content: mHtml,
+                        shadeClose: true
+                    });
+                } else {
+                    layer.msg(res.msg, {icon: 2});
+                }
+            });
+        } else if (obj.event === 'mute') {
+            layer.confirm('确定要切换该房间的全员禁言模式吗？', {
+                title: '禁言设置',
+                btn: ['开启全员禁言', '允许自由发言', '取消']
+            }, function(index) {
+                layer.close(index);
+                $.post('{:url("im.room/toggleMute")}', {room_id: data.room_id, is_mute: 1}, function(res) {
+                    layer.msg(res.msg, {icon: res.code === 1 ? 1 : 2});
+                });
+            }, function(index) {
+                layer.close(index);
+                $.post('{:url("im.room/toggleMute")}', {room_id: data.room_id, is_mute: 0}, function(res) {
+                    layer.msg(res.msg, {icon: res.code === 1 ? 1 : 2});
+                });
+            });
+        } else if (obj.event === 'delete') {
+            layer.confirm('解散房间将永久物理删除所有聊天数据且不可恢复，是否确认？', {
+                icon: 2,
+                title: '高危解散确认'
+            }, function(index) {
+                layer.close(index);
+                var loadIndex = layer.load(2);
+                $.post('{:url("im.room/delete")}', {room_id: data.room_id}, function(res) {
+                    layer.close(loadIndex);
+                    if (res.code === 1) {
+                        layer.msg(res.msg, {icon: 1});
+                        table.reload('roomTable');
+                    } else {
+                        layer.alert(res.msg, {icon: 2});
+                    }
+                });
+            });
+        }
+    });
+});
+</script>
