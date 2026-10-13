@@ -879,7 +879,13 @@ class MatrixService
             $directs = json_decode((string) $response->getBody(), true) ?? [];
 
             if (!empty($directs[$targetUserId]) && is_array($directs[$targetUserId])) {
-                return $directs[$targetUserId][0] ?? null;
+                $candidate = $directs[$targetUserId][0] ?? null;
+                if ($candidate) {
+                    $joined = $this->getUserJoinedRooms($userToken);
+                    if (in_array($candidate, $joined['joined_rooms'] ?? [], true)) {
+                        return $candidate;
+                    }
+                }
             }
             return null;
         } catch (GuzzleException) {
@@ -1082,7 +1088,11 @@ class MatrixService
     {
         try {
             $response = $this->client->post("/_matrix/client/v3/rooms/{$roomId}/receipt/m.read/{$eventId}", [
-                'headers' => ['Authorization' => "Bearer {$userToken}"],
+                'headers' => [
+                    'Authorization' => "Bearer {$userToken}",
+                    'Content-Type'  => 'application/json',
+                ],
+                'json' => (object)[],
             ]);
             return $response->getStatusCode() === 200;
         } catch (GuzzleException) {
@@ -1164,16 +1174,23 @@ class MatrixService
     /**
      * 获取公开房间广场列表（供公共群发现页展示）
      */
-    public function getPublicRooms(?string $searchTerm = null, int $limit = 20): array
+    public function getPublicRooms(?string $searchTerm = null, int $limit = 20, string $userToken = ''): array
     {
         $payload = ['limit' => $limit];
         if ($searchTerm) {
             $payload['filter'] = ['generic_search_term' => $searchTerm];
         }
 
+        $token = $userToken !== '' ? $userToken : $this->adminToken;
+        $headers = [];
+        if (!empty($token)) {
+            $headers['Authorization'] = "Bearer {$token}";
+        }
+
         try {
             $response = $this->client->post('/_matrix/client/v3/publicRooms', [
-                'json' => $payload,
+                'headers' => $headers,
+                'json'    => $payload,
             ]);
             $body = json_decode((string) $response->getBody(), true) ?? [];
             return [
@@ -1363,6 +1380,9 @@ class MatrixService
 
             // 步骤 7: 即时互动（表情点赞与已读回执）
             if ($lastEventId) {
+                // 用户 B 接受邀请进入单聊房间
+                $this->joinRoom($userTokenB, $dmRoomId);
+
                 $react = $this->sendReaction($userTokenB, $dmRoomId, $lastEventId, '🚀');
                 $receipt = $this->sendReadReceipt($userTokenB, $dmRoomId, $lastEventId);
                 $typing = $this->sendTyping($userTokenB, $dmRoomId, $userB, true, 3000);
