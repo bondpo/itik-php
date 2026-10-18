@@ -10,5 +10,6 @@ return [
         'recommend:generate' => 'app\\command\\RecommendGenerate',
         'seed:fake' => 'app\\command\\FakeData',
         'matrix:test' => 'app\\command\\TestMatrix',
+        'calc' => 'app\\command\\Calc',
     ],
 ];
