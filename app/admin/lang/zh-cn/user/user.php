@@ -30,5 +30,6 @@ return [
     'Status'                                      => '状态',
     'Leave password blank if dont want to change' => '不修改密码请留空',
     'Money'                                       => '余额',
-    'Username rule'                               => '用户名3-16个字符，必须字母开头且只能是字母、数字、下划线',
+//    'Username rule'                               => '用户名3-16个字符，必须字母开头且只能是字母、数字、下划线',
+    'Username rule'                               => '用户名3-16个字符，必须是字母、数字、下划线',
 ];
