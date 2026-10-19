@@ -1,0 +1,54 @@
+{layout name="layout/form" /}
+<form class="layui-form" method="post">
+  {:token_field()}
+  <input type="hidden" name="id" value="{$row.id|default=0}">
+  <input type="hidden" name="money" value="{$row.money|default=0}">
+  <div class="layui-form-item">
+    <label class="layui-form-label">用户ID</label>
+    <div class="layui-input-block">
+      <input type="text" value="{$row.id|default=0}" class="layui-input layui-disabled" disabled>
+    </div>
+  </div>
+  <div class="layui-form-item">
+    <label class="layui-form-label">用户名</label>
+    <div class="layui-input-block">
+      <input type="text" value="{$row.username|default=''}" class="layui-input layui-disabled" disabled>
+    </div>
+  </div>
+  <div class="layui-form-item">
+    <label class="layui-form-label">当前余额</label>
+    <div class="layui-input-block">
+      <input type="text" value="{$row.money|default=0}" class="layui-input layui-disabled" disabled>
+    </div>
+  </div>
+  <div class="layui-form-item">
+    <label class="layui-form-label">充值金额</label>
+    <div class="layui-input-block">
+      <input type="number" name="amount" lay-verify="required|number" placeholder="请输入充值金额（正数为充值，负数为扣减）" class="layui-input">
+    </div>
+  </div>
+  <div class="layui-form-item">
+    <label class="layui-form-label">备注</label>
+    <div class="layui-input-block">
+      <input type="text" name="memo" placeholder="请填写充值备注" class="layui-input">
+    </div>
+  </div>
+  <div class="layui-form-item layer-footer hide">
+    <div class="layui-input-block">
+      <button class="layui-btn pear-btn-primary layui-btn-sm disabled" lay-submit>立即提交</button>
+      <button type="reset" class="layui-btn layui-btn-primary layui-btn-sm">重置</button>
+    </div>
+  </div>
+</form>
+
+<script>
+  layui.use(["badou"], function () {
+    var bdForm = layui.bdForm;
+    bdForm.api.bindevent($("form.layui-form"), function(res) {
+      if (res.code == 1) {
+        parent.layui.bdTable.api.refresh();
+        return false;
+      }
+    });
+  });
+</script>

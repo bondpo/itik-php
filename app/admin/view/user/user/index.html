@@ -36,6 +36,37 @@
         var treeTable = layui.treeTable;
         var layer = layui.layer;
         var dropdown = layui.dropdown;
+        var http = layui.bdHttp;
+        
+        // 添加充值按钮配置
+        bdTable.button.recharge = {
+            name: 'recharge',
+            icon: 'fa fa-plus-circle',
+            title: '充值',
+            extend: "lay-event='recharge'",
+            classname: 'layui-btn layui-bg-orange layui-btn-sm',
+        };
+        
+        // 重写 formatter.operate 添加充值按钮
+        bdTable.api.formatter.operate_old = bdTable.api.formatter.operate;
+        bdTable.api.formatter.operate = function (data) {
+            var buttons = $.extend([], this.buttons || []);
+            var names = [];
+            buttons.forEach(function (item) {
+                names.push(item.name);
+            });
+            if (bdTable.extend.recharge_url && names.indexOf('recharge') === -1) {
+                buttons.push(bdTable.button.recharge);
+            }
+            if (bdTable.extend.edit_url !== '' && names.indexOf('edit') === -1) {
+                buttons.push(bdTable.button.edit);
+            }
+            if (bdTable.extend.del_url !== '' && names.indexOf('del') === -1) {
+                buttons.push(bdTable.button.del);
+            }
+            return bdTable.api.buttonlink(data, buttons, 'operate');
+        };
+        
         bdTable.api.init({
             table: treeTable,
             extend: {
@@ -44,6 +75,8 @@
                 edit_url: "user.user/edit",
                 del_url: "user.user/del",
                 multi_url: "user.user/multi",
+                recharge_url: "user.user/recharge",
+                dorecharge_url: "user.user/dorecharge",
                 table: "user",
             },
         });
@@ -75,7 +108,8 @@
 					{ field: 'avatar', title: __('Avatar'), width: 80, align: "center", templet: bdTable.api.formatter.image, operate: false },
 					{ field: 'level', title: __('Level'), width: 80, align: "center", operate: 'BETWEEN', sortable: true },
 					{ field: 'gender', title: __('Gender'), width: 80, align: "center", visible: false, searchList: {1: __('Male'), 0: __('Female')} },
-					{ field: 'score', title: __('Score'), width: 90, align: "center", operate: 'BETWEEN', sortable: true },
+					{ field: 'money', title: __('Money'), width: 90, align: "center", operate: 'BETWEEN', sortable: true },
+                    { field: 'score', title: __('Score'), width: 90, align: "center", operate: 'BETWEEN', sortable: true, hide: true, visible: false },
 					{ field: 'logintime_text', title: __('Logintime'), minWidth: 165, templet: bdTable.api.formatter.datetime, operate: false },
                     { field: 'logintime', title: __('Logintime'), templet: bdTable.api.formatter.datetime, searchType: 'time', hide: true },
 					{ field: 'loginip', title: __('Loginip'), minWidth: 130 },
@@ -91,7 +125,7 @@
                         custom: { normal: "green", hidden: "orange" },
                         templet: bdTable.api.formatter.status,
                     },
-                    { title: "操作", width: 130, align: "center", fixed: "right", templet: bdTable.api.formatter.operate },
+                    { title: "操作", width: 180, align: "center", fixed: "right", templet: bdTable.api.formatter.operate },
                 ],
             ],
         });
