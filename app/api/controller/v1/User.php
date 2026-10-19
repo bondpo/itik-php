@@ -6,6 +6,7 @@
 
 namespace app\api\controller\v1;
 
+use app\common\service\MatrixService;
 use think\facade\Db;
 
 /**
@@ -151,5 +152,37 @@ class User extends Base
             'active'    => $this->subscriptionActive(),
             'history'   => $list,
         ]);
+    }
+
+    public function findFri(){
+        $username = $this->request->post('username');
+        $user = \app\common\model\User::where('username', $username)->find();
+        $params = [];
+        if(!$user){
+            $this->error('未找到好友');
+        }else{
+            $params[$user->id]['id'] = $user->id;
+            $params[$user->id]['username'] = $user->username;
+            $params[$user->id]['imUser'] = (new MatrixService())->buildUserId($user->id);
+        }
+        $this->success(__('Successful'), $params);
+    }
+
+    public function friends(){
+        $ids = $this->request->post('ids');
+        if (!$ids) {
+            $this->error(__('Invalid parameters'));
+        }
+        $params = [];
+        foreach ($ids as $id) {
+            $params[$id]['id'] = $id;
+            $params[$id]['username'] = \app\common\model\User::where('id', $id)->value('username');
+            $params[$id]['imUser'] = (new MatrixService())->buildUserId($id);
+        }
+        if (!empty($params)) {
+            $this->success(__('Successful'), $params);
+        } else {
+            $this->error('获取异常');
+        }
     }
 }
