@@ -163,6 +163,7 @@ class User extends Base
         }else{
             $params[$user->id]['id'] = $user->id;
             $params[$user->id]['username'] = $user->username;
+            $params[$user->id]['nickname'] = $user->nickname;
             $params[$user->id]['imUser'] = (new MatrixService())->buildUserId($user->id);
         }
         $this->success(__('Successful'), $params);
@@ -175,8 +176,10 @@ class User extends Base
         }
         $params = [];
         foreach ($ids as $id) {
+            $user = \app\common\model\User::where('id', $id)->find();
             $params[$id]['id'] = $id;
-            $params[$id]['username'] = \app\common\model\User::where('id', $id)->value('username');
+            $params[$id]['username'] = $user->username;
+            $params[$user->id]['nickname'] = $user->nickname;
             $params[$id]['imUser'] = (new MatrixService())->buildUserId($id);
         }
         if (!empty($params)) {

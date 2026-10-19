@@ -46,6 +46,8 @@ Route::group('v1', function () {
     Route::put('users/me', [User::class, 'update']);
     Route::get('users/me/identities', [User::class, 'identities']);
     Route::get('users/me/subscription', [User::class, 'subscription']);
+    Route::post('users/find-fri', [User::class, 'findFri']);
+    Route::post('users/friends', [User::class, 'friends']);
 
     /* ---------------- 套餐（公开） ---------------- */
     Route::get('roles/plans', [Plan::class, 'index']);
