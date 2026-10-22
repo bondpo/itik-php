@@ -75,6 +75,24 @@ class User extends Model
         }
     }
 
+    /**
+     * 管理员修改用户昵称后，自动同步到 IM (Matrix)
+     */
+    public static function onAfterUpdate($row): void
+    {
+        $changed = $row->getChangedData();
+
+        if (!isset($changed['nickname'])) {
+            return;
+        }
+
+        try {
+            (new \app\common\service\MatrixService())->updateProfile((int)$row->id, (string)$changed['nickname']);
+        } catch (\Throwable) {
+            // IM 未配置或同步失败均不影响主流程
+        }
+    }
+
     public function getGenderList()
     {
         return ['1' => __('Male'), '0' => __('Female')];

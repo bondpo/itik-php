@@ -21,7 +21,6 @@ use think\facade\Db;
  * @method static mixed getByMobile($str) 通过手机查询用户
  * @method static mixed getByEmail($str) 通过邮箱查询用户
  * @method static mixed getByInviteCode($str) 通过邀请码查询用户
- * @method static mixed getByWalletAddress($str) 通过钱包地址查询用户
  * Class User
  * @package app\common\model
  * Author: Wusn <958342972@qq.com>
@@ -42,6 +41,24 @@ class User extends Model
     {
         if (empty($user->invite_code)) {
             $user->invite_code = self::generateInviteCode();
+        }
+    }
+
+    /**
+     * 用户修改昵称后，自动同步到 IM (Matrix)
+     */
+    public static function onAfterUpdate($user): void
+    {
+        $changed = $user->getChangedData();
+
+        if (!isset($changed['nickname'])) {
+            return;
+        }
+
+        try {
+            (new \app\common\service\MatrixService())->updateProfile((int)$user->id, (string)$changed['nickname']);
+        } catch (\Throwable) {
+            // IM 未配置或同步失败均不影响主流程
         }
     }
 

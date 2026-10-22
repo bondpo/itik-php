@@ -225,6 +225,11 @@ class MatrixService
      */
     public function updateProfile(string|int $identifier, ?string $displayName = null, ?string $avatarUrl = null): bool
     {
+        // 未配置 Matrix 时静默跳过，避免影响业务主流程
+        if (empty($this->adminToken) || empty($this->baseUrl)) {
+            return true;
+        }
+
         $matrixUserId = $this->buildUserId($identifier);
         $payload = [];
 
