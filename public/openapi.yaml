@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------
 # 项目社区信息交互平台 —— API 接口文档（OpenAPI 3.0）
 # 生成时间：2026-10-23
-# 接口：100 个（平台 /api/v1 共 75 个 + CMS /api/cms 共 25 个），90 个路径
+# 接口：103 个（平台 /api/v1 共 78 个 + CMS /api/cms 共 25 个），93 个路径
 # 参数：位置/类型由控制器源码提取，必填按接口语义标注。
 # 鉴权：请求头 token: <access_token>；响应统一 {code,msg,data,request_id,time}。
 # ----------------------------------------------------------------------
@@ -21,6 +21,7 @@ tags:
   - name: 认证
   - name: 用户与角色
   - name: 套餐
+  - name: 地区
   - name: 订阅与订单
   - name: 项目
   - name: 内容/资讯
@@ -353,6 +354,102 @@ paths:
       summary: 套餐列表
       operationId: plan_index
       security: []
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/regions:
+    get:
+      tags: [地区]
+      summary: 地区联动（取指定父级下的子地区）
+      operationId: region_index
+      security: []
+      parameters:
+        - name: parent_id
+          in: query
+          required: false
+          description: 父级地区 ID（0=国家/地区级）
+          schema:
+            type: integer
+            default: 0
+        - name: lang
+          in: query
+          required: false
+          description: 语言 zh/en
+          schema:
+            type: string
+            default: zh
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/regions/tree:
+    get:
+      tags: [地区]
+      summary: 完整地区树（可裁剪）
+      operationId: region_tree
+      security: []
+      parameters:
+        - name: parent_id
+          in: query
+          required: false
+          description: 根父级 ID
+          schema:
+            type: integer
+            default: 0
+        - name: depth
+          in: query
+          required: false
+          description: 返回层级深度（1-4）
+          schema:
+            type: integer
+            default: 3
+        - name: lang
+          in: query
+          required: false
+          description: 语言 zh/en
+          schema:
+            type: string
+            default: zh
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/regions/path:
+    get:
+      tags: [地区]
+      summary: 地区祖先链（回显）
+      operationId: region_path
+      security: []
+      parameters:
+        - name: id
+          in: query
+          required: false
+          description: 地区 ID（与 code 二选一）
+          schema:
+            type: integer
+        - name: code
+          in: query
+          required: false
+          description: 地区代码（国家 ISO alpha-2 / 中国 GB/T 2260）
+          schema:
+            type: string
+        - name: lang
+          in: query
+          required: false
+          description: 语言 zh/en
+          schema:
+            type: string
+            default: zh
       responses:
         "200":
           description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）

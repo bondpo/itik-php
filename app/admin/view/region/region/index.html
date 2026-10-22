@@ -1,0 +1,61 @@
+{layout name="layout/default" /}
+
+<!-- 表格 -->
+<div class="layui-card">
+    <div class="layui-card-body">
+        <table class="layui-hide" id="region" data-operate-edit="{:$auth->check('region.region/edit')}" data-operate-del="{:$auth->check('region.region/del')}"></table>
+    </div>
+</div>
+
+<script type="text/html" id="toolbar">
+    <a href="javascript:;" lay-event="refresh" class="layui-btn btn-refresh layui-bg-black"><i class="fa fa-refresh"></i></a>
+    <button class="layui-btn layui-bg-green {:$auth->check('region.region/add')?'':'hide'}" lay-event="add"><i class="fa fa-plus"></i> {:__('Add')}</button>
+    <button class="layui-btn layui-bg-blue btn-disabled disabled {:$auth->check('region.region/edit')?'':'hide'}" lay-event="edit"><i class="fa fa-pencil"></i> {:__('Edit')}</button>
+    <button class="layui-btn layui-bg-red btn-disabled disabled {:$auth->check('region.region/del')?'':'hide'}" lay-event="del"><i class="fa fa-trash"></i> {:__('Del')}</button>
+</script>
+
+<script>
+    layui.use(["badou", "table"], function () {
+        var bdTable = layui.bdTable;
+        var table = layui.table;
+
+        bdTable.api.init({
+            table: table,
+            extend: {
+                index_url: "region.region/index" + location.search,
+                add_url: "region.region/add",
+                edit_url: "region.region/edit",
+                del_url: "region.region/del",
+                multi_url: "region.region/multi",
+                table: "region",
+            },
+        });
+
+        bdTable.render({
+            elem: "#region",
+            url: "{:url('region.region/index')}",
+            pk: "id",
+            even: true,
+            toolbar: "#toolbar",
+            page: true,
+            cols: [
+                [
+                    { type: "checkbox" },
+                    { field: "id", title: "ID", width: 70, sort: true },
+                    { field: "parent_id", title: "父级ID", width: 90, sort: true },
+                    { field: "level", title: "层级", width: 100, searchList: {1: '国家/地区', 2: '省/州', 3: '市/区', 4: '县/区'}, templet: function (d) { return d.level_text || d.level; } },
+                    { field: "code", title: "地区代码", width: 120, operate: 'LIKE' },
+                    { field: "name_zh", title: "中文名", minWidth: 140, operate: 'LIKE' },
+                    { field: "name_en", title: "英文名", minWidth: 160, operate: 'LIKE' },
+                    { field: "name_short_zh", title: "中文简称", width: 110, operate: 'LIKE' },
+                    { field: "py", title: "首字母", width: 90, operate: 'LIKE' },
+                    { field: "weigh", title: "权重", width: 80, sort: true },
+                    { field: "status", title: "状态", width: 90, searchList: { normal: '正常', hidden: '隐藏' }, custom: { normal: 'green', hidden: 'orange' }, templet: bdTable.api.formatter.status },
+                    { field: "create_time_text", title: "创建时间", templet: bdTable.api.formatter.datetime, operate: false },
+                    { field: "create_time", title: "创建时间", templet: bdTable.api.formatter.datetime, searchType: 'time', hide: true },
+                    { title: "操作", width: 130, align: "center", templet: bdTable.api.formatter.operate },
+                ],
+            ],
+        });
+    });
+</script>
