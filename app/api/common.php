@@ -46,6 +46,11 @@ Route::group('v1', function () {
     Route::put('users/me', [User::class, 'update']);
     Route::get('users/me/identities', [User::class, 'identities']);
     Route::get('users/me/subscription', [User::class, 'subscription']);
+    Route::get('users/me/bindings', [User::class, 'bindings']);
+    Route::post('users/me/email/send-code', [User::class, 'emailSendCode']);
+    Route::post('users/me/email/bind', [User::class, 'emailBind']);
+    Route::post('users/me/wallet/challenge', [User::class, 'walletChallenge']);
+    Route::post('users/me/wallet/bind', [User::class, 'walletBind']);
 
     /* ---------------- 套餐（公开） ---------------- */
     Route::get('roles/plans', [Plan::class, 'index']);
