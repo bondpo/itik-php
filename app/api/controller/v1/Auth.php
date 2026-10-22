@@ -142,6 +142,12 @@ class Auth extends Base
 
         $matrixAuth = (new MatrixService())->syncUserOnAuth($userId, $password, $nickname ?: $username);
 
+        // 有推荐人时，注册成功后自动在 IM 里加为好友（失败不影响注册主流程）
+        $inviterId = (int)($this->auth->inviter_id ?? 0);
+        if ($inviterId > 0) {
+            (new MatrixService())->addDirectFriend((int)$this->auth->id, (string)($matrixAuth['access_token'] ?? ''), $inviterId);
+        }
+
         $this->success('注册成功', [
             'user_id'     => $userId,
             'username'    => $username,
@@ -330,6 +336,13 @@ class Auth extends Base
         }
 
         $matrixAuth = (new MatrixService())->syncUserOnAuth($userId, '', (string)($user->nickname ?? ''));
+
+        // 有推荐人时，注册成功后自动在 IM 里加为好友（失败不影响注册主流程）
+        $inviterId = (int)($user->inviter_id ?? 0);
+        if ($inviterId > 0) {
+            (new MatrixService())->addDirectFriend((int)$user->id, (string)($matrixAuth['access_token'] ?? ''), $inviterId);
+        }
+
 
         $this->success($isNewUser ? '钱包注册并登录成功' : '钱包登录成功', [
             'user_id'        => $userId,

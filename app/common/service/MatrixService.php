@@ -966,6 +966,66 @@ class MatrixService
     }
 
     /**
+     * 注册成功后，把推荐人加为新用户的 IM 好友（Matrix 1v1 私聊）
+     *
+     * 说明：新用户本人的 Matrix 账号与 Token 已由调用方（register 控制器）提前 sync 完成，
+     * 这里只负责推荐人侧与建房间，避免重复同步新用户。
+     */
+    public function addDirectFriend(int $memberId, string $memberToken, int $inviterId): bool
+    {
+        if ($memberId <= 0 || $inviterId <= 0 || $memberId === $inviterId || $memberToken === '') {
+            return false;
+        }
+
+        try {
+            $inviter = \app\common\model\User::find($inviterId);
+            if (!$inviter) {
+                return false;
+            }
+
+            // 推荐人侧确保 IM 账号与 Token 就绪
+            $inviterAuth = $this->syncUserOnAuth($inviterId, '', (string)($inviter->nickname ?? ''));
+            if (empty($inviterAuth['access_token'])) {
+                Log::warning("[IM] 注册加好友失败：推荐人 {$inviterId} 无 IM Token");
+                return false;
+            }
+
+            // 新用户向推荐人发起 1v1 私聊（已存在则复用）
+            $dm     = $this->getOrCreateDirectChat($memberToken, $memberId, $inviterId);
+            $roomId = (string)($dm['room_id'] ?? '');
+            if ($roomId === '') {
+                Log::warning("[IM] 注册加好友失败：member={$memberId} inviter={$inviterId} " . ($dm['error'] ?? ''));
+                return false;
+            }
+
+            // 推荐人侧代为接受邀请，确保双方均在房间内
+            $this->joinRoom($inviterAuth['access_token'], $roomId);
+
+            // 幂等写入本地 IM 房间业务索引
+            if (!Db::name('im_room')->where('room_id', $roomId)->find()) {
+                Db::name('im_room')->insert([
+                    'room_id'      => $roomId,
+                    'type'         => 'direct',
+                    'name'         => '',
+                    'creator_id'   => $memberId,
+                    'biz_type'     => 'general',
+                    'biz_id'       => 0,
+                    'member_count' => 2,
+                    'is_public'    => 0,
+                    'status'       => 'normal',
+                    'create_time'  => time(),
+                    'update_time'  => time(),
+                ]);
+            }
+
+            return true;
+        } catch (\Throwable $e) {
+            Log::error("[IM] 注册加好友异常：member={$memberId} inviter={$inviterId} " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * 拉取房间历史消息（用于客服会话回溯或消息漫游）
      */
     public function getRoomMessages(string $userToken, string $roomId, int $limit = 30, string $dir = 'b', ?string $from = null): array
