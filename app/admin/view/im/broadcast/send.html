@@ -1,0 +1,159 @@
+{layout name="layout/default" /}
+
+<div class="layui-fluid" style="padding: 15px;">
+    <div class="layui-row layui-col-space15">
+        <!-- 左侧配置表单 -->
+        <div class="layui-col-md7">
+            <div class="layui-card">
+                <div class="layui-card-header">
+                    <i class="fa fa-bullhorn"></i> 新建官方小助手广播通知
+                </div>
+                <div class="layui-card-body">
+                    <form class="layui-form" lay-filter="formBroadcast">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">推送目标</label>
+                            <div class="layui-input-block">
+                                <input type="radio" name="target_type" value="all" title="全员用户 (官方小助手私聊)" checked lay-filter="targetType">
+                                <input type="radio" name="target_type" value="user" title="指定用户ID (私聊)" lay-filter="targetType">
+                                <input type="radio" name="target_type" value="room" title="指定群聊房间" lay-filter="targetType">
+                            </div>
+                            <div class="layui-word-aux" id="targetTypeTip" style="margin-left: 110px; margin-top: 5px; font-size: 12px; color: #888;">
+                                <i class="fa fa-info-circle"></i> 系统官方小助手将向全站所有已激活 IM 的用户发送 1 对 1 私聊通知。
+                            </div>
+                        </div>
+
+                        <div class="layui-form-item" id="targetIdBox" style="display: none;">
+                            <label class="layui-form-label" id="targetIdLabel">目标ID</label>
+                            <div class="layui-input-block">
+                                <input type="text" name="target_id" id="inputTargetId" placeholder="输入用户 UID 或 Matrix User ID，多个以逗号分隔" class="layui-input">
+                            </div>
+                        </div>
+
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">消息形态</label>
+                            <div class="layui-input-block">
+                                <input type="radio" name="msg_type" value="text" title="普通通知 (纯文本)" checked lay-filter="msgType">
+                                <input type="radio" name="msg_type" value="card" title="业务交互卡片" lay-filter="msgType">
+                                <input type="radio" name="msg_type" value="html" title="富文本 (HTML)" lay-filter="msgType">
+                            </div>
+                        </div>
+
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">通知标题</label>
+                            <div class="layui-input-block">
+                                <input type="text" name="title" id="inputTitle" required lay-verify="required" placeholder="请输入广播标题（如：系统维护公告）" class="layui-input">
+                            </div>
+                        </div>
+
+                        <div class="layui-form-item layui-form-text">
+                            <label class="layui-form-label">通知内容</label>
+                            <div class="layui-input-block">
+                                <textarea name="content" id="inputContent" required lay-verify="required" placeholder="请输入通知正文内容..." class="layui-textarea" style="min-height: 120px;"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="layui-form-item" id="jumpUrlBox" style="display: none;">
+                            <label class="layui-form-label">跳转链接</label>
+                            <div class="layui-input-block">
+                                <input type="text" name="jump_url" placeholder="https://..." class="layui-input">
+                            </div>
+                        </div>
+
+                        <div class="layui-form-item">
+                            <div class="layui-input-block">
+                                <button class="layui-btn layui-bg-blue" lay-submit lay-filter="btnSubmit">
+                                    <i class="fa fa-paper-plane"></i> 立即推送发送
+                                </button>
+                                <a href="{:url('im.broadcast/index')}" class="layui-btn layui-btn-primary">返回列表</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧实时手机端渲染预览 -->
+        <div class="layui-col-md5">
+            <div class="layui-card">
+                <div class="layui-card-header"><i class="fa fa-mobile"></i> 客户端实时效果预览</div>
+                <div class="layui-card-body" style="background:#f4f5f7;min-height:480px;display:flex;justify-content:center;align-items:center;">
+                    <div style="width:310px;background:#fff;border-radius:12px;padding:15px;box-shadow:0 3px 12px rgba(0,0,0,0.08);">
+                        <div style="display:flex;align-items:center;margin-bottom:12px;">
+                            <div style="width:36px;height:36px;border-radius:50%;background:#1e9fff;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;">
+                                <i class="fa fa-bell"></i>
+                            </div>
+                            <div style="margin-left:10px;">
+                                <div style="font-weight:bold;font-size:14px;">系统小助手</div>
+                                <div style="font-size:11px;color:#aaa;">官方通知</div>
+                            </div>
+                        </div>
+                        <div id="previewCard" style="border:1px solid #ebeef5;border-radius:8px;padding:12px;background:#fff;">
+                            <h4 id="previewTitle" style="margin:0 0 8px 0;color:#303133;font-size:15px;font-weight:bold;">通知标题预览</h4>
+                            <div id="previewContent" style="color:#606266;font-size:13px;line-height:1.6;word-break:break-all;">通知正文内容将在此处实时联动呈现...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+layui.use(['form', 'layer'], function () {
+    var form = layui.form;
+    var layer = layui.layer;
+    var $ = layui.$;
+
+    // 实时同步预览
+    $('#inputTitle').on('input propertychange', function () {
+        var v = $(this).val();
+        $('#previewTitle').text(v ? v : '通知标题预览');
+    });
+
+    $('#inputContent').on('input propertychange', function () {
+        var v = $(this).val();
+        $('#previewContent').text(v ? v : '通知正文内容将在此处实时联动呈现...');
+    });
+
+    form.on('radio(targetType)', function (data) {
+        if (data.value === 'all') {
+            $('#targetIdBox').hide();
+            $('#targetTypeTip').html('<i class="fa fa-info-circle"></i> 系统官方小助手将向全站所有已激活 IM 的用户发送 1 对 1 私聊通知。');
+        } else if (data.value === 'user') {
+            $('#targetIdBox').show();
+            $('#targetIdLabel').text('目标用户');
+            $('#inputTargetId').attr('placeholder', '输入用户 UID 或 Matrix User ID，多个以逗号分隔，如 144, 8888 或 @u_144:domain');
+            $('#targetTypeTip').html('<i class="fa fa-info-circle"></i> 向指定的特定用户发送官方小助手 1v1 私信通知。');
+        } else if (data.value === 'room') {
+            $('#targetIdBox').show();
+            $('#targetIdLabel').text('目标房间');
+            $('#inputTargetId').attr('placeholder', '输入房间ID，多个以英文逗号分隔，如 !abc:domain,!xyz:domain');
+            $('#targetTypeTip').html('<i class="fa fa-warning" style="color:#fa8c16;"></i> 请确保系统机器人 @bot 已加入目标群聊，否则 Matrix 会因权限拒绝投递。');
+        }
+    });
+
+    form.on('radio(msgType)', function (data) {
+        if (data.value === 'card') {
+            $('#jumpUrlBox').show();
+        } else {
+            $('#jumpUrlBox').hide();
+        }
+    });
+
+    // 提交处理
+    form.on('submit(btnSubmit)', function (data) {
+        var loadIndex = layer.load(1, {shade: [0.2, '#000']});
+        $.post('{:url("im.broadcast/send")}', data.field, function (res) {
+            layer.close(loadIndex);
+            if (res.code === 1) {
+                layer.msg(res.msg, {icon: 1, time: 1500}, function () {
+                    location.href = '{:url("im.broadcast/index")}';
+                });
+            } else {
+                layer.alert(res.msg, {icon: 2});
+            }
+        });
+        return false;
+    });
+});
+</script>

@@ -1,0 +1,252 @@
+{layout name="layout/default" /}
+
+<style>
+    .im-stat-card {
+        border-radius: 8px;
+        padding: 20px;
+        color: #fff;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .im-stat-title {
+        font-size: 14px;
+        opacity: 0.9;
+        margin-bottom: 8px;
+    }
+    .im-stat-num {
+        font-size: 28px;
+        font-weight: bold;
+    }
+    .im-status-dot {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 6px;
+    }
+    .im-dot-green {
+        background-color: #52c41a;
+        box-shadow: 0 0 8px #52c41a;
+    }
+    .im-dot-red {
+        background-color: #ff4d4f;
+        box-shadow: 0 0 8px #ff4d4f;
+    }
+</style>
+
+<div class="layui-fluid" style="padding: 15px;">
+    <!-- 统计卡片 -->
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md3">
+            <div class="im-stat-card" style="background: linear-gradient(135deg, #1890ff, #096dd9);">
+                <div class="im-stat-title"><i class="fa fa-users"></i> 绑定 Matrix 用户总数</div>
+                <div class="im-stat-num">{$stats.total_users}</div>
+            </div>
+        </div>
+        <div class="layui-col-md3">
+            <div class="im-stat-card" style="background: linear-gradient(135deg, #52c41a, #389e0d);">
+                <div class="im-stat-title"><i class="fa fa-comments"></i> 活跃群聊与房间数</div>
+                <div class="im-stat-num">{$stats.total_rooms}</div>
+            </div>
+        </div>
+        <div class="layui-col-md3">
+            <div class="im-stat-card" style="background: linear-gradient(135deg, #fa8c16, #d46b08);">
+                <div class="im-stat-title"><i class="fa fa-server"></i> 服务端运行状态</div>
+                <div class="im-stat-num" style="font-size: 20px; line-height: 38px;">
+                    {if $stats.ping.success}
+                        <span class="im-status-dot im-dot-green"></span> 正常 ({$stats.ping.cost_ms}ms)
+                    {else}
+                        <span class="im-status-dot im-dot-red"></span> 异常
+                    {/if}
+                </div>
+            </div>
+        </div>
+        <div class="layui-col-md3">
+            <div class="im-stat-card" style="background: linear-gradient(135deg, #722ed1, #531dab);">
+                <div class="im-stat-title"><i class="fa fa-android"></i> 系统机器人 (Bot) 状态</div>
+                <div class="im-stat-num" style="font-size: 20px; line-height: 38px;">
+                    {if $stats.bot.valid}
+                        <span class="im-status-dot im-dot-green"></span> 正常在线
+                    {else}
+                        <span class="im-status-dot im-dot-red"></span> {$stats.bot.status|default='未就绪'}
+                    {/if}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 配置详情与自动化检测 -->
+    <div class="layui-row layui-col-space15" style="margin-top: 5px;">
+        <div class="layui-col-md6">
+            <!-- Matrix Synapse 配置 -->
+            <div class="layui-card">
+                <div class="layui-card-header"><i class="fa fa-cogs"></i> Matrix Synapse 环境配置</div>
+                <div class="layui-card-body">
+                    <table class="layui-table" lay-skin="nob">
+                        <tbody>
+                            <tr>
+                                <td style="width: 140px; color: #888;">Homeserver 域名</td>
+                                <td><code>{$stats.server_name}</code></td>
+                            </tr>
+                            <tr>
+                                <td style="color: #888;">Base API URL</td>
+                                <td><code>{$stats.base_url}</code></td>
+                            </tr>
+                            <tr>
+                                <td style="color: #888;">Admin Token 状态</td>
+                                <td>
+                                    {if $stats.configured}
+                                        <span class="layui-badge layui-bg-green">已配置</span>
+                                    {else}
+                                        <span class="layui-badge layui-bg-orange">未配置 (请检查 .env)</span>
+                                    {/if}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="color: #888;">API 探测响应</td>
+                                <td>
+                                    {if $stats.ping.success}
+                                        <span style="color: #52c41a;"><i class="fa fa-check-circle"></i> 连通正常 (HTTP {$stats.ping.status})</span>
+                                    {else}
+                                        <span style="color: #ff4d4f;"><i class="fa fa-times-circle"></i> {$stats.ping.error|default='连接超时'}</span>
+                                    {/if}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div style="margin-top: 15px;">
+                        <button type="button" class="layui-btn layui-btn-sm layui-bg-blue" id="btnPing">
+                            <i class="fa fa-refresh"></i> 重新测试服务端连通性
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 系统机器人 (Bot) 详情 -->
+            <div class="layui-card" style="margin-top: 15px;">
+                <div class="layui-card-header"><i class="fa fa-android"></i> 系统官方机器人 (Bot) 治理与凭据</div>
+                <div class="layui-card-body">
+                    <table class="layui-table" lay-skin="nob">
+                        <tbody>
+                            <tr>
+                                <td style="width: 140px; color: #888;">Bot 账号 (User ID)</td>
+                                <td><code>{$stats.bot.user_id|default='未配置'}</code></td>
+                            </tr>
+                            <tr>
+                                <td style="color: #888;">运行状态</td>
+                                <td id="botStatusBadge">
+                                    {if $stats.bot.valid}
+                                        <span class="layui-badge layui-bg-green"><i class="fa fa-check"></i> {$stats.bot.status}</span>
+                                    {else}
+                                        <span class="layui-badge layui-bg-red"><i class="fa fa-close"></i> {$stats.bot.status|default='离线'}</span>
+                                    {/if}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="color: #888;">已绑定设备 (Device ID)</td>
+                                <td id="botDeviceId"><code>{$stats.bot.device_id|default='-'}</code></td>
+                            </tr>
+                            <tr>
+                                <td style="color: #888;">应用职责</td>
+                                <td style="color: #666; font-size: 13px;">承担全站官方公告下发、系统群通知广播、自动化接待等特权下发逻辑</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div style="margin-top: 15px;">
+                        <button type="button" class="layui-btn layui-btn-sm layui-bg-cyan" id="btnBotPing">
+                            <i class="fa fa-refresh"></i> 探测机器人在线状态
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-col-md6">
+            <div class="layui-card">
+                <div class="layui-card-header"><i class="fa fa-stethoscope"></i> 全流程自动化集成自检 (Smoke Test)</div>
+                <div class="layui-card-body">
+                    <p style="color: #666; font-size: 13px; margin-bottom: 15px;">
+                        点击按钮将自动模拟测试账号完成建号、Token 签发、建群、发富文本与卡片、表情点赞、已读回执与资源清理全套闭环。
+                    </p>
+                    <button type="button" class="layui-btn layui-bg-green" id="btnRunCheck">
+                        <i class="fa fa-play-circle"></i> 运行端到端健康体检
+                    </button>
+                    <div id="checkProgressBox" style="margin-top: 15px; display: none;">
+                        <div class="layui-progress layui-progress-big" lay-filter="checkProgress" lay-showPercent="yes">
+                            <div class="layui-progress-bar layui-bg-blue" lay-percent="0%"></div>
+                        </div>
+                    </div>
+                    <div id="checkResultBox" style="margin-top: 15px; max-height: 480px; overflow-y: auto;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+layui.use(['layer', 'element'], function () {
+    var layer = layui.layer;
+    var $ = layui.$;
+
+    $('#btnPing').on('click', function () {
+        var loadIndex = layer.load(2);
+        $.post('{:url("im.dashboard/ping")}', function (res) {
+            layer.close(loadIndex);
+            if (res.code === 1) {
+                layer.msg(res.msg + ' 延迟: ' + res.data.cost_ms + 'ms', {icon: 1});
+            } else {
+                layer.alert(res.msg, {icon: 2});
+            }
+        });
+    });
+
+    $('#btnBotPing').on('click', function () {
+        var loadIndex = layer.load(2);
+        $.post('{:url("im.dashboard/botPing")}', function (res) {
+            layer.close(loadIndex);
+            if (res.code === 1) {
+                $('#botStatusBadge').html('<span class="layui-badge layui-bg-green"><i class="fa fa-check"></i> ' + (res.data.status || '正常在线') + '</span>');
+                if (res.data.device_id) {
+                    $('#botDeviceId').html('<code>' + res.data.device_id + '</code>');
+                }
+                layer.msg(res.msg + (res.data.device_id ? ' (设备: ' + res.data.device_id + ')' : ''), {icon: 1});
+            } else {
+                $('#botStatusBadge').html('<span class="layui-badge layui-bg-red"><i class="fa fa-close"></i> ' + (res.data ? res.data.status : '异常') + '</span>');
+                layer.alert(res.msg, {icon: 2});
+            }
+        });
+    });
+
+    $('#btnRunCheck').on('click', function () {
+        var loadIndex = layer.load(1, {shade: [0.2, '#000']});
+        $('#checkResultBox').html('<div style="text-align:center;padding:15px;color:#999;"><i class="fa fa-spinner fa-spin"></i> 正在执行测试用例，请稍候...</div>');
+
+        $.post('{:url("im.dashboard/check")}', function (res) {
+            layer.close(loadIndex);
+            var report = res.data;
+            if (!report || !report.steps) {
+                $('#checkResultBox').html('<div style="color:#ff4d4f;">' + (res.msg || '自检失败') + '</div>');
+                return;
+            }
+
+            var html = '<ul style="list-style:none;padding:0;">';
+            report.steps.forEach(function (step) {
+                var icon = step.passed ? '<span style="color:#52c41a;font-weight:bold;">✔ [PASS]</span>' : '<span style="color:#ff4d4f;font-weight:bold;">✘ [FAIL]</span>';
+                html += '<li style="padding:6px 0;border-bottom:1px solid #f0f0f0;font-size:12px;">' +
+                        icon + ' <strong>' + step.name + '</strong>' +
+                        (step.message ? '<div style="color:#888;margin-left:55px;">' + step.message + '</div>' : '') +
+                        '</li>';
+            });
+            html += '</ul>';
+
+            if (report.all_passed) {
+                html += '<div style="margin-top:10px;color:#52c41a;font-weight:bold;">✔ 11项测试全部通过！总耗时: ' + report.total_cost_ms + 'ms</div>';
+            } else {
+                html += '<div style="margin-top:10px;color:#ff4d4f;font-weight:bold;">✘ 检测到失败项，请检查网络或 Admin Token 设置。</div>';
+            }
+
+            $('#checkResultBox').html(html);
+        });
+    });
+});
+</script>
