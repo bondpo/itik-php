@@ -6,6 +6,7 @@
 
 namespace app\api\controller\v1;
 
+use app\common\service\MatrixService;
 use think\facade\Db;
 use app\common\library\Ems;
 use app\common\library\Wallet;
@@ -416,5 +417,40 @@ class User extends Base
         }
         $verification[$field] = $value;
         return json_encode($verification, JSON_UNESCAPED_UNICODE);
+    }
+
+    public function findFri(){
+        $username = $this->request->post('username');
+        $user = \app\common\model\User::where('username', $username)->find();
+        $params = [];
+        if(!$user){
+            $this->error('未找到好友');
+        }else{
+            $params[$user->id]['id'] = $user->id;
+            $params[$user->id]['username'] = $user->username;
+            $params[$user->id]['nickname'] = $user->nickname;
+            $params[$user->id]['imUser'] = (new MatrixService())->buildUserId($user->id);
+        }
+        $this->success(__('Successful'), $params);
+    }
+
+    public function friends(){
+        $ids = $this->request->post('ids');
+        if (!$ids) {
+            $this->error(__('Invalid parameters'));
+        }
+        $params = [];
+        foreach ($ids as $id) {
+            $user = \app\common\model\User::where('id', $id)->find();
+            $params[$id]['id'] = $id;
+            $params[$id]['username'] = $user->username;
+            $params[$user->id]['nickname'] = $user->nickname;
+            $params[$id]['imUser'] = (new MatrixService())->buildUserId($id);
+        }
+        if (!empty($params)) {
+            $this->success(__('Successful'), $params);
+        } else {
+            $this->error('获取异常');
+        }
     }
 }

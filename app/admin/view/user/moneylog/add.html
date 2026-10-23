@@ -1,0 +1,46 @@
+{layout name="layout/form" /}
+<form class="layui-form" method="post">
+    {:token_field()}
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('UserId')}</label>
+        <div class="layui-input-block">
+            <input type="hidden" id="c-user_id" name="row[user_id]" value="0">
+            <div class="remoteSelect" data-input-id="c-user_id" data-field="nickname" data-primary-key="id" data-source="user.user/selectpage"></div>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Money')}</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[money]" value="0.00" class="layui-input" autocomplete="off" lay-verify="required">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Before')}</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[before]" value="0.00" class="layui-input" autocomplete="off" lay-verify="required">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('After')}</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[after]" value="0.00" class="layui-input" autocomplete="off" lay-verify="required">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Memo')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[memo]" value="" class="layui-input" autocomplete="off">
+        </div>
+    </div>
+    <div class="layui-form-item layer-footer hide">
+        <div class="layui-input-block">
+            <button class="layui-btn btn-theme-color" lay-submit>{:__('OK')}</button>
+            <button type="reset" class="layui-btn layui-btn-primary">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
+<script>
+layui.use(["badou"], function () {
+    layui.bdForm.api.bindevent($("form.layui-form"));
+});
+</script>

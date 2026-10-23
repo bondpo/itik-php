@@ -52,6 +52,8 @@ Route::group('v1', function () {
     Route::post('users/me/email/bind', [User::class, 'emailBind']);
     Route::post('users/me/wallet/challenge', [User::class, 'walletChallenge']);
     Route::post('users/me/wallet/bind', [User::class, 'walletBind']);
+    Route::post('users/find-fri', [User::class, 'findFri']);
+    Route::post('users/friends', [User::class, 'friends']);
 
     /* ---------------- 套餐（公开） ---------------- */
     Route::get('roles/plans', [Plan::class, 'index']);

@@ -503,6 +503,20 @@ layui.define(['jquery', 'bdHttp', 'tableSearch'], function (exports) {
                     }
                 },
                 operate: {
+                    // 充值
+                    'recharge': function (id, obj) {
+                        var title = $(this).data('title') || $(this).attr("title") || '充值';
+                        var data = $(this).data() || {};
+                        var row = obj.data;
+                        var table = bdTable.initTable;
+                        delete data.title;
+
+                        var url = bdTable.extend.recharge_url;
+                        row = $.extend({}, row ? row : {}, { id: row[obj.pk] });
+                        url = bdTable.api.replaceurl(url, row, table);
+                        http.api.open(url, typeof title === 'function' ? title.call(table, row) : title, data);
+                        return false;
+                    },
                     // 编辑
                     'btn-editone': function (id, obj) {
                         var title = $(this).data('title') || $(this).attr("title") || __('Edit');

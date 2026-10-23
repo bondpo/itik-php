@@ -12,7 +12,8 @@ class User extends Validate
      * 验证规则
      */
     protected $rule = [
-        'username' => 'require|unique:user',
+//        'username' => 'require|regex:^[a-zA-Z][a-zA-Z0-9_]{2,15}$|unique:user',
+        'username' => 'require|regex:^[a-zA-Z0-9_]{1,15}$|unique:user',
         'nickname' => 'require|unique:user',
         'email'    => 'email|unique:user',
         'mobile'   => 'mobile|unique:user',

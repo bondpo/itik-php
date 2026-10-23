@@ -11,5 +11,6 @@ return [
         'seed:fake' => 'app\\command\\FakeData',
         'matrix:test' => 'app\\command\\TestMatrix',
         'region:import' => 'app\\command\\ImportRegion',
+        'calc' => 'app\\command\\Calc',
     ],
 ];
