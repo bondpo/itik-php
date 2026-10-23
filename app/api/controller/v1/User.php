@@ -39,7 +39,7 @@ class User extends Base
         $userId = $this->userId();
         $user = Db::name('user')
             ->where('id', $userId)
-            ->field('id,username,nickname,email,mobile,invite_code,inviter_id,avatar,wallet_address,gender,birthday,bio,money,score,level,group_id,logintime')
+            ->field('id,username,nickname,email,mobile,invite_code,inviter_id,avatar,wallet_address,gender,birthday,bio,money,score,level,group_id,lv_vip,lv_team,logintime')
             ->find();
 
         if (!$user) {
@@ -61,6 +61,10 @@ class User extends Base
                 'money'       => $user['money'],
                 'score'       => (int)$user['score'],
                 'level'       => (int)$user['level'],
+                'lv_vip'      => (int)$user['lv_vip'],
+                'lv_team'     => (int)$user['lv_team'],
+                'lv_vip_name' => Db::name('user_lv_vip')->where('id', $user['lv_vip'])->value('name'),
+                'lv_team_name'=> Db::name('user_lv_team')->where('id', $user['lv_team'])->value('name'),
                 'wallet_address' => $user['wallet_address'],
             ],
             'role'         => $this->role,

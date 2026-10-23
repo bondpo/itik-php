@@ -22,6 +22,8 @@ return [
     'Config group'                                   => '配置分组',
     'Please input your email'                        => '请输入您的邮箱',
     'Group'                                          => '分组',
+    'Vip'                                            => 'VIP等级',
+    'Team'                                           => '团队等级',
     'Type'                                           => '类型',
     'Weigh'                                          => '权重',
     'Tip'                                            => '提示信息',

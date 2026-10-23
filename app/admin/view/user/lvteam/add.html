@@ -1,0 +1,35 @@
+{layout name="layout/form" /}
+<form class="layui-form" method="post">
+    {:token_field()}
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Name')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[name]" value="" class="layui-input" autocomplete="off" lay-verify="required">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Pref')}</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[pref]" value="0" class="layui-input" autocomplete="off">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Status')}</label>
+        <div class="layui-input-block">
+            {foreach name="StatusList" item="vo"}
+            <input type="radio" name="row[status]" value="{$key}" title="{$vo}" {in name="key" value="0"}checked{/in}>
+            {/foreach}
+        </div>
+    </div>
+    <div class="layui-form-item layer-footer hide">
+        <div class="layui-input-block">
+            <button class="layui-btn btn-theme-color" lay-submit>{:__('OK')}</button>
+            <button type="reset" class="layui-btn layui-btn-primary">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
+<script>
+layui.use(["badou"], function () {
+    layui.bdForm.api.bindevent($("form.layui-form"));
+});
+</script>
