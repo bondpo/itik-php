@@ -94,7 +94,7 @@
                     { field: "id", title: "ID", width: 70, sort: true, fixed: "left" },
                     { field: "group_id", title: __('Group'), width: 80, searchType: "remoteSelect",
                 extend: 'data-source="user.group/selectpage" data-field="name" data-multiple="false"', hide: true },
-                    { field: 'user_group.name', title: __('Group'), minWidth: 100, operate: false },
+                    { field: 'user_group.name', title: __('Group'), minWidth: 100, operate: false, hide: true, visible: false },
                     { field: "lv_vip", title: __('Vip'), width: 80, searchType: "remoteSelect",
                         extend: 'data-source="user.lvvip/selectpage" data-field="name" data-multiple="false"', hide: true, visible: false },
                     { field: 'user_lv_vip.name', title: __('Vip'), minWidth: 100, operate: false },
@@ -112,7 +112,7 @@
 						return '<span title="' + d.wallet_address + '" style="font-family:monospace;font-size:12px;">' + d.wallet_address.substring(0, 6) + '...' + d.wallet_address.substring(d.wallet_address.length - 4) + '</span>';
 					}},
 					{ field: 'avatar', title: __('Avatar'), width: 80, align: "center", templet: bdTable.api.formatter.image, operate: false },
-					{ field: 'level', title: __('Level'), width: 80, align: "center", operate: 'BETWEEN', sortable: true },
+					{ field: 'level', title: __('Level'), width: 80, align: "center", operate: 'BETWEEN', sortable: true, hide: true, visible: false },
 					{ field: 'gender', title: __('Gender'), width: 80, align: "center", visible: false, searchList: {1: __('Male'), 0: __('Female')} },
 					{ field: 'money', title: __('Money'), width: 90, align: "center", operate: 'BETWEEN', sortable: true },
                     { field: 'score', title: __('Score'), width: 90, align: "center", operate: 'BETWEEN', sortable: true, hide: true, visible: false },
