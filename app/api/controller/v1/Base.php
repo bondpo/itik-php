@@ -47,10 +47,10 @@ class Base extends Api
     public const CODE_SERVER_ERROR   = 50001;
 
     /** 角色代码 */
-    public const ROLE_OWNER   = 'OWNER';
-    public const ROLE_LEADER  = 'LEADER';
-    public const ROLE_MEMBER  = 'MEMBER';
-    public const ROLE_VISITOR = 'VISITOR';
+    public const ROLE_OWNER   = 'OWNER';  //项目方
+    public const ROLE_LEADER  = 'LEADER'; //社区长
+    public const ROLE_MEMBER  = 'MEMBER';  //会员
+    public const ROLE_VISITOR = 'VISITOR';  //游客
 
     /** 订阅六态 */
     public const SUB_PENDING   = 'PENDING_PAYMENT';

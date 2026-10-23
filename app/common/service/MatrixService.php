@@ -7,6 +7,7 @@ namespace app\common\service;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use think\facade\Config;
+use think\facade\Db;
 use think\facade\Log;
 
 /**
@@ -224,6 +225,11 @@ class MatrixService
      */
     public function updateProfile(string|int $identifier, ?string $displayName = null, ?string $avatarUrl = null): bool
     {
+        // 未配置 Matrix 时静默跳过，避免影响业务主流程
+        if (empty($this->adminToken) || empty($this->baseUrl)) {
+            return true;
+        }
+
         $matrixUserId = $this->buildUserId($identifier);
         $payload = [];
 
@@ -361,9 +367,10 @@ class MatrixService
             'msgtype' => 'm.notice',
             'body'    => $message,
         ];
+        $encodedRoomId = rawurlencode($roomId);
 
         try {
-            $response = $this->client->put("/_matrix/client/v3/rooms/{$roomId}/send/m.room.message/{$txnId}", [
+            $response = $this->client->put("/_matrix/client/v3/rooms/{$encodedRoomId}/send/m.room.message/{$txnId}", [
                 'headers' => [
                     'Authorization' => "Bearer {$this->botToken}",
                 ],
@@ -574,12 +581,45 @@ class MatrixService
 
     /**
      * 获取房间成员列表（用于后台展示成员或群聊详情）
+     * 优先使用 Synapse Admin API（支持管理员无需在群内也能查看全量成员）
      */
     public function getRoomMembers(string $userToken, string $roomId): array
     {
+        $token = $userToken ?: $this->adminToken;
+
+        // 1. 优先尝试 Synapse Admin API（上帝视角，无需在房间内）
+        if (!empty($this->adminToken)) {
+            try {
+                $response = $this->client->get("/_synapse/admin/v1/rooms/{$roomId}/members", [
+                    'headers' => ['Authorization' => "Bearer {$this->adminToken}"],
+                ]);
+
+                if ($response->getStatusCode() === 200) {
+                    $body = json_decode((string) $response->getBody(), true) ?? [];
+                    $memberIds = $body['members'] ?? [];
+                    $members = [];
+                    foreach ($memberIds as $mId) {
+                        $members[] = [
+                            'user_id'     => $mId,
+                            'displayname' => $mId,
+                            'avatar_url'  => '',
+                        ];
+                    }
+                    return [
+                        'success' => true,
+                        'members' => $members,
+                        'total'   => $body['total'] ?? count($members),
+                    ];
+                }
+            } catch (\Throwable) {
+                // 忽略异常，降级尝试 Client API
+            }
+        }
+
+        // 2. 降级尝试 Client-Server API（要求调用者在房间内）
         try {
             $response = $this->client->get("/_matrix/client/v3/rooms/{$roomId}/members", [
-                'headers' => ['Authorization' => "Bearer {$userToken}"],
+                'headers' => ['Authorization' => "Bearer {$token}"],
             ]);
             $body = json_decode((string) $response->getBody(), true) ?? [];
             $members = [];
@@ -587,7 +627,7 @@ class MatrixService
                 if (($event['type'] ?? '') === 'm.room.member' && ($event['content']['membership'] ?? '') === 'join') {
                     $members[] = [
                         'user_id'     => $event['state_key'] ?? '',
-                        'displayname' => $event['content']['displayname'] ?? '',
+                        'displayname' => $event['content']['displayname'] ?? ($event['state_key'] ?? ''),
                         'avatar_url'  => $event['content']['avatar_url'] ?? '',
                     ];
                 }
@@ -595,6 +635,7 @@ class MatrixService
             return [
                 'success' => $response->getStatusCode() === 200,
                 'members' => $members,
+                'total'   => count($members),
             ];
         } catch (GuzzleException $e) {
             return ['success' => false, 'error' => $e->getMessage(), 'members' => []];
@@ -713,8 +754,10 @@ class MatrixService
             'body'    => $message,
         ];
 
+        $encodedRoomId = rawurlencode($roomId);
+
         try {
-            $response = $this->client->put("/_matrix/client/v3/rooms/{$roomId}/send/m.room.message/{$txnId}", [
+            $response = $this->client->put("/_matrix/client/v3/rooms/{$encodedRoomId}/send/m.room.message/{$txnId}", [
                 'headers' => ['Authorization' => "Bearer {$userToken}"],
                 'json'    => $payload,
             ]);
@@ -740,9 +783,10 @@ class MatrixService
             'format'         => 'org.matrix.custom.html',
             'formatted_body' => $htmlBody,
         ];
+        $encodedRoomId = rawurlencode($roomId);
 
         try {
-            $response = $this->client->put("/_matrix/client/v3/rooms/{$roomId}/send/m.room.message/{$txnId}", [
+            $response = $this->client->put("/_matrix/client/v3/rooms/{$encodedRoomId}/send/m.room.message/{$txnId}", [
                 'headers' => ['Authorization' => "Bearer {$userToken}"],
                 'json'    => $payload,
             ]);
@@ -771,9 +815,10 @@ class MatrixService
                 'payload'   => $cardPayload,
             ],
         ];
+        $encodedRoomId = rawurlencode($roomId);
 
         try {
-            $response = $this->client->put("/_matrix/client/v3/rooms/{$roomId}/send/m.room.message/{$txnId}", [
+            $response = $this->client->put("/_matrix/client/v3/rooms/{$encodedRoomId}/send/m.room.message/{$txnId}", [
                 'headers' => ['Authorization' => "Bearer {$userToken}"],
                 'json'    => $payload,
             ]);
@@ -923,6 +968,66 @@ class MatrixService
             } catch (\Throwable) {}
         }
         return $result;
+    }
+
+    /**
+     * 注册成功后，把推荐人加为新用户的 IM 好友（Matrix 1v1 私聊）
+     *
+     * 说明：新用户本人的 Matrix 账号与 Token 已由调用方（register 控制器）提前 sync 完成，
+     * 这里只负责推荐人侧与建房间，避免重复同步新用户。
+     */
+    public function addDirectFriend(int $memberId, string $memberToken, int $inviterId): bool
+    {
+        if ($memberId <= 0 || $inviterId <= 0 || $memberId === $inviterId || $memberToken === '') {
+            return false;
+        }
+
+        try {
+            $inviter = \app\common\model\User::find($inviterId);
+            if (!$inviter) {
+                return false;
+            }
+
+            // 推荐人侧确保 IM 账号与 Token 就绪
+            $inviterAuth = $this->syncUserOnAuth($inviterId, '', (string)($inviter->nickname ?? ''));
+            if (empty($inviterAuth['access_token'])) {
+                Log::warning("[IM] 注册加好友失败：推荐人 {$inviterId} 无 IM Token");
+                return false;
+            }
+
+            // 新用户向推荐人发起 1v1 私聊（已存在则复用）
+            $dm     = $this->getOrCreateDirectChat($memberToken, $memberId, $inviterId);
+            $roomId = (string)($dm['room_id'] ?? '');
+            if ($roomId === '') {
+                Log::warning("[IM] 注册加好友失败：member={$memberId} inviter={$inviterId} " . ($dm['error'] ?? ''));
+                return false;
+            }
+
+            // 推荐人侧代为接受邀请，确保双方均在房间内
+            $this->joinRoom($inviterAuth['access_token'], $roomId);
+
+            // 幂等写入本地 IM 房间业务索引
+            if (!Db::name('im_room')->where('room_id', $roomId)->find()) {
+                Db::name('im_room')->insert([
+                    'room_id'      => $roomId,
+                    'type'         => 'direct',
+                    'name'         => '',
+                    'creator_id'   => $memberId,
+                    'biz_type'     => 'general',
+                    'biz_id'       => 0,
+                    'member_count' => 2,
+                    'is_public'    => 0,
+                    'status'       => 'normal',
+                    'create_time'  => time(),
+                    'update_time'  => time(),
+                ]);
+            }
+
+            return true;
+        } catch (\Throwable $e) {
+            Log::error("[IM] 注册加好友异常：member={$memberId} inviter={$inviterId} " . $e->getMessage());
+            return false;
+        }
     }
 
     /**
@@ -1428,7 +1533,230 @@ class MatrixService
             'steps'         => $steps,
         ];
     }
+
+    /**
+     * 【反向对账】获取 Matrix 上的全量房间列表（Synapse Admin API）
+     */
+    public function getAllRoomsAdmin(int $limit = 100, ?string $from = null, string $searchTerm = ''): array
+    {
+        $query = ['limit' => $limit];
+        if ($from) {
+            $query['from'] = $from;
+        }
+        if ($searchTerm !== '') {
+            $query['search_term'] = $searchTerm;
+        }
+
+        try {
+            $response = $this->client->get('/_synapse/admin/v1/rooms', [
+                'headers' => ['Authorization' => "Bearer {$this->adminToken}"],
+                'query'   => $query,
+            ]);
+            $body = json_decode((string) $response->getBody(), true) ?? [];
+            return [
+                'success'     => $response->getStatusCode() === 200,
+                'rooms'       => $body['rooms'] ?? [],
+                'total_rooms' => $body['total_rooms'] ?? 0,
+                'next_batch'  => $body['next_batch'] ?? '',
+            ];
+        } catch (GuzzleException $e) {
+            return ['success' => false, 'error' => $e->getMessage(), 'rooms' => []];
+        }
+    }
+
+    /**
+     * 【风控强化】一键下线指定用户的所有设备会话
+     */
+    public function revokeAllDevicesAdmin(string|int $identifier): array
+    {
+        $matrixUserId = $this->buildUserId($identifier);
+        try {
+            $devicesRes = $this->getUserDevicesAdmin($identifier);
+            $deviceIds = array_column($devicesRes['devices'] ?? [], 'device_id');
+            if (empty($deviceIds)) {
+                return ['success' => true, 'count' => 0];
+            }
+
+            $response = $this->client->post("/_synapse/admin/v2/users/{$matrixUserId}/delete_devices", [
+                'headers' => ['Authorization' => "Bearer {$this->adminToken}"],
+                'json'    => ['devices' => $deviceIds],
+            ]);
+
+            return [
+                'success' => $response->getStatusCode() === 200,
+                'count'   => count($deviceIds),
+            ];
+        } catch (GuzzleException $e) {
+            return ['success' => false, 'error' => $e->getMessage(), 'count' => 0];
+        }
+    }
+
+    /**
+     * 检测系统机器人 (Bot) 的存活状态与配置
+     */
+    public function getBotStatus(): array
+    {
+        if (empty($this->botToken) || empty($this->botUserId)) {
+            return [
+                'configured' => false,
+                'user_id'    => $this->botUserId,
+                'valid'      => false,
+                'status'     => '未配置',
+                'device_id'  => '',
+            ];
+        }
+
+        try {
+            $response = $this->client->get('/_matrix/client/v3/account/whoami', [
+                'headers' => ['Authorization' => "Bearer {$this->botToken}"],
+            ]);
+            $body = json_decode((string) $response->getBody(), true) ?? [];
+
+            if ($response->getStatusCode() === 200 && !empty($body['user_id'])) {
+                return [
+                    'configured' => true,
+                    'user_id'    => $body['user_id'],
+                    'valid'      => true,
+                    'status'     => '正常在线',
+                    'device_id'  => $body['device_id'] ?? '',
+                ];
+            }
+
+            return [
+                'configured' => true,
+                'user_id'    => $this->botUserId,
+                'valid'      => false,
+                'status'     => 'Token 失效',
+                'error'      => $body['error'] ?? 'Authentication failed',
+                'device_id'  => '',
+            ];
+        } catch (GuzzleException $e) {
+            return [
+                'configured' => true,
+                'user_id'    => $this->botUserId,
+                'valid'      => false,
+                'status'     => '连接超时',
+                'error'      => $e->getMessage(),
+                'device_id'  => '',
+            ];
+        }
+    }
+
+    /**
+     * 获取或创建系统官方机器人与指定用户的 1 对 1 私聊房间 (Direct Message)
+     *
+     * @param string|int $targetUserId 目标用户 Matrix User ID 或系统 UID
+     * @param int        $numericUid   系统用户 UID (用于数据库记录，可为 0)
+     * @return string|null 房间 ID
+     */
+    public function getOrCreateBotDirectRoom(string|int $targetUserId, int $numericUid = 0): ?string
+    {
+        if (empty($this->botToken)) {
+            return null;
+        }
+
+        $fullUserId = $this->buildUserId($targetUserId);
+
+        // 如果未传入 numericUid，尝试从 fullUserId 解析或查询 app_identity
+        if ($numericUid <= 0) {
+            $identity = Db::name('app_identity')
+                ->where('type', 'matrix')
+                ->where('identifier', $fullUserId)
+                ->find();
+            if ($identity) {
+                $numericUid = (int) $identity['user_id'];
+            }
+        }
+
+        // 1. 查询本地是否已存在该用户与官方小助手的私聊会话
+        if ($numericUid > 0) {
+            $existing = Db::name('im_room')
+                ->where('type', 'direct')
+                ->where('biz_type', 'system_notice')
+                ->where('creator_id', $numericUid)
+                ->where('status', 'normal')
+                ->value('room_id');
+            if (!empty($existing)) {
+                return $existing;
+            }
+        }
+
+        // 2. 调用 Matrix API 由官方 Bot 创建 Direct Message 房间并邀请用户
+        $payload = [
+            'preset'     => 'trusted_private_chat',
+            'is_direct'  => true,
+            'invite'     => [$fullUserId],
+            'name'       => '系统官方小助手',
+            'topic'      => '系统公告、服务通知与安全提醒',
+            'visibility' => 'private',
+        ];
+
+        try {
+            $response = $this->client->post('/_matrix/client/v3/createRoom', [
+                'headers' => [
+                    'Authorization' => "Bearer {$this->botToken}",
+                ],
+                'json' => $payload,
+            ]);
+
+            $body = json_decode((string) $response->getBody(), true) ?? [];
+            if ($response->getStatusCode() === 200 && !empty($body['room_id'])) {
+                $roomId = $body['room_id'];
+
+                // 入库本地记录
+                Db::name('im_room')->insert([
+                    'room_id'      => $roomId,
+                    'type'         => 'direct',
+                    'name'         => '系统官方小助手',
+                    'creator_id'   => $numericUid,
+                    'biz_type'     => 'system_notice',
+                    'biz_id'       => 0,
+                    'member_count' => 2,
+                    'is_public'    => 0,
+                    'status'       => 'normal',
+                    'create_time'  => time(),
+                    'update_time'  => time(),
+                ]);
+
+                return $roomId;
+            }
+        } catch (\Throwable $e) {
+            Log::error('getOrCreateBotDirectRoom error: ' . $e->getMessage());
+        }
+
+        return null;
+    }
+
+    /**
+     * 系统官方机器人向指定用户投递通知消息 (私信直达)
+     */
+    public function sendBotDirectNotice(string|int $targetUserId, string $msgType, string $title, string $content, string $jumpUrl = '', int $numericUid = 0): array
+    {
+        $roomId = $this->getOrCreateBotDirectRoom($targetUserId, $numericUid);
+        if (empty($roomId)) {
+            return [
+                'success' => false,
+                'error'   => '无法建立与目标用户的直聊会话',
+            ];
+        }
+
+        if ($msgType === 'card') {
+            $res = $this->sendCustomCard($this->botToken, $roomId, $title, [
+                'content'  => $content,
+                'jump_url' => $jumpUrl,
+            ], $title);
+        } elseif ($msgType === 'html') {
+            $res = $this->sendHtmlMessage($this->botToken, $roomId, $content, $title);
+        } else {
+            $res = $this->sendSystemNotice($roomId, "【{$title}】\n{$content}");
+        }
+
+        $res['room_id'] = $roomId;
+        return $res;
+    }
 }
+
+
 
 
 

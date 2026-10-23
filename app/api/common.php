@@ -23,6 +23,7 @@ use app\api\controller\v1\Relation;
 use app\api\controller\v1\Recommend;
 use app\api\controller\v1\Promotion;
 use app\api\controller\v1\Consult;
+use app\api\controller\v1\Region;
 use app\api\controller\cms\Index      as CmsIndex;
 use app\api\controller\cms\Channel    as CmsChannel;
 use app\api\controller\cms\Archives   as CmsArchives;
@@ -46,11 +47,21 @@ Route::group('v1', function () {
     Route::put('users/me', [User::class, 'update']);
     Route::get('users/me/identities', [User::class, 'identities']);
     Route::get('users/me/subscription', [User::class, 'subscription']);
+    Route::get('users/me/bindings', [User::class, 'bindings']);
+    Route::post('users/me/email/send-code', [User::class, 'emailSendCode']);
+    Route::post('users/me/email/bind', [User::class, 'emailBind']);
+    Route::post('users/me/wallet/challenge', [User::class, 'walletChallenge']);
+    Route::post('users/me/wallet/bind', [User::class, 'walletBind']);
     Route::post('users/find-fri', [User::class, 'findFri']);
     Route::post('users/friends', [User::class, 'friends']);
 
     /* ---------------- 套餐（公开） ---------------- */
     Route::get('roles/plans', [Plan::class, 'index']);
+
+    /* ---------------- 地区联动（公开） ---------------- */
+    Route::get('regions', [Region::class, 'index']);
+    Route::get('regions/tree', [Region::class, 'tree']);
+    Route::get('regions/path', [Region::class, 'path']);
 
     /* ---------------- 订阅与订单 ---------------- */
     Route::get('billing/orders', [Billing::class, 'orders']);

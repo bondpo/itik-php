@@ -1,0 +1,85 @@
+{layout name="layout/form" /}
+<form class="layui-form" method="post">
+    {:token_field()}
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">父级地区</label>
+        <div class="layui-input-block">
+            <input type="hidden" id="c-parent_id" name="row[parent_id]" value="{$row.parent_id|default='0'}" class="layui-input" />
+            <div class="remoteSelect" id="remoteSelect-parent_id"
+                 data-input-id="c-parent_id"
+                 data-field="name_zh"
+                 data-search-field="name_zh,name_en,code"
+                 data-primary-key="id"
+                 data-source="region.region/selectpage"
+                 data-filterable="true"
+                 data-multiple="false"></div>
+            <div class="layui-form-mid layui-word-aux">留空表示顶级（国家/地区）；层级将随父级自动计算</div>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">地区代码</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[code]" value="{$row.code|default=''}" placeholder="国家=ISO alpha-2，中国=GB/T 2260" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">中文名</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[name_zh]" value="{$row.name_zh|default=''}" placeholder="中文名" autocomplete="off" class="layui-input" lay-verify="required" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">英文名</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[name_en]" value="{$row.name_en|default=''}" placeholder="英文名" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">中文简称</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[name_short_zh]" value="{$row.name_short_zh|default=''}" placeholder="如：北京、内蒙古" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">拼音首字母</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[py]" value="{$row.py|default=''}" placeholder="如：BJ、ZJ" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">权重</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[weigh]" value="{$row.weigh|default='0'}" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">状态</label>
+        <div class="layui-input-block">
+            <select name="row[status]">
+                <option value="normal" {:$row.status=='normal'?'selected':''}>正常</option>
+                <option value="hidden" {:$row.status=='hidden'?'selected':''}>隐藏</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item layer-footer hide">
+        <div class="layui-input-block">
+            <button class="layui-btn btn-theme-color disabled" lay-submit>{:__('OK')}</button>
+            <button type="reset" class="layui-btn layui-btn-primary">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
+
+<script>
+    layui.use(["form", "badou"], function () {
+        layui.bdForm.api.bindevent($("form.layui-form"));
+    });
+</script>

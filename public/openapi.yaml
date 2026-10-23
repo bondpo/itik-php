@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------
 # 项目社区信息交互平台 —— API 接口文档（OpenAPI 3.0）
-# 生成时间：2026-10-13 02:20
-# 接口：95 个（平台 /api/v1 共 70 个 + CMS /api/cms 共 25 个），85 个路径
+# 生成时间：2026-10-23
+# 接口：103 个（平台 /api/v1 共 78 个 + CMS /api/cms 共 25 个），93 个路径
 # 参数：位置/类型由控制器源码提取，必填按接口语义标注。
 # 鉴权：请求头 token: <access_token>；响应统一 {code,msg,data,request_id,time}。
 # ----------------------------------------------------------------------
@@ -21,6 +21,7 @@ tags:
   - name: 认证
   - name: 用户与角色
   - name: 套餐
+  - name: 地区
   - name: 订阅与订单
   - name: 项目
   - name: 内容/资讯
@@ -139,9 +140,20 @@ paths:
   /api/v1/auth/wallet/challenge:
     post:
       tags: [认证]
-      summary: "钱包登录-创建签名挑战（未开放）"
+      summary: 钱包登录-创建签名挑战
       operationId: auth_walletChallenge
       security: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [address]
+              properties:
+                address:
+                  type: string
+                  description: 钱包地址（0x 开头 40 位十六进制）
       responses:
         "200":
           description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
@@ -152,9 +164,26 @@ paths:
   /api/v1/auth/wallet/verify:
     post:
       tags: [认证]
-      summary: "钱包登录-校验签名（未开放）"
+      summary: 钱包登录与注册-校验签名
       operationId: auth_walletVerify
       security: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [address, signature]
+              properties:
+                address:
+                  type: string
+                  description: 钱包地址
+                signature:
+                  type: string
+                  description: 以太坊 personal_sign 签名
+                invite_code:
+                  type: string
+                  description: 推荐人邀请码（选填，仅新用户注册时生效）
       responses:
         "200":
           description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
@@ -209,12 +238,218 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiResponse"
+  /api/v1/users/me/bindings:
+    get:
+      tags: [用户与角色]
+      summary: 邮箱/钱包绑定状态
+      operationId: user_bindings
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/users/me/email/send-code:
+    post:
+      tags: [用户与角色]
+      summary: 绑定邮箱-发送验证码
+      operationId: user_emailSendCode
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  description: 待绑定的邮箱地址
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/users/me/email/bind:
+    post:
+      tags: [用户与角色]
+      summary: 绑定邮箱-校验验证码
+      operationId: user_emailBind
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [email, code]
+              properties:
+                email:
+                  type: string
+                  description: 待绑定的邮箱地址
+                code:
+                  type: string
+                  description: 邮箱验证码
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/users/me/wallet/challenge:
+    post:
+      tags: [用户与角色]
+      summary: 绑定钱包-创建签名挑战
+      operationId: user_walletChallenge
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [address]
+              properties:
+                address:
+                  type: string
+                  description: 待绑定的钱包地址（0x 开头 40 位十六进制）
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/users/me/wallet/bind:
+    post:
+      tags: [用户与角色]
+      summary: 绑定钱包-校验签名
+      operationId: user_walletBind
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [address, signature]
+              properties:
+                address:
+                  type: string
+                  description: 待绑定的钱包地址
+                signature:
+                  type: string
+                  description: 以太坊 personal_sign 签名
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
   /api/v1/roles/plans:
     get:
       tags: [套餐]
       summary: 套餐列表
       operationId: plan_index
       security: []
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/regions:
+    get:
+      tags: [地区]
+      summary: 地区联动（取指定父级下的子地区）
+      operationId: region_index
+      security: []
+      parameters:
+        - name: parent_id
+          in: query
+          required: false
+          description: 父级地区 ID（0=国家/地区级）
+          schema:
+            type: integer
+            default: 0
+        - name: lang
+          in: query
+          required: false
+          description: 语言 zh/en
+          schema:
+            type: string
+            default: zh
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/regions/tree:
+    get:
+      tags: [地区]
+      summary: 完整地区树（可裁剪）
+      operationId: region_tree
+      security: []
+      parameters:
+        - name: parent_id
+          in: query
+          required: false
+          description: 根父级 ID
+          schema:
+            type: integer
+            default: 0
+        - name: depth
+          in: query
+          required: false
+          description: 返回层级深度（1-4）
+          schema:
+            type: integer
+            default: 3
+        - name: lang
+          in: query
+          required: false
+          description: 语言 zh/en
+          schema:
+            type: string
+            default: zh
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/regions/path:
+    get:
+      tags: [地区]
+      summary: 地区祖先链（回显）
+      operationId: region_path
+      security: []
+      parameters:
+        - name: id
+          in: query
+          required: false
+          description: 地区 ID（与 code 二选一）
+          schema:
+            type: integer
+        - name: code
+          in: query
+          required: false
+          description: 地区代码（国家 ISO alpha-2 / 中国 GB/T 2260）
+          schema:
+            type: string
+        - name: lang
+          in: query
+          required: false
+          description: 语言 zh/en
+          schema:
+            type: string
+            default: zh
       responses:
         "200":
           description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）

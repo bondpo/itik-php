@@ -152,8 +152,16 @@ class User extends Api
         }
         $ret = $this->auth->register($username, $password, $email, $mobile, $extend);
         if ($ret) {
-            $userinfo = $this->auth->getUserinfo();
-            $matrixAuth = (new MatrixService())->syncUserOnAuth($userinfo['id'], $password, $userinfo['nickname'] ?? $username);
+            $member     = $this->auth->getUser();
+            $userinfo   = $this->auth->getUserinfo();
+            $matrixAuth = (new MatrixService())->syncUserOnAuth((int)$member->id, $password, $userinfo['nickname'] ?? $username);
+
+            // 有推荐人时，注册成功后自动在 IM 里加为好友（失败不影响注册主流程）
+            $inviterId = (int)($member->inviter_id ?? 0);
+            if ($inviterId > 0) {
+                (new MatrixService())->addDirectFriend((int)$member->id, (string)($matrixAuth['access_token'] ?? ''), $inviterId);
+            }
+
             $data = [
                 'userinfo' => $userinfo,
                 'matrix'   => $matrixAuth,
