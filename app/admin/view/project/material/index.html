@@ -52,7 +52,22 @@
 { field: "review_reason", title: "驳回原因", operate: 'LIKE' },
 { field: "create_time_text", title: "上传时间", templet: bdTable.api.formatter.datetime, operate: false },
                     { field: "create_time", title: "上传时间", templet: bdTable.api.formatter.datetime, searchType: 'time', hide: true },
-                    { title: "操作", width: 200, align: "center", templet: bdTable.api.formatter.operate },
+                    {
+                        title: "操作",
+                        width: 220,
+                        align: "center",
+                        templet: bdTable.api.formatter.operate,
+                        buttons: [
+                            {
+                                name: "detail",
+                                text: "查看",
+                                title: "查看资料详情",
+                                icon: "fa fa-eye",
+                                classname: "layui-btn layui-btn-sm layui-btn-normal btn-dialog",
+                                url: "project.material/detail?ids={id}",
+                            }
+                        ]
+                    },
                 ],
             ],
         });

@@ -13,7 +13,7 @@ class Material extends Backend
 {
     protected $model = null;
     protected $modelValidate = false;
-    protected $noNeedRight = ['selectpage'];
+    protected $noNeedRight = ['selectpage', 'detail'];
 
     public function initialize()
     {
@@ -42,6 +42,77 @@ class Material extends Backend
             'normal'   => '已通过',
             'rejected' => '已驳回',
         ]);
+
+        return $this->view->fetch();
+    }
+
+    /**
+     * 查看资料详情 (弹窗页面)
+     */
+    public function detail()
+    {
+        $id = (int)($this->request->param('ids') ?: $this->request->param('id'));
+        $row = $this->model
+            ->with(['project'])
+            ->where('id', $id)
+            ->find();
+
+        if (!$row) {
+            $this->error('资料不存在');
+        }
+
+        // 上传人
+        $uploader = null;
+        if (!empty($row['uploader_id'])) {
+            $uploader = Db::name('user')->where('id', $row['uploader_id'])->field('id,username,nickname,mobile,avatar,email')->find();
+        }
+
+        // 完整文件访问路径
+        $fileUrl = '';
+        if (!empty($row['storage_key'])) {
+            $fileUrl = function_exists('cdnurl') ? cdnurl($row['storage_key'], true) : $row['storage_key'];
+        }
+
+        // 格式化文件大小
+        $filesizeText = '';
+        if (!empty($row['filesize'])) {
+            $size = (int)$row['filesize'];
+            if ($size >= 1048576) {
+                $filesizeText = round($size / 1048576, 2) . ' MB';
+            } elseif ($size >= 1024) {
+                $filesizeText = round($size / 1024, 2) . ' KB';
+            } else {
+                $filesizeText = $size . ' B';
+            }
+        }
+
+        $categoryMap = [
+            'license' => '资质',
+            'brand'   => '品牌',
+            'project' => '项目',
+            'quality' => '质量',
+            'other'   => '其它',
+        ];
+
+        $typeMap = [
+            'news'       => '资讯',
+            'case'       => '案例',
+            'activity'   => '活动',
+            'video'      => '视频',
+            'ppt'        => 'PPT',
+            'doc'        => '文档',
+            'whitepaper' => '白皮书',
+            'license'    => '营业执照/资质',
+            'address'    => '工商地址/实地',
+            'image'      => '图片素材',
+        ];
+
+        $this->view->assign('row', $row);
+        $this->view->assign('uploader', $uploader);
+        $this->view->assign('fileUrl', $fileUrl);
+        $this->view->assign('filesizeText', $filesizeText);
+        $this->view->assign('categoryTitle', $categoryMap[$row['category']] ?? $row['category']);
+        $this->view->assign('typeTitle', $typeMap[$row['type']] ?? $row['type']);
 
         return $this->view->fetch();
     }

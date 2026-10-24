@@ -73,9 +73,14 @@ class FakeData extends Command
             $output->writeln(sprintf('      已为各项目生成 %d 条发展历程节点（包含主网上线、融资、重大版本等）', $timelineCount));
 
             // 7. CMS 文章互动评论数据
-            $output->writeln('<comment>[8/8] 生成 CMS 文章互动评论数据 (bd_cms_comment)...</comment>');
+            $output->writeln('<comment>[8/9] 生成 CMS 文章互动评论数据 (bd_cms_comment)...</comment>');
             $commentCount = $this->seedCmsComments($createdUsers);
             $output->writeln(sprintf('      已生成 %d 条文章互动评论', $commentCount));
+
+            // 8. 推流套餐假数据
+            $output->writeln('<comment>[9/9] 生成推流套餐/广告位测试数据 (bd_app_promotion_package)...</comment>');
+            $packageCount = $this->seedPromotionPackages();
+            $output->writeln(sprintf('      已生成 %d 个推流套餐（涵盖首页推荐、行业频道、热门榜单与定向投放）', $packageCount));
 
             Db::commit();
 
@@ -113,6 +118,7 @@ class FakeData extends Command
 
         Db::name('app_project_category')->where('id', '>', 0)->delete();
         Db::name('app_project_timeline')->where('id', '>', 0)->delete();
+        Db::name('app_promotion_package')->where('id', '>', 0)->delete();
         Db::name('cms_comment')->whereLike('content', '%[测试评论]%')->delete();
     }
 
@@ -929,5 +935,146 @@ class FakeData extends Command
         }
 
         return $totalInserted;
+    }
+
+    /**
+     * 生成推流套餐测试假数据 (bd_app_promotion_package)
+     */
+    protected function seedPromotionPackages(): int
+    {
+        $now = time();
+        $packages = [
+            [
+                'name'          => '首页焦点轮播 · 7天极速冲量包',
+                'position'      => 'home',
+                'price'         => 499.00,
+                'currency'      => 'USD',
+                'duration_days' => 7,
+                'exposure_cap'  => 50000,
+                'feature_flags' => json_encode(['首页首屏轮播Banner', '全域高光标识', '智能冷启动分发'], JSON_UNESCAPED_UNICODE),
+                'status'        => 'normal',
+                'create_time'   => $now - 86400 * 10,
+                'update_time'   => $now,
+            ],
+            [
+                'name'          => '首页黄金推荐位 · 14天全域曝光旗舰版',
+                'position'      => 'home',
+                'price'         => 999.00,
+                'currency'      => 'USD',
+                'duration_days' => 14,
+                'exposure_cap'  => 150000,
+                'feature_flags' => json_encode(['首页核心推荐信息流前三位', '金牌推荐徽章', '优先匹配推荐官推广'], JSON_UNESCAPED_UNICODE),
+                'status'        => 'normal',
+                'create_time'   => $now - 86400 * 8,
+                'update_time'   => $now,
+            ],
+            [
+                'name'          => '首页至尊霸屏 · 30天品牌全月统治包',
+                'position'      => 'home',
+                'price'         => 1899.00,
+                'currency'      => 'USD',
+                'duration_days' => 30,
+                'exposure_cap'  => 500000,
+                'feature_flags' => json_encode(['首页独占Banner大卡', '跨端推送强曝光', '专属1v1投放优化师支持', '全站弹窗推荐'], JSON_UNESCAPED_UNICODE),
+                'status'        => 'normal',
+                'create_time'   => $now - 86400 * 6,
+                'update_time'   => $now,
+            ],
+            [
+                'name'          => '行业频道头条 · 7天精准获客流',
+                'position'      => 'channel',
+                'price'         => 199.00,
+                'currency'      => 'USD',
+                'duration_days' => 7,
+                'exposure_cap'  => 20000,
+                'feature_flags' => json_encode(['垂直一级行业分类频道置顶', '垂类高意向用户触达', '频道内突出显示'], JSON_UNESCAPED_UNICODE),
+                'status'        => 'normal',
+                'create_time'   => $now - 86400 * 5,
+                'update_time'   => $now,
+            ],
+            [
+                'name'          => '行业频道专区 · 15天垂直深耕套餐',
+                'position'      => 'channel',
+                'price'         => 399.00,
+                'currency'      => 'USD',
+                'duration_days' => 15,
+                'exposure_cap'  => 60000,
+                'feature_flags' => json_encode(['所属赛道频道长期置顶', '行业资讯及案例联动推荐', '频道搜索权重加倍'], JSON_UNESCAPED_UNICODE),
+                'status'        => 'normal',
+                'create_time'   => $now - 86400 * 4,
+                'update_time'   => $now,
+            ],
+            [
+                'name'          => '热门项目榜单 · 7天飙升打榜特权',
+                'position'      => 'rank',
+                'price'         => 299.00,
+                'currency'      => 'USD',
+                'duration_days' => 7,
+                'exposure_cap'  => 30000,
+                'feature_flags' => json_encode(['热门榜前三位轮播展示', '飙升动态徽章', '投资者看板热推'], JSON_UNESCAPED_UNICODE),
+                'status'        => 'normal',
+                'create_time'   => $now - 86400 * 3,
+                'update_time'   => $now,
+            ],
+            [
+                'name'          => '热门项目榜单 · 30天全月霸榜荣誉包',
+                'position'      => 'rank',
+                'price'         => 1199.00,
+                'currency'      => 'USD',
+                'duration_days' => 30,
+                'exposure_cap'  => 200000,
+                'feature_flags' => json_encode(['榜单前排长期锁定', '官方生态周报置顶推荐', '高信誉认证专区光环'], JSON_UNESCAPED_UNICODE),
+                'status'        => 'normal',
+                'create_time'   => $now - 86400 * 2,
+                'update_time'   => $now,
+            ],
+            [
+                'name'          => 'AI定向推荐 · 7天关联竞品精准拦截',
+                'position'      => 'target',
+                'price'         => 349.00,
+                'currency'      => 'USD',
+                'duration_days' => 7,
+                'exposure_cap'  => 40000,
+                'feature_flags' => json_encode(['同赛道关联项目详情页推荐', '基于用户浏览行为AI预测匹配', '高潜投资人定向拦截'], JSON_UNESCAPED_UNICODE),
+                'status'        => 'normal',
+                'create_time'   => $now - 86400 * 2,
+                'update_time'   => $now,
+            ],
+            [
+                'name'          => '全网定向穿透 · 14天高转化追踪包',
+                'position'      => 'target',
+                'price'         => 699.00,
+                'currency'      => 'USD',
+                'duration_days' => 14,
+                'exposure_cap'  => 100000,
+                'feature_flags' => json_encode(['全站关联项目穿透投放', '浏览未关注用户二次挽留', '私域社群定向触达'], JSON_UNESCAPED_UNICODE),
+                'status'        => 'normal',
+                'create_time'   => $now - 86400 * 1,
+                'update_time'   => $now,
+            ],
+            [
+                'name'          => '新项目首发体验包 (新客特惠测试)',
+                'position'      => 'home',
+                'price'         => 99.00,
+                'currency'      => 'USD',
+                'duration_days' => 3,
+                'exposure_cap'  => 10000,
+                'feature_flags' => json_encode(['新手冷启动扶持', '首页新秀专区展现', '特惠试水测试'], JSON_UNESCAPED_UNICODE),
+                'status'        => 'normal',
+                'create_time'   => $now - 3600 * 12,
+                'update_time'   => $now,
+            ],
+        ];
+
+        $count = 0;
+        foreach ($packages as $pkg) {
+            $exists = Db::name('app_promotion_package')->where('name', $pkg['name'])->find();
+            if (!$exists) {
+                Db::name('app_promotion_package')->insert($pkg);
+                $count++;
+            }
+        }
+
+        return $count;
     }
 }
