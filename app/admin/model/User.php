@@ -76,18 +76,37 @@ class User extends Model
     }
 
     /**
-     * 管理员修改用户昵称后，自动同步到 IM (Matrix)
+     * 管理员修改用户昵称或头像后，自动同步到 IM (Matrix)
      */
     public static function onAfterUpdate($row): void
     {
         $changed = $row->getChangedData();
 
-        if (!isset($changed['nickname'])) {
+        $hasNickname = isset($changed['nickname']);
+        $hasAvatar   = isset($changed['avatar']);
+
+        if (!$hasNickname && !$hasAvatar) {
             return;
         }
 
+        $nickname  = $hasNickname ? (string)$changed['nickname'] : null;
+        $avatarUrl = null;
+
+        if ($hasAvatar) {
+            $avatar = (string)$changed['avatar'];
+            if ($avatar !== '') {
+                try {
+                    $avatarUrl = function_exists('cdnurl') ? cdnurl($avatar, true) : $avatar;
+                } catch (\Throwable) {
+                    $avatarUrl = $avatar;
+                }
+            } else {
+                $avatarUrl = '';
+            }
+        }
+
         try {
-            (new \app\common\service\MatrixService())->updateProfile((int)$row->id, (string)$changed['nickname']);
+            (new \app\common\service\MatrixService())->updateProfile((int)$row->id, $nickname, $avatarUrl);
         } catch (\Throwable) {
             // IM 未配置或同步失败均不影响主流程
         }
