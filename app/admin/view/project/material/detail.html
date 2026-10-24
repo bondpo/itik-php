@@ -1,0 +1,290 @@
+{layout name="layout/form" /}
+
+<style>
+    .material-detail-container {
+        padding: 16px 20px;
+        background: #fbfbfb;
+    }
+    .detail-hero-card {
+        background: #fff;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        margin-bottom: 16px;
+    }
+    .material-header-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 10px;
+        line-height: 1.4;
+    }
+    .badge-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+    .section-card {
+        background: #fff;
+        border-radius: 8px;
+        padding: 18px 20px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        margin-bottom: 16px;
+    }
+    .section-header {
+        font-size: 15px;
+        font-weight: 600;
+        color: #333;
+        border-left: 4px solid #1E9FFF;
+        padding-left: 10px;
+        margin-bottom: 14px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .detail-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .detail-table th {
+        width: 110px;
+        padding: 10px 12px;
+        background: #f8fafc;
+        color: #64748b;
+        font-weight: 500;
+        font-size: 13px;
+        border: 1px solid #edf2f7;
+        text-align: right;
+    }
+    .detail-table td {
+        padding: 10px 14px;
+        color: #334155;
+        font-size: 13px;
+        border: 1px solid #edf2f7;
+    }
+    .media-preview-box {
+        background: #f8fafc;
+        border-radius: 6px;
+        padding: 16px;
+        text-align: center;
+        margin-top: 12px;
+        border: 1px dashed #cbd5e1;
+    }
+    .media-preview-img {
+        max-width: 100%;
+        max-height: 380px;
+        border-radius: 4px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+    .media-preview-img:hover {
+        transform: scale(1.02);
+    }
+    .file-download-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        border-radius: 6px;
+        padding: 12px 16px;
+        margin-top: 10px;
+    }
+    .alert-rejected {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: 6px;
+        padding: 12px 16px;
+        color: #991b1b;
+        margin-top: 10px;
+        font-size: 13px;
+    }
+    .footer-actions {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin-top: 24px;
+        margin-bottom: 20px;
+    }
+</style>
+
+<div class="material-detail-container">
+    <!-- 概览 Hero -->
+    <div class="detail-hero-card">
+        <div class="material-header-title">
+            <i class="fa fa-file-text-o" style="color: #1E9FFF; margin-right: 6px;"></i>
+            {$row.title|default='无标题'}
+        </div>
+        <div class="badge-group">
+            <span class="layui-badge layui-bg-blue">分类: {$categoryTitle} ({$row.category})</span>
+            <span class="layui-badge layui-bg-cyan">类型: {$typeTitle} ({$row.type})</span>
+            <span class="layui-badge layui-bg-purple">v{$row.version|default='1'}</span>
+            {if $row.review_status == 'normal'}
+                <span class="layui-badge layui-bg-green"><i class="fa fa-check-circle"></i> 审核通过</span>
+            {elseif $row.review_status == 'rejected'}
+                <span class="layui-badge layui-bg-red"><i class="fa fa-times-circle"></i> 审核驳回</span>
+            {else/}
+                <span class="layui-badge layui-bg-orange"><i class="fa fa-clock-o"></i> 待审核</span>
+            {/if}
+            {if $row.is_public == 1}
+                <span class="layui-badge layui-bg-green">公开</span>
+            {else/}
+                <span class="layui-badge layui-bg-gray">非公开</span>
+            {/if}
+        </div>
+
+        {if $row.review_status == 'rejected' && !empty($row.review_reason)}
+            <div class="alert-rejected">
+                <i class="fa fa-exclamation-triangle"></i> <strong>驳回原因：</strong> {$row.review_reason}
+            </div>
+        {/if}
+    </div>
+
+    <!-- 基础信息与所属项目 -->
+    <div class="section-card">
+        <div class="section-header">
+            <span><i class="fa fa-info-circle"></i> 资料及项目信息</span>
+        </div>
+        <table class="detail-table">
+            <tbody>
+                <tr>
+                    <th>资料 ID</th>
+                    <td>{$row.id}</td>
+                    <th>所属项目</th>
+                    <td>
+                        {if isset($row.project.name)}
+                            <b style="color: #1E9FFF;">{$row.project.name}</b> (ID: {$row.project_id})
+                        {else/}
+                            项目 ID: {$row.project_id}
+                        {/if}
+                    </td>
+                </tr>
+                <tr>
+                    <th>上传人</th>
+                    <td>
+                        {if $uploader}
+                            <span style="font-weight: 600;">{$uploader.nickname|default=$uploader.username}</span> (UID: {$uploader.id}{if !empty($uploader.mobile)} / {$uploader.mobile}{/if})
+                        {else/}
+                            UID: {$row.uploader_id|default='0'}
+                        {/if}
+                    </td>
+                    <th>版权责任方</th>
+                    <td>{$row.copyright_owner|default='--'}</td>
+                </tr>
+                <tr>
+                    <th>来源说明</th>
+                    <td>{$row.source|default='--'}</td>
+                    <th>展示权重</th>
+                    <td>{$row.weigh|default='0'}</td>
+                </tr>
+                <tr>
+                    <th>上传时间</th>
+                    <td>{$row.create_time ? date('Y-m-d H:i:s', $row.create_time) : '--'}</td>
+                    <th>更新时间</th>
+                    <td>{$row.update_time ? date('Y-m-d H:i:s', $row.update_time) : '--'}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 文件与附件内容 -->
+    <div class="section-card">
+        <div class="section-header">
+            <span><i class="fa fa-paperclip"></i> 文件与存储内容</span>
+            {if !empty($fileUrl)}
+                <a href="{$fileUrl}" target="_blank" class="layui-btn layui-btn-xs layui-btn-normal">
+                    <i class="fa fa-external-link"></i> 新窗口打开
+                </a>
+            {/if}
+        </div>
+        <table class="detail-table">
+            <tbody>
+                <tr>
+                    <th>存储路径</th>
+                    <td colspan="3" style="word-break: break-all; font-family: monospace;">{$row.storage_key|default='--'}</td>
+                </tr>
+                <tr>
+                    <th>文件扩展名</th>
+                    <td><span class="layui-badge layui-bg-gray">{$row.ext|default='--'}</span></td>
+                    <th>文件大小</th>
+                    <td>{$filesizeText|default='--'}</td>
+                </tr>
+                <tr>
+                    <th>附件关联 ID</th>
+                    <td>{$row.attachment_id|default='0'}</td>
+                    <th>完整访问 URL</th>
+                    <td style="word-break: break-all;">
+                        {if !empty($fileUrl)}
+                            <a href="{$fileUrl}" target="_blank" style="color: #1E9FFF;">{$fileUrl}</a>
+                        {else/}
+                            --
+                        {/if}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- 图片类直接在线预览 -->
+        {php}
+            $isImage = in_array(strtolower((string)$row['ext']), ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'])
+                || preg_match('/\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i', (string)$fileUrl);
+            $isVideo = in_array(strtolower((string)$row['ext']), ['mp4', 'webm', 'ogg'])
+                || preg_match('/\.(mp4|webm|ogg)$/i', (string)$fileUrl);
+        {/php}
+
+        {if $isImage && !empty($fileUrl)}
+            <div class="media-preview-box">
+                <p style="font-size: 13px; color: #64748b; margin-bottom: 8px;"><i class="fa fa-image"></i> 图片预览（点击可查看原图）：</p>
+                <img src="{$fileUrl}" alt="{$row.title}" class="media-preview-img" onclick="previewImage('{$fileUrl}')" />
+            </div>
+        {elseif $isVideo && !empty($fileUrl)}
+            <div class="media-preview-box">
+                <video src="{$fileUrl}" controls style="max-width: 100%; max-height: 360px; border-radius: 4px;"></video>
+            </div>
+        {elseif !empty($fileUrl)}
+            <div class="file-download-bar">
+                <div>
+                    <i class="fa fa-file-o fa-2x" style="color: #3b82f6; vertical-align: middle; margin-right: 8px;"></i>
+                    <span style="font-weight: 500; color: #1e3a8a;">{$row.title}</span>
+                    <span style="color: #64748b; font-size: 12px; margin-left: 6px;">({$filesizeText})</span>
+                </div>
+                <a href="{$fileUrl}" target="_blank" download class="layui-btn layui-btn-sm layui-bg-blue">
+                    <i class="fa fa-download"></i> 立即下载
+                </a>
+            </div>
+        {/if}
+    </div>
+
+    <!-- 底部操作按钮 -->
+    <div class="footer-actions">
+        <button type="button" class="layui-btn layui-btn-primary" onclick="closeCurrentDialog()">
+            <i class="fa fa-times"></i> 关闭
+        </button>
+    </div>
+</div>
+
+<script>
+    function previewImage(url) {
+        layer.photos({
+            photos: {
+                title: "资料图片预览",
+                data: [{ src: url }]
+            },
+            shade: 0.6,
+            closeBtn: 1,
+            anim: 5
+        });
+    }
+
+    function closeCurrentDialog() {
+        var index = parent.layer.getFrameIndex(window.name);
+        if (index) {
+            parent.layer.close(index);
+        } else {
+            window.close();
+        }
+    }
+</script>
