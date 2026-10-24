@@ -37,7 +37,12 @@
     <div class="layui-form-item">
         <label class="layui-form-label">封面</label>
         <div class="layui-input-block">
-            <input type="text" name="row[cover]" value="" placeholder="封面" autocomplete="off" class="layui-input" />
+            <input type="text" id="c-cover" name="row[cover]" value="" placeholder="封面图片地址" autocomplete="off" class="layui-input" style="width:70%" />
+            <div class="layui-input-suffix" style="width:30%">
+                <button type="button" data-input-id="c-cover" data-preview-id="p-cover" class="layui-btn btn-bdupload"><i class="fa fa-upload"></i> 上传</button>
+                <button type="button" data-input-id="c-cover" class="layui-btn layui-bg-green btn-bdchoose"><i class="fa fa-list"></i> 选择</button>
+            </div>
+            <div class="layui-upload-list" id="p-cover"></div>
         </div>
     </div>
 
