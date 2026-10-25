@@ -11,6 +11,7 @@ use app\common\library\Ems;
 use app\common\library\Wallet;
 use app\common\model\User as UserModel;
 use app\common\service\MatrixService;
+use app\common\service\TpWalletService;
 
 /**
  * 认证接口
@@ -20,13 +21,14 @@ use app\common\service\MatrixService;
  *   POST /api/v1/auth/email/register    邮箱注册
  *   POST /api/v1/auth/email/login       邮箱验证码登录
  *   POST /api/v1/auth/logout            退出登录
- *
- * 说明：钱包登录（SIWE + nonce）按既定决策后置，接口位已预留。
+ *   POST /api/v1/auth/wallet/challenge  钱包挑战 (SIWE Nonce)
+ *   POST /api/v1/auth/wallet/verify     钱包验签登录
+ *   ALL  /api/v1/auth/wallet/tp-login   TokenPocket 钱包 DeepLink 授权登入与注册
  */
 class Auth extends Base
 {
     /** 无需登录 */
-    protected $noNeedLogin = ['sendCode', 'register', 'login', 'walletChallenge', 'walletVerify'];
+    protected $noNeedLogin = ['sendCode', 'register', 'login', 'walletChallenge', 'walletVerify', 'tpLogin'];
     /** 无需鉴权 */
     protected $noNeedRight = '*';
 
@@ -357,5 +359,113 @@ class Auth extends Base
             'matrix'         => $matrixAuth,
         ]);
     }
+
+    /**
+     * TokenPocket 钱包 DeepLink 授权登入与注册
+     * 路由：/api/v1/auth/wallet/tp-login
+     *
+     * 支持三种交互形态：
+     * 1. action=init / 默认不传 signature：生成唤起 TP 钱包的 DeepLink / Universal Link 协议与挑战
+     * 2. action=verify / 携带 signature：校验钱包签名，完成自动登录或注册，签发 Token
+     * 3. action=check / GET 携带 ticket：供前端或移动端轮询授权完成状态
+     */
+    public function tpLogin()
+    {
+        $action = trim((string)$this->request->param('action', ''));
+        $ticket = trim((string)$this->request->param('ticket', ''));
+        $address = trim((string)$this->request->param('address', ''));
+        $signature = trim((string)$this->request->param('signature', ''));
+        $message = (string)$this->request->param('message', '');
+        $inviteCode = trim((string)$this->request->param('invite_code', ''));
+
+        // 兼容 TP 钱包原生 Webhook / 回调数据结构 (JSON Raw / POST)
+        $rawPost = $this->request->post();
+        if (isset($rawPost['actionId']) && empty($ticket)) {
+            $ticket = (string)$rawPost['actionId'];
+        }
+        if (isset($rawPost['data']) && is_array($rawPost['data'])) {
+            if (empty($address) && !empty($rawPost['data']['address'])) {
+                $address = (string)$rawPost['data']['address'];
+            }
+            if (empty($signature) && !empty($rawPost['data']['signature'])) {
+                $signature = (string)$rawPost['data']['signature'];
+            }
+            if (empty($message) && !empty($rawPost['data']['message'])) {
+                $message = (string)$rawPost['data']['message'];
+            }
+        }
+
+        // 自动判定 Action 动作类型
+        if ($action === '' || $action === 'auto') {
+            if ($signature !== '') {
+                $action = 'verify';
+            } elseif ($this->request->isGet() && $ticket !== '') {
+                $action = 'check';
+            } else {
+                $action = 'init';
+            }
+        }
+
+        $service = new TpWalletService();
+        $responseData = null;
+        $responseMsg = '';
+
+        // 严格遵循 BadouCMS 规范：try {} 内禁止直接返回响应
+        try {
+            if ($action === 'check') {
+                if ($ticket === '') {
+                    throw new \InvalidArgumentException('请传入 ticket 票据');
+                }
+                $checkRes = $service->checkTicketStatus($ticket);
+                if ($checkRes['status'] === 'success') {
+                    $userId = (int)($checkRes['data']['user_id'] ?? 0);
+                    $checkRes['data']['role'] = $this->resolveRole($userId);
+                }
+                $responseData = $checkRes;
+                $responseMsg = $checkRes['message'] ?? '查询成功';
+            } elseif ($action === 'verify') {
+                if ($address === '') {
+                    throw new \InvalidArgumentException('钱包地址不能为空');
+                }
+                if ($signature === '') {
+                    throw new \InvalidArgumentException('签名内容不能为空');
+                }
+                $loginResult = $service->verifyAndLogin($address, $signature, $ticket ?: null, $message ?: null, $inviteCode);
+                $userId = (int)$loginResult['user_id'];
+                $loginResult['role'] = $this->resolveRole($userId);
+
+                $responseData = $loginResult;
+                $responseMsg = !empty($loginResult['is_new_user']) ? 'TP钱包注册并登录成功' : 'TP钱包登录成功';
+            } else {
+                // 初始化生成 DeepLink
+                $callbackUrl = (string)$this->request->param('callback_url', '');
+                $chainId = (int)$this->request->param('chain_id', 1);
+                $dappName = (string)$this->request->param('dapp_name', 'ITIK');
+                $dappIcon = (string)$this->request->param('dapp_icon', '');
+
+                $session = $service->createAuthSession([
+                    'address'      => $address,
+                    'callback_url' => $callbackUrl,
+                    'invite_code'  => $inviteCode,
+                    'chain_id'     => $chainId,
+                    'dapp_name'    => $dappName,
+                    'dapp_icon'    => $dappIcon,
+                ]);
+
+                $responseData = $session;
+                $responseMsg = 'TP钱包DeepLink授权协议生成成功';
+            }
+        } catch (\InvalidArgumentException $e) {
+            $this->fail($e->getMessage(), self::CODE_PARAM_INVALID);
+        } catch (\RuntimeException $e) {
+            $this->fail($e->getMessage(), self::CODE_BIZ_FAIL);
+        } catch (\Throwable $e) {
+            $this->fail('系统处理失败: ' . $e->getMessage(), self::CODE_SERVER_ERROR);
+        }
+
+        // 成功响应位于完整的 try/catch 之后
+        $this->success($responseMsg, $responseData);
+    }
 }
+
 

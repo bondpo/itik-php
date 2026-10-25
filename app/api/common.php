@@ -41,6 +41,7 @@ Route::group('v1', function () {
     Route::post('auth/logout', [Auth::class, 'logout']);
     Route::post('auth/wallet/challenge', [Auth::class, 'walletChallenge']);
     Route::post('auth/wallet/verify', [Auth::class, 'walletVerify']);
+    Route::rule('auth/wallet/tp-login', [Auth::class, 'tpLogin']);
 
     /* ---------------- 用户与角色 ---------------- */
     Route::get('users/me', [User::class, 'me']);
