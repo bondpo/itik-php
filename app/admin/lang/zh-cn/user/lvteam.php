@@ -3,8 +3,8 @@
 return [
     'Id' => 'ID',
     'Name' => '等级名称',
-    'Team' => '团队等级',
-    'Pref' => '业绩',
+    'Perf' => '业绩',
+    'Rate' => '极差',
     'Status' => '状态',
     'Status0' => '失效',
     'Status1' => '有效',

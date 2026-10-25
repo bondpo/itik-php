@@ -253,4 +253,8 @@ class Billing extends Base
         $order['discount'] = (float)($order['discount'] ?? 0);
         return $order;
     }
+
+    public function wallet(){
+        $this->success('获取成功', get_sys_config('wallet'));
+    }
 }

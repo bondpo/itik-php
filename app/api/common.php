@@ -72,6 +72,7 @@ Route::group('v1', function () {
     Route::get('billing/subscription', [Billing::class, 'subscription']);
     Route::post('billing/subscription/renew', [Billing::class, 'renew']);
     Route::post('billing/pay/notify', [Billing::class, 'notify']);
+    Route::get('billing/wallet', [Billing::class, 'wallet']);
 
     /* ---------------- 项目 ---------------- */
     Route::get('projects/categories', [Project::class, 'categories']);
