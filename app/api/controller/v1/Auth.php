@@ -439,7 +439,7 @@ class Auth extends Base
             } else {
                 // 初始化生成 DeepLink
                 $callbackUrl = (string)$this->request->param('callback_url', '');
-                $chainId = (int)$this->request->param('chain_id', 1);
+                $chainId = (int)$this->request->param('chain_id', 56);
                 $dappName = (string)$this->request->param('dapp_name', 'ITIK');
                 $dappIcon = (string)$this->request->param('dapp_icon', '');
 
