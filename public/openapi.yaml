@@ -191,6 +191,80 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiResponse"
+  /api/v1/auth/wallet/tp-login:
+    post:
+      tags: [认证]
+      summary: TokenPocket钱包DeepLink授权登录与注册
+      description: |
+        支持两种模式：
+        1. 发起授权（action=init）：生成唤起 TP 钱包的 URL Scheme (tpoutside://) 与 Universal Link，生成防重放 SIWE 签名挑战；
+        2. 验签登入/注册（action=verify 或携带 signature）：校验以太坊签名，已存在用户直接登录，未注册用户自动注册为游客并绑定邀请关系。
+      operationId: auth_tpLoginPost
+      security: []
+      requestBody:
+        required: false
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                action:
+                  type: string
+                  enum: [init, verify, check]
+                  description: 动作类型，默认根据传参自动判定
+                address:
+                  type: string
+                  description: 钱包地址（0x 开头 40 位十六进制）
+                signature:
+                  type: string
+                  description: 钱包签名数据（验签时必填）
+                ticket:
+                  type: string
+                  description: 授权票据编号（验签或查询时传入）
+                message:
+                  type: string
+                  description: 原始签名消息（可选，若无 ticket 时需提供）
+                invite_code:
+                  type: string
+                  description: 推荐人邀请码（新用户自动注册时绑定）
+                callback_url:
+                  type: string
+                  description: 自定义回调/回跳 Scheme 或 URL
+                chain_id:
+                  type: integer
+                  default: 1
+                  description: 链 ID（默认 1 以太坊主网）
+                dapp_name:
+                  type: string
+                  default: ITIK
+                  description: 钱包弹窗中展示的应用名称
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+    get:
+      tags: [认证]
+      summary: 轮询查询TP钱包授权状态
+      description: 供移动端或前端轮询授权进度，返回 pending（等待签名中） / success（登录成功并包含 Token） / expired（已过期）
+      operationId: auth_tpLoginGet
+      security: []
+      parameters:
+        - name: ticket
+          in: query
+          required: true
+          description: 授权会话票据
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 统一响应
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
   /api/v1/users/me:
     get:
       tags: [用户与角色]
