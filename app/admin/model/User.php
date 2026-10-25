@@ -162,11 +162,6 @@ class User extends Model
         return $this->belongsTo(UserGroup::class, 'group_id', 'id');
     }
 
-    public function userLvVip(): BelongsTo
-    {
-        return $this->belongsTo(UserLvVip::class, 'lv_vip', 'id');
-    }
-
     public function userLvTeam(): BelongsTo
     {
         return $this->belongsTo(UserLvTeam::class, 'lv_team', 'id');

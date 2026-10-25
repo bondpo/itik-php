@@ -24,6 +24,7 @@ class SubscriptionService
 
     /** 订单状态 */
     public const ORDER_PENDING  = 'pending';
+    public const ORDER_BROADCAST= 'broadcast';
     public const ORDER_PAID     = 'paid';
     public const ORDER_CLOSED   = 'closed';
     public const ORDER_REFUNDED = 'refunded';
@@ -67,6 +68,10 @@ class SubscriptionService
         $discount = 0.00;
         if ($couponCode !== '') {
             [$discount] = $this->calcDiscount($couponCode, (float)$plan['price'], (string)$plan['currency'], (string)$plan['role_code']);
+        }else{
+            if($plan['dis'] > 0 && time() >= $plan['start_time'] && time() < $plan['end_time']){
+                $discount = (float)$plan['dis'];
+            }
         }
 
         Db::startTrans();
@@ -141,7 +146,7 @@ class SubscriptionService
         if (!$order) {
             throw new \Exception('订单不存在');
         }
-        if ($order['status'] === self::ORDER_PAID) {
+        if ($order['status'] === self::ORDER_PAID || $order['status'] === self::ORDER_BROADCAST) {
             $sub = Db::name('app_subscription')->where('source_order_id', $order['id'])->find();
             return ['order' => $order, 'subscription' => $sub ?: [], 'repeated' => true];
         }
@@ -161,57 +166,12 @@ class SubscriptionService
         try {
             // 1) 订单置为已支付
             Db::name('app_order')->where('id', $order['id'])->update([
-                'status'       => self::ORDER_PAID,
+                'status'       => self::ORDER_BROADCAST,
                 'pay_type'     => $payType,
                 'pay_trade_no' => $tradeNo,
                 'pay_payload'  => $payload ? json_encode($payload, JSON_UNESCAPED_UNICODE) : null,
                 'paid_at'      => $now,
                 'update_time'  => $now,
-            ]);
-
-            // 2) 激活订阅（同套餐未到期则顺延）
-            $sub = Db::name('app_subscription')->where('source_order_id', $order['id'])->find();
-            $startAt = $now;
-
-            $current = Db::name('app_subscription')
-                ->where('user_id', $order['user_id'])
-                ->where('plan_code', $order['plan_code'])
-                ->whereIn('status', [self::SUB_ACTIVE, self::SUB_GRACE])
-                ->where('end_at', '>', $now)
-                ->order('end_at', 'desc')
-                ->find();
-            if ($current) {
-                $startAt = (int)$current['end_at']; // 顺延
-            }
-
-            $subData = [
-                'user_id'    => $order['user_id'],
-                'plan_code'  => $order['plan_code'],
-                'role_code'  => $plan['role_code'],
-                'status'     => self::SUB_ACTIVE,
-                'start_at'   => $startAt,
-                'end_at'     => $startAt + $duration,
-                'update_time' => $now,
-            ];
-
-            if ($sub) {
-                Db::name('app_subscription')->where('id', $sub['id'])->update($subData);
-                $subId = (int)$sub['id'];
-            } else {
-                $subData['source_order_id'] = $order['id'];
-                $subData['create_time'] = $now;
-                $subId = (int)Db::name('app_subscription')->insertGetId($subData);
-            }
-
-            // 3) 角色升级（游客/会员 → 对应角色组）
-            $this->assignRoleGroup((int)$order['user_id'], (string)$plan['role_code']);
-
-            $this->audit('system', 0, 'order.pay', 'order', (int)$order['id'], ['status' => self::ORDER_PENDING], [
-                'status'   => self::ORDER_PAID,
-                'pay_type' => $payType,
-                'trade_no' => $tradeNo,
-                'sub_id'   => $subId,
-                'end_at'   => $subData['end_at'],
             ]);
 
             Db::commit();
@@ -430,7 +390,7 @@ class SubscriptionService
     /**
      * 写审计日志（仅 INSERT）
      */
-    protected function audit(string $actorType, int $actorId, string $action, string $targetType, int $targetId, array $before, array $after): void
+    public function audit(string $actorType, int $actorId, string $action, string $targetType, int $targetId, array $before, array $after): void
     {
         try {
             Db::name('app_audit_log')->insert([

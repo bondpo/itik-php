@@ -32,15 +32,11 @@ class User extends Backend
         $groupList = Db::name("user_group")
             ->order('id ASC')
             ->column('name', 'id');
-        $lvVipList = Db::name("user_lv_vip")
-            ->order('id ASC')
-            ->column('name', 'id');
         $lvTeamList = Db::name("user_lv_team")
             ->order('id ASC')
             ->column('name', 'id');
 
         $this->view->assign('groupdata', $groupList);
-        $this->view->assign('lvVipData', $lvVipList);
         $this->view->assign('lvTeamData', $lvTeamList);
     }
 
@@ -56,7 +52,7 @@ class User extends Backend
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $list = $this->model
-                ->with(['user_group', 'user_lv_vip', 'user_lv_team', 'inviter'])
+                ->with(['user_group', 'user_lv_team', 'inviter'])
                 ->where($where)
                 ->order($sort, $order)
                 ->paginate($limit);
