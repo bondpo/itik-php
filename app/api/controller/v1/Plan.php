@@ -27,7 +27,7 @@ class Plan extends Base
     {
         $list = Db::name('app_plan')
             ->where('status', 'normal')
-            ->field('plan_code,role_code,name,price,currency,duration_days,feature_flags,weigh')
+            ->field('plan_code,role_code,name,price,dis,start_time,end_time,currency,duration_days,feature_flags,weigh')
             ->order('weigh', 'desc')
             ->select();
 
@@ -37,6 +37,13 @@ class Plan extends Base
             $list[$k]['feature_flags'] = is_array($flags) ? $flags : [];
             $list[$k]['price']         = (float)$item['price'];
             $list[$k]['duration_days'] = (int)$item['duration_days'];
+            if($item['dis'] > 0 && time() >= $item['start_time'] && time() < $item['end_time']){
+                $list[$k]['dis']         = (float)$item['dis'];
+            }else{
+                $list[$k]['dis']         = 0;
+            }
+            $list[$k]['start_time']         = $item['start_time'];
+            $list[$k]['end_time']         = $item['end_time'];
         }
 
         $this->success('', ['list' => $list]);
