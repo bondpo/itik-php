@@ -56,7 +56,7 @@
                     { field: "type", title: "类型", searchList: { news: "资讯", material: "资料", member_upload: "会员上传" } },
                     { field: "author_id", title: "作者ID", operate: "BETWEEN", sortable: true },
                     { field: "project_id", title: "关联项目", operate: "BETWEEN", sortable: true },
-                    { field: "category_l1", title: "一级栏目", operate: "LIKE" },
+                    // { field: "category_l1", title: "一级栏目", operate: "LIKE" },
                     { field: "tags", title: "标签", operate: "LIKE" },
                     { field: "status", title: "状态", searchList: { draft: "草稿", pending: "待审核", normal: "已通过", rejected: "已驳回", hidden: "已下架" }, custom: { draft: "default", pending: "orange", normal: "green", rejected: "red", hidden: "default" }, templet: bdTable.api.formatter.status },
                     { field: "visibility", title: "可见性", searchList: { public: "公开", member: "会员", relation: "关系可见" } },
@@ -125,14 +125,11 @@
             if (event === "detail") {
                 openDetailDialog(data.id, data.title);
             } else if (event === "edit") {
-                layer.open({
-                    type: 2,
-                    title: "编辑内容 - " + (data.title || "ID:" + data.id),
-                    shade: 0.2,
-                    maxmin: true,
-                    area: ["920px", "90%"],
-                    content: "{:url('content.review/edit')}?ids=" + data.id,
-                });
+                layui.badou.api.open(
+                    "{:url('content.review/edit')}?ids=" + data.id,
+                    "编辑内容 - " + (data.title || "ID:" + data.id),
+                    {shade: 0.2, maxmin: true, area: ["920px", "90%"]}
+                );
             } else if (event === "del") {
                 layer.confirm("确认删除该内容？", function (index) {
                     $.post("{:url('content.review/del')}", { ids: data.id }, function (ret) {

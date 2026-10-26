@@ -21,6 +21,7 @@ layui.define(
     var colorpicker = layui.colorpicker;
     var bdTool = layui.bdTool;
     var laytpl = layui.laytpl;
+    var formSequence = 0;
     var bdForm = {
       config: {
         fieldlisttpl:
@@ -61,25 +62,33 @@ layui.define(
         //表单校验事件
         validator: function (layform, success, error, submit) {
           if (!layform.is("form")) return;
-          var submitBtn = $("[lay-submit]", layform),
-            filter = submitBtn.attr("lay-filter");
-
-          $(
-            ".layer-footer [lay-submit],.fixed-footer [lay-submit],.normal-footer [lay-submit]",
-            layform,
-          ).removeClass("disabled");
+          var submitBtn = $("[lay-submit]", layform);
+          if (!submitBtn.length) return;
+          // 每个表单使用独立过滤器，避免无过滤器或多表单时提交到错误地址。
+          var filter = "bd-form-" + ++formSequence;
+          submitBtn.attr("lay-filter", filter);
+          bdForm.api.setSubmitting(layform, false);
+          if (bdForm.api.dialogIndex() === null) {
+            $(".layer-footer", layform).removeClass("hide");
+          }
+          // 原生 submit（包括回车）统一交给 Layui 校验和 Ajax 提交。
+          layform.off("submit.bdForm").on("submit.bdForm", function () {
+            submitBtn.first().trigger("click");
+            return false;
+          });
           //验证通过提交表单
           form.on("submit(" + filter + ")", function (data) {
+            if (layform.data("bd-submitting")) return false;
             // 同步富文本编辑器内容到 textarea
             if (layui.bdEditor && typeof layui.bdEditor.syncAll === "function") {
               layui.bdEditor.syncAll();
             }
-            submitBtn.addClass("disabled");
+            bdForm.api.setSubmitting(layform, true);
 
             var submitResult = bdForm.api.submit(
               layform,
               function (data, ret) {
-                submitBtn.removeClass("disabled");
+                bdForm.api.setSubmitting(layform, false);
                 if (
                   false === $(this).triggerHandler("success.form", [data, ret])
                 ) {
@@ -96,22 +105,23 @@ layui.define(
                     ? ret.msg
                     : __("Operation completed");
 
-                parent.layui.toast.success({ message: msg });
-                parent.$(".btn-refresh").trigger("click");
-
-                if (window.name) {
-                  var index = parent.layer.getFrameIndex(window.name);
+                var index = bdForm.api.dialogIndex();
+                if (index !== null) {
+                  parent.layui.toast.success({ message: msg });
+                  parent.$(".btn-refresh").trigger("click");
                   parent.layer.close(index);
+                } else {
+                  toast.success({ message: msg });
                 }
                 return false;
               },
               function (data, ret) {
+                bdForm.api.setSubmitting(layform, false);
                 if (
                   false === $(this).triggerHandler("error.form", [data, ret])
                 ) {
                   return false;
                 }
-                submitBtn.removeClass("disabled");
                 if (typeof error === "function") {
                   if (false === error.call($(this), data, ret)) {
                     return false;
@@ -122,15 +132,15 @@ layui.define(
             );
             //如果提交失败则释放锁定
             if (!submitResult) {
-              submitBtn.removeClass("disabled");
+              bdForm.api.setSubmitting(layform, false);
             }
             return false;
           });
 
           //自定义关闭按钮事件
           layform.on("click", ".layer-close", function () {
-            if (window.name) {
-              var index = parent.layer.getFrameIndex(window.name);
+            var index = bdForm.api.dialogIndex();
+            if (index !== null) {
               parent.layer.close(index);
             }
             return false;
@@ -553,6 +563,19 @@ layui.define(
         },
       },
       api: {
+        dialogIndex: function () {
+          try {
+            if (parent !== window && window.name && parent.layer) {
+              var index = parent.layer.getFrameIndex(window.name);
+              return index == null ? null : index;
+            }
+          } catch (e) {}
+          return null;
+        },
+        setSubmitting: function (layform, submitting) {
+          layform.data("bd-submitting", submitting);
+          $("[lay-submit]", layform).toggleClass("disabled", submitting).prop("disabled", submitting);
+        },
         submit: function (form, success, error, submit) {
           if (form.length === 0) {
             toast.error("表单未初始化完成,无法提交");
@@ -575,7 +598,7 @@ layui.define(
             ? form.attr("method").toUpperCase()
             : "POST";
           type = type && (type === "GET" || type === "POST") ? type : "POST";
-          url = form.attr("action");
+          var url = form.attr("action");
           url = url ? url : location.href;
           //修复当存在多选项元素时提交的BUG
           var params = {};
@@ -600,6 +623,7 @@ layui.define(
                 (Object.keys(params).length > 0 ? "&" + $.param(params) : ""),
               dataType: "json",
               complete: function (xhr) {
+                bdForm.api.setSubmitting(form, false);
                 var token = xhr.getResponseHeader("__token__");
                 if (token) {
                   $("input[name='__token__'],input[name='token']").val(token);
@@ -657,10 +681,13 @@ layui.define(
           //从 bdForm 对象中获取 events 对象，它包含了一些与表单相关的事件处理方法。
           var events = bdForm.events;
           //绑定表单事件,调用 events 对象中的 bindevent 方法，用于绑定表单的事件（例如图标选择器等）。
-          events.bindevent(form);
-          //绑定表单验证事件 调用 events 对象中的 validator 方法，用于绑定表单的验证逻辑。
-          //success, error, 和 submit 参数会被传递给验证逻辑，分别表示成功、错误和提交时的回调函数。
-          events.validator(form, success, error, submit);
+          return form.each(function () {
+            var layform = $(this);
+            if (!layform.is("form") || layform.data("bd-form-bound")) return;
+            layform.data("bd-form-bound", true);
+            events.bindevent(layform);
+            events.validator(layform, success, error, submit);
+          });
         },
       },
     };

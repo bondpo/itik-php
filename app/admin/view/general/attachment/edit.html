@@ -1,6 +1,7 @@
 {layout name="layout/form" /}
 
 <form class="layui-form" lay-filter="edit-form" method="POST">
+    {:token_field()}
     <div class="layui-form-item">
         <label class="layui-form-label">{:__('Url')}</label>
         <div class="layui-input-block">

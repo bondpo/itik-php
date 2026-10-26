@@ -177,18 +177,6 @@
         var table = layui.table;
         var layer = layui.layer;
         var $ = layui.$;
-        form.on("submit(*)", function (data) {
-            $.post(data.form.action, data.field, function (res) {
-                if (res.code == 1) {
-                    layer.msg(res.msg, { icon: 1, time: 1000 }, function () {
-                        location.reload();
-                    });
-                } else {
-                    layer.msg(res.msg, { icon: 2, time: 1000 });
-                }
-            });
-            return false;
-        });
         upload.render({
             elem: "#upload-avatar",
             url: "{:url('ajax/upload')}",
@@ -202,7 +190,12 @@
             },
         });
 
-        bdForm.api.bindevent($("form.layui-form"));
+        bdForm.api.bindevent($("form.layui-form"), function (data, ret) {
+            layer.msg(ret.msg, { icon: 1, time: 1000 }, function () {
+                location.reload();
+            });
+            return false;
+        });
 
 
         //初始化表格

@@ -13,7 +13,7 @@ class Log extends Backend
 {
     protected $model = null;
     protected $modelValidate = false;
-    protected $noNeedRight = ['selectpage', 'messages'];
+    protected $noNeedRight = ['selectpage'];
 
     public function initialize()
     {
@@ -52,21 +52,34 @@ class Log extends Backend
         if ($cid <= 0) {
             $this->error('缺少会话 ID');
         }
-        $conversation = Db::name('app_conversation')->where('id', $cid)->find();
-        if (!$conversation) {
-            $this->error('会话不存在');
+        $page = max(1, (int)$this->request->param('page', 1));
+        $limit = max(1, min(200, (int)$this->request->param('limit', 50)));
+        try {
+            $data = $this->model->getMessages($cid, $page, $limit);
+        } catch (\Throwable $e) {
+            $this->error($e->getMessage());
         }
+        $this->success('', null, $data);
+    }
 
-        $list = Db::name('app_message')
-            ->alias('m')
-            ->join('user u', 'u.id = m.sender_id', 'LEFT')
-            ->where('m.conversation_id', $cid)
-            ->field('m.id,m.sender_id,m.type,m.body,m.read_at,m.create_time,u.nickname')
-            ->order('m.id', 'asc')
-            ->limit(200)
-            ->select();
-
-        $this->success('', null, ['conversation' => $conversation, 'list' => $list]);
+    public function del()
+    {
+        if (!$this->request->isPost()) {
+            $this->error('请使用 POST 请求');
+        }
+        $ids = array_values(array_unique(array_filter(
+            array_map('intval', explode(',', (string)$this->request->post('ids', ''))),
+            fn($id) => $id > 0
+        )));
+        if (!$ids) {
+            $this->error('请选择要删除的会话');
+        }
+        try {
+            $count = $this->model->deleteWithMessages($ids, (int)$this->auth->id, $this->request->ip());
+        } catch (\Throwable $e) {
+            $this->error($e->getMessage());
+        }
+        $this->success('已删除 ' . $count . ' 个会话');
     }
 
     /**

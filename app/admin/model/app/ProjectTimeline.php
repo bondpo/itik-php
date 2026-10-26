@@ -14,6 +14,7 @@ class ProjectTimeline extends Model
     protected $autoWriteTimestamp = 'int';
     protected $createTime = 'create_time';
     protected $updateTime = 'update_time';
+    protected $append = ['event_time_text'];
 
     protected $type = [
         'create_time' => 'int',

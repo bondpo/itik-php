@@ -71,8 +71,14 @@
         </div>
     </div>
 
-    <div class="layui-form-item text-center">
-        <button type="submit" class="layui-btn layui-btn-normal" lay-submit>立即保存</button>
+    <div class="layui-form-item layer-footer hide">
+        <button type="submit" class="layui-btn btn-theme-color" lay-submit>立即保存</button>
         <button type="reset" class="layui-btn layui-btn-primary">重置</button>
     </div>
 </form>
+
+<script>
+layui.use(['badou'], function () {
+    layui.bdForm.api.bindevent($('form.layui-form'));
+});
+</script>

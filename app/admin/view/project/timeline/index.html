@@ -61,7 +61,7 @@
                     { field: "project.name", title: "所属项目", minWidth: 160, operate: false, templet: function(d) {
                         return d.project ? "<b>" + d.project.name + "</b>" : "<span style='color:#aaa;'>未知项目</span>";
                     }},
-                    { field: "event_time_text", title: "里程碑日期", width: 120, align: "center", sort: true },
+                    { field: "event_time", title: "里程碑日期", width: 120, align: "center", sort: true, searchType: "time", datetimeFormat: "yyyy-MM-dd", templet: bdTable.api.formatter.datetime },
                     { field: "title", title: "事件/里程碑标题", minWidth: 200, operate: 'LIKE' },
                     { field: "tag", title: "标签分类", width: 110, align: "center", templet: function(d) {
                         return "<span class=\"layui-badge-rim\">" + (d.tag || '里程碑') + "</span>";
@@ -75,7 +75,7 @@
                     }},
                     { field: "weigh", title: "权重", width: 80, align: "center", sort: true },
                     { field: "status", title: "状态", width: 85, align: "center", searchList: { normal: '正常', hidden: '隐藏' }, custom: { normal: 'green', hidden: 'default' }, templet: bdTable.api.formatter.status },
-                    { field: "create_time_text", title: "发布时间", minWidth: 160, templet: bdTable.api.formatter.datetime, operate: false },
+                    { field: "create_time", title: "发布时间", minWidth: 160, templet: bdTable.api.formatter.datetime, operate: false },
                     { title: "操作", width: 140, align: "center", fixed: "right", templet: bdTable.api.formatter.operate },
                 ],
             ],

@@ -3,7 +3,7 @@
 <!-- 表格 -->
 <div class="layui-card">
     <div class="layui-card-body">
-        <table class="layui-hide" id="consultlog"></table>
+        <table class="layui-hide" id="consultlog" data-operate-messages="{:$auth->check('consult.log/messages')}" data-operate-del="{:$auth->check('consult.log/del')}"></table>
     </div>
 </div>
 
@@ -14,7 +14,7 @@
 </script>
 
 <script>
-    layui.use(["badou", "table"], function () {
+    layui.use(["badou", "table", "laypage"], function () {
         var bdTable = layui.bdTable;
         var table = layui.table;
         var layer = layui.layer;
@@ -24,9 +24,15 @@
             table: table,
             extend: {
                 index_url: "consult.log/index" + location.search,
+                del_url: "consult.log/del",
                 table: "app_conversation",
             },
         });
+
+        bdTable.api.events.operate['view-consult'] = function (id, obj) {
+            openMessages(obj.data.id);
+            return false;
+        };
 
         var tableObj = bdTable.render({
             elem: "#consultlog",
@@ -48,9 +54,53 @@
                     { field: "status", title: "状态", searchList: { open: "进行中", closed: "已关闭" }, custom: { open: "green", closed: "default" }, templet: bdTable.api.formatter.status },
                     { field: "last_message_at", title: "最后留言", templet: bdTable.api.formatter.datetime, operate: false },
                     { field: "create_time", title: "创建时间", templet: bdTable.api.formatter.datetime, operate: false },
+                    { title: "操作", field: "operate", width: 170, fixed: "right", align: "center",
+                        templet: bdTable.api.formatter.operate,
+                        buttons: [{name: 'messages', text: '查看', icon: 'fa fa-eye',
+                            classname: 'layui-btn layui-btn-xs layui-btn-primary',
+                            extend: 'lay-event="view-consult"'},
+                            $.extend({}, bdTable.button.del, {text: '删除', classname: 'layui-btn layui-btn-xs layui-bg-red'})]
+                    },
                 ],
             ],
         });
+
+        function openMessages(id) {
+            // Layer 的 DOM 弹窗会就地包装内容节点，必须先挂载到页面。
+            var content = $('<div>').css('padding', '14px 18px').appendTo('body');
+            var subject = $('<div>').css('margin-bottom', '12px').appendTo(content);
+            var list = $('<div>').css({maxHeight: '55vh', overflow: 'auto'}).appendTo(content);
+            var pager = $('<div>').appendTo(content);
+            layer.open({type: 1, title: '会话 #' + id + ' 留言记录', area: ['720px', 'auto'], content: content,
+                end: function () { content.remove(); }
+            });
+            function loadPage(page) {
+                layui.badou.api.ajax({
+                    url: "{:url('consult.log/messages')}", type: 'GET',
+                    data: {conversation_id: id, page: page, limit: 50}
+                }, function (data) {
+                    subject.text(data.conversation.subject || '未填写主题');
+                    list.empty();
+                    if (!data.list.length) {
+                        $('<div>').text('暂无留言').appendTo(list);
+                    }
+                    data.list.forEach(function (message) {
+                        var item = $('<div>').css('margin-bottom', '12px').appendTo(list);
+                        $('<b>').text(message.nickname || '用户#' + message.sender_id).appendTo(item);
+                        $('<span>').css({color: '#a2a8b4', marginLeft: '8px'}).text(
+                            message.create_time ? layui.util.toDateString(message.create_time * 1000) : '-'
+                        ).appendTo(item);
+                        $('<div>').css({marginTop: '4px', whiteSpace: 'pre-wrap', overflowWrap: 'anywhere'})
+                            .text(message.body || '').appendTo(item);
+                    });
+                    layui.laypage.render({elem: pager[0], count: data.total, curr: data.page, limit: data.limit,
+                        jump: function (pageInfo, first) { if (!first) loadPage(pageInfo.curr); }
+                    });
+                    return false;
+                });
+            }
+            loadPage(1);
+        }
 
         table.on("toolbar(consultlog)", function (obj) {
             var event = obj.event;
@@ -61,18 +111,7 @@
 
             if (event === "view") {
                 var id = rows[0].id;
-                $.get("{:url('consult.log/messages')}", { conversation_id: id }, function (ret) {
-                    if (!ret || ret.code !== 1 || !ret.data) { layer.msg("加载失败"); return; }
-                    var html = '<div style="padding:14px 18px;max-height:60vh;overflow:auto;">';
-                    (ret.data.list || []).forEach(function (m) {
-                        html += '<div style="margin-bottom:10px;"><b>' + (m.nickname || ("用户#" + m.sender_id)) +
-                                '</b> <span style="color:#a2a8b4;font-size:12px;">' + new Date(m.create_time * 1000).toLocaleString() + '</span>' +
-                                '<div style="margin-top:4px;white-space:pre-wrap;">' + $('<div>').text(m.body || "").html() + '</div></div>';
-                    });
-                    html += '</div>';
-                    if (!(ret.data.list || []).length) { html = '<div style="padding:20px;text-align:center;color:#a2a8b4;">暂无留言</div>'; }
-                    layer.open({ type: 1, title: "会话 #" + id + " 留言记录", area: ["720px", "auto"], content: html });
-                });
+                openMessages(id);
                 return;
             }
 

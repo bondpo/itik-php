@@ -36,5 +36,7 @@ AGENTS.md
 /database/*
 !/database/i18n.sql
 !/database/init_i18n.php
+!/database/init_consult_operations.php
 /MATRIX_IM_GUIDE.md
 /MATRIX_ADMIN_DEV_GUIDE.md
+/tests
