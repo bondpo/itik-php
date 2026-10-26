@@ -4,6 +4,7 @@ return [
     'Type'       => '类型',
     'Name'       => '名称',
     'Title'      => '标题',
+    'Language'   => '展示语言',
     'Image'      => '图片',
     'Url'        => '链接',
     'Parsetpl'   => '解析模板',

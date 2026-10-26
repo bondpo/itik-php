@@ -13,6 +13,11 @@ info:
     四角色（项目方 OWNER / 社区长 LEADER / 会员 MEMBER / 游客 VISITOR）社区信息交互平台后端接口。
     CMS 已前后端分离重构：无模板依赖，全部能力以 JSON 接口提供。
     平台 API 前缀 /api/v1；CMS API 前缀 /api/cms。不含 IM 即时通讯。
+    国际化：接口可传查询参数 lang 或请求头 think-lang，查询参数优先；未显式指定时依次使用 think_lang Cookie、浏览器 Accept-Language 和默认语言（默认 zh-cn，可配置）。
+    应用语言代码：zh-cn、en、zh-tw、ja、ko、fr、de、es、ru、ar、pt；不支持的语言使用当前默认语言。
+    已接入翻译的业务展示字段仅返回已发布且原文版本一致的译文；缺少有效译文时回退原文。具体覆盖范围见 docs/i18n.md。
+    广告图通过后台按语言配置独立记录，按语言筛选图片；与文本翻译的原文回退规则不同。
+    API 缓存需区分语言；语言切换后重新请求数据，普通读取请求不会调用百度翻译 API。
 servers:
   - url: /
 security:
@@ -2028,16 +2033,28 @@ paths:
   /api/cms/index:
     get:
       tags: ["CMS-首页"]
-      summary: 首页聚合数据
+      summary: 首页聚合数据（含按语言筛选的广告图）
+      description: |
+        返回 config、channels、blocks、hot、latest。
+        示例：GET /api/cms/index?lang=en。
+        blocks 仅包含通用广告（lang 为空字符串）和当前语言广告；两者一起展示，并非互相覆盖。
+        同一广告位需要不同语言图片时，在后台分别新增广告并指定展示语言，避免保留重复的通用版本。
+        仅返回正常状态且在有效期内的广告，按 weigh 降序、id 降序排列，筛选后最多返回 6 条。
+        未配置当前语言广告时仅显示通用广告，不回退其他语言广告；不存在符合条件的数据时返回空数组。
+        广告图片由后台分别上传，不调用百度翻译，也不依赖机器翻译开关。
       operationId: index_index
       security: []
       parameters:
+        - $ref: "#/components/parameters/LanguageQuery"
+        - $ref: "#/components/parameters/LanguageHeader"
         - name: limit
           in: query
           required: false
-          description: 每页条数
+          description: hot、latest 各自返回的最多条数；不影响 blocks（最多 6 条）
           schema:
             type: integer
+            minimum: 1
+            maximum: 10
             default: 6
       responses:
         "200":
@@ -2045,7 +2062,33 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiResponse"
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          config: { type: object, description: 站点公开配置 }
+                          channels: { type: array, items: { type: object }, description: 栏目树 }
+                          blocks:
+                            type: array
+                            maxItems: 6
+                            description: 通用广告和当前语言广告，前端继续使用 image、url 渲染
+                            items:
+                              $ref: "#/components/schemas/CmsBlock"
+                          hot: { type: array, items: { type: object }, description: 热门内容 }
+                          latest: { type: array, items: { type: object }, description: 最新内容 }
+              examples:
+                englishBanners:
+                  summary: 英语请求的广告字段示例（省略其他聚合字段）
+                  value:
+                    code: 1
+                    msg: ""
+                    data:
+                      blocks:
+                        - { id: 12, type: image, name: indexfocus, title: English banner, image: /uploads/banner-en.jpg, url: /projects, content: "", weigh: 12, begintime: 0, endtime: 0, lang: en }
+                        - { id: 1, type: image, name: indexfocus, title: 通用广告, image: /uploads/banner-common.jpg, url: /projects, content: "", weigh: 1, begintime: 0, endtime: 0, lang: "" }
   /api/cms/config:
     get:
       tags: ["CMS-首页"]
@@ -2621,6 +2664,25 @@ paths:
                 $ref: "#/components/schemas/ApiResponse"
 
 components:
+  parameters:
+    LanguageQuery:
+      name: lang
+      in: query
+      required: false
+      description: 展示语言，优先于 think-lang 请求头；请传应用语言代码，日语为 ja
+      schema:
+        type: string
+        enum: [zh-cn, en, zh-tw, ja, ko, fr, de, es, ru, ar, pt]
+        example: en
+    LanguageHeader:
+      name: think-lang
+      in: header
+      required: false
+      description: lang 查询参数未传时使用的展示语言
+      schema:
+        type: string
+        enum: [zh-cn, en, zh-tw, ja, ko, fr, de, es, ru, ar, pt]
+        example: en
   securitySchemes:
     TokenAuth:
       type: apiKey
@@ -2628,6 +2690,21 @@ components:
       name: token
       description: 登录接口返回的 access token
   schemas:
+    CmsBlock:
+      type: object
+      description: 广告区块；图片地址保留已有存储格式，前端沿用原有图片地址处理方式
+      properties:
+        id: { type: integer, description: 区块 ID }
+        type: { type: string, nullable: true, description: 区块类型 }
+        name: { type: string, nullable: true, description: 区块标识，例如 indexfocus }
+        title: { type: string, nullable: true, description: 标题 }
+        image: { type: string, nullable: true, description: 此条语言版本的图片地址 }
+        url: { type: string, nullable: true, description: 点击跳转地址 }
+        content: { type: string, nullable: true, description: 区块内容 }
+        weigh: { type: integer, description: 排序权重，值越大越靠前 }
+        begintime: { type: integer, nullable: true, description: 开始时间戳，0 或 null 表示不限 }
+        endtime: { type: integer, nullable: true, description: 结束时间戳，0 或 null 表示不限 }
+        lang: { type: string, description: 展示语言代码，空字符串表示所有语言通用, example: en }
     ApiResponse:
       type: object
       properties:

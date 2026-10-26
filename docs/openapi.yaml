@@ -1,0 +1,2618 @@
+# ----------------------------------------------------------------------
+# 项目社区信息交互平台 —— API 接口文档（OpenAPI 3.0）
+# 生成时间：2026-10-05 01:15
+# 接口：102 个（平台 /api/v1 + CMS /api/cms），92 个路径
+# 参数：位置/类型由控制器源码提取，必填按接口语义标注。
+# 鉴权：请求头 token: <access_token>；响应统一 {code,msg,data,request_id,time}。
+# ----------------------------------------------------------------------
+openapi: 3.0.3
+info:
+  title: 项目社区信息交互平台 API（含 CMS）
+  version: 1.4.0
+  description: |
+    四角色（项目方 OWNER / 社区长 LEADER / 会员 MEMBER / 游客 VISITOR）社区信息交互平台后端接口。
+    CMS 已前后端分离重构：无模板依赖，全部能力以 JSON 接口提供。
+    平台 API 前缀 /api/v1；CMS API 前缀 /api/cms。不含 IM 即时通讯。
+    国际化：接口可传查询参数 lang 或请求头 think-lang，查询参数优先；未显式指定时依次使用 think_lang Cookie、浏览器 Accept-Language 和默认语言（默认 zh-cn，可配置）。
+    应用语言代码：zh-cn、en、zh-tw、ja、ko、fr、de、es、ru、ar、pt；不支持的语言使用当前默认语言。
+    已接入翻译的业务展示字段仅返回已发布且原文版本一致的译文；缺少有效译文时回退原文。具体覆盖范围见 docs/i18n.md。
+    广告图通过后台按语言配置独立记录，按语言筛选图片；与文本翻译的原文回退规则不同。
+    API 缓存需区分语言；语言切换后重新请求数据，普通读取请求不会调用百度翻译 API。
+servers:
+  - url: /
+security:
+  - TokenAuth: []
+tags:
+  - name: 认证
+  - name: 用户与角色
+  - name: 套餐
+  - name: 订阅与订单
+  - name: 项目
+  - name: 内容/资讯
+  - name: 推荐与配额
+  - name: 推流投放
+  - name: 关系
+  - name: 咨询（留言式）
+  - name: "CMS-首页"
+  - name: "CMS-栏目"
+  - name: "CMS-内容"
+  - name: "CMS-标签"
+  - name: "CMS-单页"
+  - name: "CMS-专题"
+  - name: "CMS-搜索"
+  - name: "CMS-评论"
+  - name: "CMS-自定义表单"
+  - name: "CMS-订单"
+  - name: "CMS-会员中心"
+paths:
+  /api/v1/auth/email/send-code:
+    post:
+      tags: [认证]
+      summary: 发送邮箱验证码
+      operationId: auth_sendCode
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  description: 邮箱地址
+                event:
+                  type: string
+                  description: 事件 register/login/resetpwd
+                  default: register
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/auth/email/register:
+    post:
+      tags: [认证]
+      summary: 邮箱注册
+      operationId: auth_register
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [email, code, password]
+              properties:
+                code:
+                  type: string
+                  description: 邮箱验证码
+                email:
+                  type: string
+                  description: 邮箱地址
+                password:
+                  type: string
+                  description: 密码（≥6 位）
+                nickname:
+                  type: string
+                  description: 昵称
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/auth/email/login:
+    post:
+      tags: [认证]
+      summary: 邮箱验证码登录
+      operationId: auth_login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [email, code]
+              properties:
+                code:
+                  type: string
+                  description: 邮箱验证码
+                email:
+                  type: string
+                  description: 邮箱地址
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/auth/logout:
+    post:
+      tags: [认证]
+      summary: 退出登录
+      operationId: auth_logout
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/auth/wallet/challenge:
+    post:
+      tags: [认证]
+      summary: "钱包登录-创建签名挑战（未开放）"
+      operationId: auth_walletChallenge
+      security: []
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/auth/wallet/verify:
+    post:
+      tags: [认证]
+      summary: "钱包登录与注册-校验签名"
+      operationId: auth_walletVerify
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [address, signature]
+              properties:
+                address:
+                  type: string
+                  description: 钱包地址
+                signature:
+                  type: string
+                  description: 以太坊 personal_sign 签名
+                invite_code:
+                  type: string
+                  description: 推荐人邀请码（选填，仅新用户注册时生效）
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/auth/wallet/tp-login:
+    post:
+      tags: [认证]
+      summary: TokenPocket钱包DeepLink授权登录与注册
+      description: |
+        支持两种模式：
+        1. 发起授权（action=init）：生成唤起 TP 钱包的 URL Scheme (tpoutside://) 与 Universal Link，生成防重放 SIWE 签名挑战；
+        2. 验签登入/注册（action=verify 或携带 signature）：校验以太坊签名，已存在用户直接登录，未注册用户自动注册为游客并绑定邀请关系。
+      operationId: auth_tpLoginPost
+      security: []
+      requestBody:
+        required: false
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                action:
+                  type: string
+                  enum: [init, verify, check]
+                  description: 动作类型，默认根据传参自动判定
+                address:
+                  type: string
+                  description: 钱包地址（0x 开头 40 位十六进制）
+                signature:
+                  type: string
+                  description: 钱包签名数据（验签时必填）
+                ticket:
+                  type: string
+                  description: 授权票据编号（验签或查询时传入）
+                message:
+                  type: string
+                  description: 原始签名消息（可选，若无 ticket 时需提供）
+                invite_code:
+                  type: string
+                  description: 推荐人邀请码（新用户自动注册时绑定）
+                callback_url:
+                  type: string
+                  description: 自定义回调/回跳 Scheme 或 URL
+                chain_id:
+                  type: integer
+                  default: 1
+                  description: 链 ID（默认 1 以太坊主网）
+                dapp_name:
+                  type: string
+                  default: ITIK
+                  description: 钱包弹窗中展示的应用名称
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+    get:
+      tags: [认证]
+      summary: 轮询查询TP钱包授权状态
+      description: 供移动端或前端轮询授权进度，返回 pending（等待签名中） / success（登录成功并包含 Token） / expired（已过期）
+      operationId: auth_tpLoginGet
+      security: []
+      parameters:
+        - name: ticket
+          in: query
+          required: true
+          description: 授权会话票据
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 统一响应
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/users/me:
+    get:
+      tags: [用户与角色]
+      summary: 当前用户档案（角色+订阅状态）
+      operationId: user_me
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+    put:
+      tags: [用户与角色]
+      summary: 更新我的资料
+      operationId: user_update
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/users/me/identities:
+    get:
+      tags: [用户与角色]
+      summary: 已绑定身份（脱敏）
+      operationId: user_identities
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/users/me/subscription:
+    get:
+      tags: [用户与角色]
+      summary: 当前订阅与历史
+      operationId: user_subscription
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/roles/plans:
+    get:
+      tags: [套餐]
+      summary: 套餐列表
+      operationId: plan_index
+      security: []
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/billing/orders:
+    get:
+      tags: [订阅与订单]
+      summary: 我的订单列表
+      operationId: billing_orders
+      parameters:
+        - name: status
+          in: query
+          required: false
+          description: 状态筛选
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+    post:
+      tags: [订阅与订单]
+      summary: 创建订单（幂等）
+      operationId: billing_createOrder
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [plan_code]
+              properties:
+                plan_code:
+                  type: string
+                  description: 套餐代码
+                coupon_code:
+                  type: string
+                  description: 优惠码
+                idempotent_key:
+                  type: string
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/billing/orders/detail:
+    get:
+      tags: [订阅与订单]
+      summary: 订单详情
+      operationId: billing_orderDetail
+      parameters:
+        - name: order_no
+          in: query
+          required: true
+          description: 订单号
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/billing/orders/close:
+    post:
+      tags: [订阅与订单]
+      summary: 关闭未支付订单
+      operationId: billing_closeOrder
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [order_no]
+              properties:
+                order_no:
+                  type: string
+                  description: 订单号
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/billing/subscription:
+    get:
+      tags: [订阅与订单]
+      summary: 当前订阅（含剩余天数）
+      operationId: billing_subscription
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/billing/subscription/renew:
+    post:
+      tags: [订阅与订单]
+      summary: 续费（有效期顺延）
+      operationId: billing_renew
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                plan_code:
+                  type: string
+                  description: 套餐代码
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/billing/pay/notify:
+    post:
+      tags: [订阅与订单]
+      summary: 支付回调（渠道服务端调用）
+      operationId: billing_notify
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [order_no]
+              properties:
+                order_no:
+                  type: string
+                  description: 订单号
+                pay_type:
+                  type: string
+                  description: 支付渠道标识
+                sign:
+                  type: string
+                  description: 签名（开启验签时必填）
+                trade_no:
+                  type: string
+                  description: 第三方/链上交易号
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/projects:
+    get:
+      tags: [项目]
+      summary: 项目列表
+      operationId: project_index
+      security: []
+      parameters:
+        - name: certified
+          in: query
+          required: false
+          description: 是否已认证 1/0
+          schema:
+            type: string
+        - name: keyword
+          in: query
+          required: false
+          description: 搜索关键词
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+    post:
+      tags: [项目]
+      summary: 创建项目（项目方+有效订阅）
+      operationId: project_save
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                  description: 名称
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/projects/detail:
+    get:
+      tags: [项目]
+      summary: 项目详情
+      operationId: project_detail
+      security: []
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: 资源 ID
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/projects/update:
+    post:
+      tags: [项目]
+      summary: 编辑项目（已通过则回到待审）
+      operationId: project_update
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  description: 资源 ID
+                  default: 0
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/projects/submit:
+    post:
+      tags: [项目]
+      summary: 提交审核
+      operationId: project_submit
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  description: 资源 ID
+                  default: 0
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/projects/materials:
+    get:
+      tags: [项目]
+      summary: 项目资料列表
+      operationId: project_materials
+      parameters:
+        - name: project_id
+          in: query
+          required: true
+          description: 项目 ID
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+    post:
+      tags: [项目]
+      summary: 上传项目资料（进入审核）
+      operationId: project_addMaterial
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [project_id, category, type, storage_key]
+              properties:
+                category:
+                  type: string
+                  description: 分类（license/brand/project）
+                  default: project
+                project_id:
+                  type: integer
+                  description: 项目 ID
+                  default: 0
+                storage_key:
+                  type: string
+                  description: 已上传文件路径
+                type:
+                  type: string
+                  description: 类型
+                copyright_owner:
+                  type: string
+                  description: 版权责任方（社区长上传必填）
+                source:
+                  type: string
+                  description: 来源说明（社区长上传必填）
+                title:
+                  type: string
+                  description: 标题
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/projects/members:
+    get:
+      tags: [项目]
+      summary: 项目团队/社区长列表
+      operationId: project_members
+      parameters:
+        - name: project_id
+          in: query
+          required: true
+          description: 项目 ID
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/projects/members/bind:
+    post:
+      tags: [项目]
+      summary: 绑定社区长（001号推荐官）
+      operationId: project_bindLeader
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [project_id, user_id]
+              properties:
+                project_id:
+                  type: integer
+                  description: 项目 ID
+                  default: 0
+                user_id:
+                  type: integer
+                  description: 用户 ID
+                  default: 0
+                serial_no:
+                  type: string
+                title:
+                  type: string
+                  description: 标题
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/projects/stats:
+    get:
+      tags: [项目]
+      summary: 项目数据看板
+      operationId: project_stats
+      parameters:
+        - name: project_id
+          in: query
+          required: true
+          description: 项目 ID
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/contents:
+    get:
+      tags: [内容/资讯]
+      summary: 内容列表
+      operationId: content_index
+      security: []
+      parameters:
+        - name: keyword
+          in: query
+          required: false
+          description: 搜索关键词
+          schema:
+            type: string
+        - name: project_id
+          in: query
+          required: false
+          description: 项目 ID
+          schema:
+            type: integer
+            default: 0
+        - name: tag
+          in: query
+          required: false
+          description: 标签名筛选
+          schema:
+            type: string
+        - name: type
+          in: query
+          required: false
+          description: 类型
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+    post:
+      tags: [内容/资讯]
+      summary: 发布内容（进入审核）
+      operationId: content_save
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [title]
+              properties:
+                title:
+                  type: string
+                  description: 标题
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/contents/detail:
+    get:
+      tags: [内容/资讯]
+      summary: 内容详情
+      operationId: content_detail
+      security: []
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: 资源 ID
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/contents/mine:
+    get:
+      tags: [内容/资讯]
+      summary: 我的内容（含草稿/驳回）
+      operationId: content_mine
+      parameters:
+        - name: status
+          in: query
+          required: false
+          description: 状态筛选
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/contents/update:
+    post:
+      tags: [内容/资讯]
+      summary: 编辑内容（已发布则重新审核）
+      operationId: content_update
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  description: 资源 ID
+                  default: 0
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/contents/submit:
+    post:
+      tags: [内容/资讯]
+      summary: 提交审核
+      operationId: content_submit
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  description: 资源 ID
+                  default: 0
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/contents/delete:
+    post:
+      tags: [内容/资讯]
+      summary: 删除内容（软删除）
+      operationId: content_delete
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  description: 资源 ID
+                  default: 0
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/recommendations:
+    get:
+      tags: [推荐与配额]
+      summary: 我的推荐列表（含配额）
+      operationId: recommend_index
+      parameters:
+        - name: channel
+          in: query
+          required: false
+          description: 推荐渠道 owner_match/leader_member
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/recommendations/generate:
+    post:
+      tags: [推荐与配额]
+      summary: 生成推荐（受配额限制）
+      operationId: recommend_generate
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                channel:
+                  type: string
+                  description: 推荐渠道 owner_match/leader_member
+                want:
+                  type: integer
+                  description: 期望条数
+                  default: 0
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/recommendations/view:
+    post:
+      tags: [推荐与配额]
+      summary: 标记已查看
+      operationId: recommend_markView
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  description: 资源 ID
+                  default: 0
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/recommendations/respond:
+    post:
+      tags: [推荐与配额]
+      summary: 标记已响应
+      operationId: recommend_markRespond
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  description: 资源 ID
+                  default: 0
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/recommendations/feedback:
+    post:
+      tags: [推荐与配额]
+      summary: 推荐反馈（相关/不相关）
+      operationId: recommend_feedback
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id, feedback]
+              properties:
+                feedback:
+                  type: string
+                  description: 反馈值 relevant/irrelevant
+                id:
+                  type: integer
+                  description: 资源 ID
+                  default: 0
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/recommendations/quota:
+    get:
+      tags: [推荐与配额]
+      summary: 剩余推荐配额
+      operationId: recommend_quota
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/promotions/packages:
+    get:
+      tags: [推流投放]
+      summary: 推流套餐列表
+      operationId: promotion_packages
+      security: []
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/promotions/active:
+    get:
+      tags: [推流投放]
+      summary: 当前生效投放
+      operationId: promotion_active
+      security: []
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: 每页条数
+          schema:
+            type: integer
+            default: 10
+        - name: position
+          in: query
+          required: false
+          description: 广告位
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/promotions/campaigns:
+    get:
+      tags: [推流投放]
+      summary: 我的投放列表
+      operationId: promotion_campaigns
+      parameters:
+        - name: project_id
+          in: query
+          required: false
+          description: 项目 ID
+          schema:
+            type: integer
+            default: 0
+        - name: status
+          in: query
+          required: false
+          description: 状态筛选
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+    post:
+      tags: [推流投放]
+      summary: 创建投放（素材须已审核）
+      operationId: promotion_createCampaign
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [project_id, package_id, material_id]
+              properties:
+                material_id:
+                  type: integer
+                  description: 资料/推广素材 ID
+                  default: 0
+                package_id:
+                  type: integer
+                  description: 推流套餐 ID
+                  default: 0
+                project_id:
+                  type: integer
+                  description: 项目 ID
+                  default: 0
+                end_at:
+                  type: string
+                  description: 结束时间
+                start_at:
+                  type: string
+                  description: 开始时间（时间戳或日期串）
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/promotions/campaigns/stats:
+    get:
+      tags: [推流投放]
+      summary: 投放归因数据
+      operationId: promotion_stats
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: 资源 ID
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/promotions/campaigns/cancel:
+    post:
+      tags: [推流投放]
+      summary: 取消投放
+      operationId: promotion_cancelCampaign
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  description: 资源 ID
+                  default: 0
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/promotions/track:
+    post:
+      tags: [推流投放]
+      summary: 归因上报（曝光/点击/咨询/关注）
+      operationId: promotion_track
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [campaign_id, metric]
+              properties:
+                campaign_id:
+                  type: integer
+                  description: 投放计划 ID
+                  default: 0
+                metric:
+                  type: string
+                  description: 统计类型 exposure/click/consult/follow
+                  default: exposure
+                count:
+                  type: integer
+                  description: 数量
+                  default: 1
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/relations/follow:
+    post:
+      tags: [关系]
+      summary: 关注（幂等）
+      operationId: relation_follow
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [target_type, target_id]
+              properties:
+                target_id:
+                  type: integer
+                  description: 目标 ID
+                  default: 0
+                target_type:
+                  type: string
+                  description: 目标类型 user/project
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/relations/unfollow:
+    post:
+      tags: [关系]
+      summary: 取消关注
+      operationId: relation_unfollow
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [target_type, target_id]
+              properties:
+                target_id:
+                  type: integer
+                  description: 目标 ID
+                  default: 0
+                target_type:
+                  type: string
+                  description: 目标类型 user/project
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/relations/following:
+    get:
+      tags: [关系]
+      summary: 我关注的
+      operationId: relation_following
+      parameters:
+        - name: target_type
+          in: query
+          required: false
+          description: 目标类型 user/project
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/relations/followers:
+    get:
+      tags: [关系]
+      summary: 关注我的
+      operationId: relation_followers
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/relations/favorite:
+    post:
+      tags: [关系]
+      summary: 收藏（幂等）
+      operationId: relation_favorite
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [target_type, target_id]
+              properties:
+                target_id:
+                  type: integer
+                  description: 目标 ID
+                  default: 0
+                target_type:
+                  type: string
+                  description: 目标类型 user/project
+                  default: project
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/relations/unfavorite:
+    post:
+      tags: [关系]
+      summary: 取消收藏
+      operationId: relation_unfavorite
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [target_type, target_id]
+              properties:
+                target_id:
+                  type: integer
+                  description: 目标 ID
+                  default: 0
+                target_type:
+                  type: string
+                  description: 目标类型 user/project
+                  default: project
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/relations/favorites:
+    get:
+      tags: [关系]
+      summary: 我的收藏
+      operationId: relation_favorites
+      parameters:
+        - name: target_type
+          in: query
+          required: false
+          description: 目标类型 user/project
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/relations/block:
+    post:
+      tags: [关系]
+      summary: 拉黑
+      operationId: relation_block
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [user_id]
+              properties:
+                user_id:
+                  type: integer
+                  description: 用户 ID
+                  default: 0
+                reason:
+                  type: string
+                  description: 原因
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/relations/unblock:
+    post:
+      tags: [关系]
+      summary: 解除拉黑
+      operationId: relation_unblock
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [user_id]
+              properties:
+                user_id:
+                  type: integer
+                  description: 用户 ID
+                  default: 0
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/relations/blocks:
+    get:
+      tags: [关系]
+      summary: 黑名单
+      operationId: relation_blocks
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/relations/reports:
+    post:
+      tags: [关系]
+      summary: 举报（防重复提交）
+      operationId: relation_reports
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [target_type, target_id, category]
+              properties:
+                category:
+                  type: string
+                  description: 分类（license/brand/project）
+                target_id:
+                  type: integer
+                  description: 目标 ID
+                  default: 0
+                target_type:
+                  type: string
+                  description: 目标类型 user/project
+                evidence:
+                  type: string
+                  description: 证据图片路径
+                remark:
+                  type: string
+                  description: 补充说明
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/consultations:
+    get:
+      tags: [咨询（留言式）]
+      summary: 我的会话列表
+      operationId: consult_index
+      parameters:
+        - name: role
+          in: query
+          required: false
+          schema:
+            type: string
+            default: sent
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+    post:
+      tags: [咨询（留言式）]
+      summary: 创建咨询会话（关系门槛）
+      operationId: consult_create
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [target_type, target_id, content]
+              properties:
+                content:
+                  type: string
+                  description: 内容正文
+                target_id:
+                  type: integer
+                  description: 目标 ID
+                  default: 0
+                target_type:
+                  type: string
+                  description: 目标类型 user/project
+                  default: project
+                subject:
+                  type: string
+                  description: 咨询主题
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/consultations/messages:
+    get:
+      tags: [咨询（留言式）]
+      summary: 拉取会话留言
+      operationId: consult_messages
+      parameters:
+        - name: conversation_id
+          in: query
+          required: true
+          description: 会话 ID
+          schema:
+            type: integer
+            default: 0
+        - name: after_id
+          in: query
+          required: false
+          description: 增量拉取起点（消息 ID）
+          schema:
+            type: integer
+            default: 0
+        - name: limit
+          in: query
+          required: false
+          description: 每页条数
+          schema:
+            type: integer
+            default: 50
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+    post:
+      tags: [咨询（留言式）]
+      summary: 发送留言/回复
+      operationId: consult_send
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [conversation_id, content]
+              properties:
+                content:
+                  type: string
+                  description: 内容正文
+                conversation_id:
+                  type: integer
+                  description: 会话 ID
+                  default: 0
+                type:
+                  type: string
+                  description: 类型
+                  default: text
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/consultations/read:
+    post:
+      tags: [咨询（留言式）]
+      summary: 标记会话已读
+      operationId: consult_read
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [conversation_id]
+              properties:
+                conversation_id:
+                  type: integer
+                  description: 会话 ID
+                  default: 0
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/v1/consultations/close:
+    post:
+      tags: [咨询（留言式）]
+      summary: 关闭会话
+      operationId: consult_close
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [conversation_id]
+              properties:
+                conversation_id:
+                  type: integer
+                  description: 会话 ID
+                  default: 0
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/cms/index:
+    get:
+      tags: ["CMS-首页"]
+      summary: 首页聚合数据（含按语言筛选的广告图）
+      description: |
+        返回 config、channels、blocks、hot、latest。
+        示例：GET /api/cms/index?lang=en。
+        blocks 仅包含通用广告（lang 为空字符串）和当前语言广告；两者一起展示，并非互相覆盖。
+        同一广告位需要不同语言图片时，在后台分别新增广告并指定展示语言，避免保留重复的通用版本。
+        仅返回正常状态且在有效期内的广告，按 weigh 降序、id 降序排列，筛选后最多返回 6 条。
+        未配置当前语言广告时仅显示通用广告，不回退其他语言广告；不存在符合条件的数据时返回空数组。
+        广告图片由后台分别上传，不调用百度翻译，也不依赖机器翻译开关。
+      operationId: index_index
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/LanguageQuery"
+        - $ref: "#/components/parameters/LanguageHeader"
+        - name: limit
+          in: query
+          required: false
+          description: hot、latest 各自返回的最多条数；不影响 blocks（最多 6 条）
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 10
+            default: 6
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          config: { type: object, description: 站点公开配置 }
+                          channels: { type: array, items: { type: object }, description: 栏目树 }
+                          blocks:
+                            type: array
+                            maxItems: 6
+                            description: 通用广告和当前语言广告，前端继续使用 image、url 渲染
+                            items:
+                              $ref: "#/components/schemas/CmsBlock"
+                          hot: { type: array, items: { type: object }, description: 热门内容 }
+                          latest: { type: array, items: { type: object }, description: 最新内容 }
+              examples:
+                englishBanners:
+                  summary: 英语请求的广告字段示例（省略其他聚合字段）
+                  value:
+                    code: 1
+                    msg: ""
+                    data:
+                      blocks:
+                        - { id: 12, type: image, name: indexfocus, title: English banner, image: /uploads/banner-en.jpg, url: /projects, content: "", weigh: 12, begintime: 0, endtime: 0, lang: en }
+                        - { id: 1, type: image, name: indexfocus, title: 通用广告, image: /uploads/banner-common.jpg, url: /projects, content: "", weigh: 1, begintime: 0, endtime: 0, lang: "" }
+  /api/cms/config:
+    get:
+      tags: ["CMS-首页"]
+      summary: 站点配置（前端初始化）
+      operationId: index_config
+      security: []
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/cms/navigation:
+    get:
+      tags: ["CMS-首页"]
+      summary: 导航菜单
+      operationId: index_navigation
+      security: []
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/cms/friendlink:
+    get:
+      tags: ["CMS-首页"]
+      summary: 友情链接
+      operationId: index_friendlink
+      security: []
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/cms/channels:
+    get:
+      tags: ["CMS-栏目"]
+      summary: 栏目树
+      operationId: channel_index
+      security: []
+      parameters:
+        - name: parent_id
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: type
+          in: query
+          required: false
+          description: 类型
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/cms/channels/detail:
+    get:
+      tags: ["CMS-栏目"]
+      summary: 栏目详情（子栏目/模型字段/面包屑）
+      operationId: channel_detail
+      security: []
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: 资源 ID
+          schema:
+            type: integer
+            default: 0
+        - name: diyname
+          in: query
+          required: false
+          description: 栏目标识（拼音名）
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/cms/channels/archives:
+    get:
+      tags: ["CMS-栏目"]
+      summary: 栏目内容列表（分页+筛选+排序）
+      operationId: channel_archives
+      security: []
+      parameters:
+        - name: channel_id
+          in: query
+          required: true
+          description: 栏目 ID
+          schema:
+            type: integer
+            default: 0
+        - name: diyname
+          in: query
+          required: false
+          description: 栏目标识（拼音名）
+          schema:
+            type: string
+        - name: include_children
+          in: query
+          required: false
+          description: 是否含子栏目内容 1/0
+          schema:
+            type: integer
+            default: 1
+        - name: keyword
+          in: query
+          required: false
+          description: 搜索关键词
+          schema:
+            type: string
+        - name: tag
+          in: query
+          required: false
+          description: 标签名筛选
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/cms/archives/detail:
+    get:
+      tags: ["CMS-内容"]
+      summary: 内容详情（含副表自定义字段/标签/上下篇）
+      operationId: archives_detail
+      security: []
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: 资源 ID
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/cms/archives/relative:
+    get:
+      tags: ["CMS-内容"]
+      summary: 相关内容推荐
+      operationId: archives_relative
+      security: []
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: 资源 ID
+          schema:
+            type: integer
+            default: 0
+        - name: limit
+          in: query
+          required: false
+          description: 每页条数
+          schema:
+            type: integer
+            default: 6
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/cms/archives/like:
+    post:
+      tags: ["CMS-内容"]
+      summary: 点赞
+      operationId: archives_like
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  description: 资源 ID
+                  default: 0
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/cms/archives/view:
+    post:
+      tags: ["CMS-内容"]
+      summary: 浏览量上报
+      operationId: archives_view
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  description: 资源 ID
+                  default: 0
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/cms/tags:
+    get:
+      tags: ["CMS-标签"]
+      summary: 标签列表
+      operationId: tag_index
+      security: []
+      parameters:
+        - name: keyword
+          in: query
+          required: false
+          description: 搜索关键词
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          description: 每页条数
+          schema:
+            type: integer
+            default: 50
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/cms/tags/archives:
+    get:
+      tags: ["CMS-标签"]
+      summary: 按标签取内容
+      operationId: tag_archives
+      security: []
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: 资源 ID
+          schema:
+            type: integer
+            default: 0
+        - name: name
+          in: query
+          required: false
+          description: 名称
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/cms/pages:
+    get:
+      tags: ["CMS-单页"]
+      summary: 单页列表
+      operationId: page_index
+      security: []
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/cms/pages/detail:
+    get:
+      tags: ["CMS-单页"]
+      summary: 单页详情
+      operationId: page_detail
+      security: []
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: 资源 ID
+          schema:
+            type: integer
+            default: 0
+        - name: diyname
+          in: query
+          required: false
+          description: 栏目标识（拼音名）
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/cms/specials:
+    get:
+      tags: ["CMS-专题"]
+      summary: 专题列表
+      operationId: special_index
+      security: []
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/cms/specials/detail:
+    get:
+      tags: ["CMS-专题"]
+      summary: 专题详情（含关联内容与标签）
+      operationId: special_detail
+      security: []
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: 资源 ID
+          schema:
+            type: integer
+            default: 0
+        - name: diyname
+          in: query
+          required: false
+          description: 栏目标识（拼音名）
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/cms/search:
+    get:
+      tags: ["CMS-搜索"]
+      summary: 关键词搜索
+      operationId: search_index
+      security: []
+      parameters:
+        - name: keyword
+          in: query
+          required: true
+          description: 搜索关键词
+          schema:
+            type: string
+        - name: channel_id
+          in: query
+          required: false
+          description: 栏目 ID
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/cms/search/hot:
+    get:
+      tags: ["CMS-搜索"]
+      summary: 热门搜索词
+      operationId: search_hot
+      security: []
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: 每页条数
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/cms/search/suggest:
+    get:
+      tags: ["CMS-搜索"]
+      summary: 搜索建议
+      operationId: search_suggest
+      security: []
+      parameters:
+        - name: keyword
+          in: query
+          required: false
+          description: 搜索关键词
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/cms/comments:
+    get:
+      tags: ["CMS-评论"]
+      summary: 评论列表
+      operationId: comment_index
+      security: []
+      parameters:
+        - name: aid
+          in: query
+          required: true
+          description: 目标内容 ID
+          schema:
+            type: integer
+            default: 0
+        - name: pid
+          in: query
+          required: false
+          description: 父级评论 ID（回复时传）
+          schema:
+            type: integer
+            default: -1
+        - name: tree
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: type
+          in: query
+          required: false
+          description: 类型
+          schema:
+            type: string
+            default: archives
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+    post:
+      tags: ["CMS-评论"]
+      summary: 发表评论
+      operationId: comment_post
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [aid, content]
+              properties:
+                aid:
+                  type: integer
+                  description: 目标内容 ID
+                  default: 0
+                content:
+                  type: string
+                  description: 内容正文
+                pid:
+                  type: integer
+                  description: 父级评论 ID（回复时传）
+                  default: 0
+                type:
+                  type: string
+                  description: 类型
+                  default: archives
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/cms/comments/delete:
+    post:
+      tags: ["CMS-评论"]
+      summary: 删除自己的评论
+      operationId: comment_delete
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  description: 资源 ID
+                  default: 0
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/cms/comments/subscribe:
+    post:
+      tags: ["CMS-评论"]
+      summary: 订阅/取消回复通知
+      operationId: comment_subscribe
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  description: 资源 ID
+                  default: 0
+                subscribe:
+                  type: integer
+                  description: 是否订阅 1/0
+                  default: 1
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/cms/diyform:
+    get:
+      tags: ["CMS-自定义表单"]
+      summary: 表单定义与字段
+      operationId: diyform_index
+      security: []
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: 资源 ID
+          schema:
+            type: integer
+            default: 0
+        - name: diyname
+          in: query
+          required: false
+          description: 栏目标识（拼音名）
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/cms/diyform/data:
+    get:
+      tags: ["CMS-自定义表单"]
+      summary: 表单数据列表
+      operationId: diyform_data
+      security: []
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: 资源 ID
+          schema:
+            type: integer
+            default: 0
+        - name: diyname
+          in: query
+          required: false
+          description: 栏目标识（拼音名）
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/cms/diyform/post:
+    post:
+      tags: ["CMS-自定义表单"]
+      summary: 提交表单
+      operationId: diyform_post
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  description: 资源 ID
+                  default: 0
+                diyname:
+                  type: string
+                  description: 栏目标识（拼音名）
+                row:
+                  type: string
+                  description: 表单数据对象
+                  default: []
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/cms/orders:
+    get:
+      tags: ["CMS-订单"]
+      summary: 我的订单列表
+      operationId: order_index
+      parameters:
+        - name: status
+          in: query
+          required: false
+          description: 状态筛选
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+    post:
+      tags: ["CMS-订单"]
+      summary: 创建订单（内容付费）
+      operationId: order_save
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [archives_id]
+              properties:
+                archives_id:
+                  type: integer
+                  description: 内容 ID
+                  default: 0
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/cms/orders/detail:
+    get:
+      tags: ["CMS-订单"]
+      summary: 订单详情
+      operationId: order_detail
+      parameters:
+        - name: orderid
+          in: query
+          required: true
+          description: 订单号
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/cms/orders/cancel:
+    post:
+      tags: ["CMS-订单"]
+      summary: 取消未支付订单
+      operationId: order_cancel
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [orderid]
+              properties:
+                orderid:
+                  type: string
+                  description: 订单号
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/cms/orders/notify:
+    post:
+      tags: ["CMS-订单"]
+      summary: 支付回调（渠道服务端调用）
+      operationId: order_notify
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [orderid]
+              properties:
+                orderid:
+                  type: string
+                  description: 订单号
+                paytype:
+                  type: string
+                sign:
+                  type: string
+                  description: 签名（开启验签时必填）
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/cms/user/overview:
+    get:
+      tags: ["CMS-会员中心"]
+      summary: 会员概览
+      operationId: user_overview
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/cms/user/archives:
+    get:
+      tags: ["CMS-会员中心"]
+      summary: 我发布的内容
+      operationId: user_archives
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/cms/user/comments:
+    get:
+      tags: ["CMS-会员中心"]
+      summary: 我的评论
+      operationId: user_comments
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/cms/user/favorites:
+    get:
+      tags: ["CMS-会员中心"]
+      summary: 我的收藏
+      operationId: user_favorites
+      parameters:
+        - name: type
+          in: query
+          required: false
+          description: 类型
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /api/cms/user/favorite:
+    post:
+      tags: ["CMS-会员中心"]
+      summary: 收藏/取消收藏
+      operationId: user_favorite
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [aid]
+              properties:
+                aid:
+                  type: integer
+                  description: 目标内容 ID
+                  default: 0
+                action:
+                  type: string
+                  description: 操作动作（add/remove；审核类如 pass/reject）
+                  default: add
+                type:
+                  type: string
+                  description: 类型
+                  default: archives
+      responses:
+        "200":
+          description: 统一响应；code=1 成功，其它为错误码（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+components:
+  parameters:
+    LanguageQuery:
+      name: lang
+      in: query
+      required: false
+      description: 展示语言，优先于 think-lang 请求头；请传应用语言代码，日语为 ja
+      schema:
+        type: string
+        enum: [zh-cn, en, zh-tw, ja, ko, fr, de, es, ru, ar, pt]
+        example: en
+    LanguageHeader:
+      name: think-lang
+      in: header
+      required: false
+      description: lang 查询参数未传时使用的展示语言
+      schema:
+        type: string
+        enum: [zh-cn, en, zh-tw, ja, ko, fr, de, es, ru, ar, pt]
+        example: en
+  securitySchemes:
+    TokenAuth:
+      type: apiKey
+      in: header
+      name: token
+      description: 登录接口返回的 access token
+  schemas:
+    CmsBlock:
+      type: object
+      description: 广告区块；图片地址保留已有存储格式，前端沿用原有图片地址处理方式
+      properties:
+        id: { type: integer, description: 区块 ID }
+        type: { type: string, nullable: true, description: 区块类型 }
+        name: { type: string, nullable: true, description: 区块标识，例如 indexfocus }
+        title: { type: string, nullable: true, description: 标题 }
+        image: { type: string, nullable: true, description: 此条语言版本的图片地址 }
+        url: { type: string, nullable: true, description: 点击跳转地址 }
+        content: { type: string, nullable: true, description: 区块内容 }
+        weigh: { type: integer, description: 排序权重，值越大越靠前 }
+        begintime: { type: integer, nullable: true, description: 开始时间戳，0 或 null 表示不限 }
+        endtime: { type: integer, nullable: true, description: 结束时间戳，0 或 null 表示不限 }
+        lang: { type: string, description: 展示语言代码，空字符串表示所有语言通用, example: en }
+    ApiResponse:
+      type: object
+      properties:
+        code: { type: integer, description: "1 成功，其它为错误码" }
+        msg: { type: string, description: 提示信息 }
+        data: { nullable: true, description: 业务数据 }
+        request_id: { type: string, description: 请求追踪 ID }
+        time: { type: integer, description: 服务端时间戳 }
+    ErrorCodes:
+      type: object
+      description: 分段错误码表
+      properties:
+        "1": { type: string, description: 成功 }
+        "10001": { type: string, description: 参数不合法 }
+        "10002": { type: string, description: 缺少必填参数 }
+        "20001": { type: string, description: 未登录/令牌无效 }
+        "20002": { type: string, description: 无权限（含关系 ACL、会话归属） }
+        "20003": { type: string, description: 角色不符 }
+        "20004": { type: string, description: 订阅状态不满足 }
+        "30001": { type: string, description: 业务失败 }
+        "30002": { type: string, description: 资源不存在 }
+        "30003": { type: string, description: 状态不允许 }
+        "30004": { type: string, description: 重复操作 }
+        "40001": { type: string, description: 风控拒绝 }
+        "40002": { type: string, description: 频控限制（含推荐配额用尽） }
+        "50001": { type: string, description: 系统错误 }

@@ -21,6 +21,17 @@
         </div>
     </div>
     <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Language')}</label>
+        <div class="layui-input-block">
+            <select name="row[lang]">
+                {foreach $languageList as $code=>$label}
+                <option value="{$code|htmlentities}" {if isset($row['lang']) && $row['lang']==$code}selected{/if}>{$label|htmlentities}</option>
+                {/foreach}
+            </select>
+            <div class="layui-form-mid layui-text-em">通用广告在所有语言下显示；指定语言的广告仅在对应语言下展示。不同语言广告图请分别新增区块。</div>
+        </div>
+    </div>
+    <div class="layui-form-item">
         <label class="layui-form-label">{:__('Image')}</label>
         <div class="layui-input-block">
             <input type="text" id="c-image" name="row[image]" value="{$row.image|default=''}" placeholder="{:__('Image')}" class="layui-input" style="width:70%" />

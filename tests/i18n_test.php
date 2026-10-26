@@ -249,12 +249,42 @@ try {
 }
 Db::execute('DROP TRIGGER fail_bulk_approval');
 
+// 广告语言筛选在排序和数量限制之前执行，旧广告默认通用。
+Db::execute("CREATE TABLE test_cms_block (id INTEGER PRIMARY KEY AUTOINCREMENT, type TEXT, name TEXT, title TEXT, image TEXT, url TEXT, content TEXT, weigh INTEGER DEFAULT 0, begintime INTEGER, endtime INTEGER, status TEXT DEFAULT 'normal', lang TEXT NOT NULL DEFAULT '', createtime INTEGER, updatetime INTEGER)");
+foreach (['' => 1, 'zh-cn' => 2, 'en' => 3, 'ja' => 4] as $locale => $id) {
+    Db::name('cms_block')->insert(['id' => $id, 'lang' => $locale, 'image' => '/' . $id . '.png', 'weigh' => $id]);
+}
+Db::name('cms_block')->insertAll([
+    ['id' => 5, 'lang' => 'en', 'status' => 'hidden', 'begintime' => 0, 'endtime' => 0, 'weigh' => 99],
+    ['id' => 6, 'lang' => 'en', 'status' => 'normal', 'begintime' => 0, 'endtime' => time() - 100, 'weigh' => 99],
+    ['id' => 7, 'lang' => 'en', 'status' => 'normal', 'begintime' => time() + 100, 'endtime' => 0, 'weigh' => 99],
+]);
+foreach (['en' => 3, 'ja' => 4, 'zh-cn' => 2] as $locale => $id) {
+    $app->lang->setLangSet($locale);
+    $blocks = \app\common\model\cms\Block::getHomeBlocks();
+    verify(array_column($blocks, 'id') === [$id, 1], '广告按语言隔离并保留通用广告：' . $locale);
+    verify($blocks[0]['image'] === '/' . $id . '.png', '广告接口保留现有图片字段格式：' . $locale);
+    verify(array_column(\app\common\model\cms\Block::getHomeBlocks(1), 'id') === [$id], '广告数量限制在语言筛选之后执行：' . $locale);
+}
+$block = \app\admin\model\cms\Block::find(3);
+$block->save(['title' => 'English banner']);
+verify(Db::name('cms_block')->where('id', 3)->value('lang') === 'en', '后台更新其他字段保留展示语言');
+try {
+    $block->save(['lang' => 'invalid']);
+    throw new RuntimeException('未拒绝无效广告语言');
+} catch (InvalidArgumentException $e) {
+    verify(true, '后台拒绝未配置的广告语言');
+}
+$app->lang->setLangSet('zh-cn');
+
 $app->request->withSession($app->session);
 $auth = new class { public function check($rule) { return true; } };
 $cachePath = sys_get_temp_dir() . '/itik-i18n-template-' . bin2hex(random_bytes(8)) . '/';
 $viewRows = [
     'setting/index' => Setting::defaults() + ['has_secret' => true],
     'translation/index' => [],
+    '../cms/block/add' => [],
+    '../cms/block/edit' => ['id' => 3, 'lang' => 'en', 'type' => 'image', 'name' => 'indexfocus', 'title' => 'Banner', 'image' => '/3.png', 'url' => '', 'content' => '', 'weigh' => 3, 'begintime' => 0, 'endtime' => 0, 'status' => 'normal'],
     'translation/edit' => ['id' => 1, 'source_hash' => str_repeat('a', 64), 'locale' => 'en', 'source_text' => '<原文>',
         'translated_text' => 'Text <test>', 'status' => 'review', 'origin' => 'machine'],
 ];
@@ -264,12 +294,15 @@ try {
         $source = preg_replace('/^\{layout[^\n]+\}\s*/', '', file_get_contents(root_path() . 'app/admin/view/i18n/' . $name . '.html'));
         ob_start();
         try {
-            $template->display($source, ['row' => $row, 'languages' => config('i18n.languages'), 'auth' => $auth]);
+            $template->display($source, ['row' => $row, 'languages' => config('i18n.languages'), 'languageList' => (new \app\admin\model\cms\Block())->getLanguageList(), 'statusList' => ['normal' => '正常', 'hidden' => '隐藏'], 'nameList' => [], 'auth' => $auth]);
             $html = ob_get_contents();
         } finally {
             ob_end_clean();
         }
         verify(strlen($html) > 100, '后台模板可编译渲染：' . $name);
+        if ($name === '../cms/block/edit') {
+            verify((bool)preg_match('/value="en"\s+selected/', $html), '后台广告编辑表单正确回显语言');
+        }
         if ($name === 'translation/edit') {
             verify(str_contains($html, '&lt;原文&gt;') && str_contains($html, 'Text &lt;test&gt;'), '后台编辑页安全回显原文与译文');
         }

@@ -34,6 +34,10 @@ class Block extends Model
                 }
                 $row->setAttr($k, $value);
             }
+            $data = $row->getData();
+            if (array_key_exists('lang', $data) && !array_key_exists((string)$data['lang'], $row->getLanguageList())) {
+                throw new \InvalidArgumentException('请选择有效的展示语言');
+            }
             if (isset($row['begintime']) && isset($row['endtime']) && $row['begintime'] > $row['endtime']) {
                 exception("结束时间必须大于开始时间");
             }
@@ -60,6 +64,11 @@ class Block extends Model
     protected function setEndtimeAttr($value)
     {
         return $value && !is_numeric($value) ? strtotime($value) : ($value ? $value : null);
+    }
+
+    public function getLanguageList(): array
+    {
+        return ['' => '通用（所有语言）'] + array_map(fn($language) => $language['name'], config('i18n.languages'));
     }
 
     public function getNameList()

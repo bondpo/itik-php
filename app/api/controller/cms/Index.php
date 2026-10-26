@@ -31,13 +31,7 @@ class Index extends Base
         $limit = min(10, max(1, (int)$this->request->param('limit', 6)));
 
         // 焦点图（block 或推荐内容）
-        $blocks = Db::name('cms_block')
-            ->where('status', 'normal')
-            ->where(function ($q) {
-                $q->where('begintime', '=', 0)->whereOr('begintime', '<=', time());
-            })
-            ->field($this->fieldString('cms_block', ['id','type','name','title','image','url','content','weigh','begintime','endtime']))
-            ->order('weigh', 'desc')->limit(6)->select()->toArray();
+        $blocks = \app\common\model\cms\Block::getHomeBlocks();
 
         // 热门内容（按浏览量）
         $hot = Db::name('cms_archives')

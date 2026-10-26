@@ -59,6 +59,9 @@
                     { field: "type", title: "{:__('Type')}", operate: 'LIKE' },
                     { field: "name", title: "{:__('Name')}", operate: 'LIKE' },
                     { field: "title", title: "{:__('Title')}", operate: 'LIKE' },
+                    { field: "lang", title: "{:__('Language')}", width: 160, searchList: Config.languageList,
+                        templet: function (row) { return layui.util.escape(Config.languageList[row.lang] || row.lang || '通用（所有语言）'); }
+                    },
                     { field: "image", title: "{:__('Image')}", operate: 'LIKE' },
                     { field: "url", title: "{:__('Url')}", operate: 'LIKE' },
                     { field: "content", title: "{:__('Content')}", hide: true, operate: false },

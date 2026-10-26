@@ -25,6 +25,8 @@ class Block extends Backend
         $this->model = new \app\admin\model\cms\Block;
         $this->view->assign("statusList", $this->model->getStatusList());
         $this->view->assign("nameList", $this->model->getNameList());
+        $this->view->assign('languageList', $this->model->getLanguageList());
+        $this->assignconfig('languageList', $this->model->getLanguageList());
     }
 
     public function index()
@@ -78,6 +80,7 @@ class Block extends Backend
 
     public function edit($ids = null)
     {
+        $ids = $ids ?? $this->request->param('ids');
         $values = \app\admin\model\cms\Block::find($ids);
         if (!$values) {
             $this->error(__('No Results were found'));

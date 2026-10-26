@@ -64,6 +64,27 @@ class Block extends Model
         return (bool)$this->getData("image");
     }
 
+    public static function applyLanguage($query, ?string $language = null): void
+    {
+        $language = $language ?? app()->lang->getLangSet();
+        $query->whereIn('lang', ['', $language]);
+    }
+
+    public static function getHomeBlocks(int $limit = 6): array
+    {
+        $now = time();
+        $query = Db::name('cms_block')->where('status', 'normal')
+            ->where(function ($query) use ($now) {
+                $query->whereNull('begintime')->whereOr('begintime', 0)->whereOr('begintime', '<=', $now);
+            })
+            ->where(function ($query) use ($now) {
+                $query->whereNull('endtime')->whereOr('endtime', 0)->whereOr('endtime', '>=', $now);
+            });
+        self::applyLanguage($query);
+        return $query->field('id,type,name,title,image,url,content,weigh,begintime,endtime,lang')
+            ->order('weigh', 'desc')->order('id', 'desc')->limit($limit)->select()->toArray();
+    }
+
     /**
      * 获取区块列表
      * @param $params
@@ -71,6 +92,7 @@ class Block extends Model
      */
     public static function getBlockList($params)
     {
+        $params['lang'] = app()->lang->getLangSet();
         $config = get_addon_config('cms');
         $type = empty($params['type']) ? '' : $params['type'];
         $name = empty($params['name']) ? '' : $params['name'];
@@ -105,6 +127,7 @@ class Block extends Model
             ->field($field)
             ->orderRaw($order);
 
+        self::applyLanguage($blockModel);
         if ($paginate) {
             list($listRows, $simple, $config) = Service::getPaginateParams('bpage' . self::$tagCount, $params);
             $list = $blockModel->paginate($listRows, $simple, $config);
@@ -142,16 +165,16 @@ class Block extends Model
      */
     public static function getBlockContent($params)
     {
+        $params['lang'] = app()->lang->getLangSet();
         $fieldName = isset($params['id']) ? 'id' : 'name';
         $value = $params[$fieldName] ?? '';
         $field = $params['field'] ?? '';
 
         list($cacheKey, $cacheExpire) = Service::getCacheKeyExpire('blockcontent', $params);
 
-        $row = self::where($fieldName, $value)
-            ->where('status', 'normal')
-            ->cache($cacheKey, $cacheExpire, 'cms')
-            ->find();
+        $query = self::where($fieldName, $value)->where('status', 'normal');
+        self::applyLanguage($query);
+        $row = $query->cache($cacheKey, $cacheExpire, 'cms')->find();
         $result = '';
         if ($row) {
             Service::appendTextAndList('block', 0, $row);
