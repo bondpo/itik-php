@@ -1,0 +1,135 @@
+{layout name="layout/form" /}
+<form class="layui-form" method="post">
+    {:token_field()}
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('OrderNo')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[order_no]" value="{$row.order_no|default=''|htmlentities}" class="layui-input" autocomplete="off">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('UserId')}</label>
+        <div class="layui-input-block">
+            <input type="hidden" id="c-user_id" name="row[user_id]" value="{$row.user_id|default=''|htmlentities}">
+            <div class="remoteSelect" data-input-id="c-user_id" data-field="nickname" data-primary-key="id" data-source="user.user/selectpage"></div>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('TaskId')}</label>
+        <div class="layui-input-block">
+            <select name="row[task_id]" lay-verify="required">
+                {foreach name="TaskIdList" item="vo"}
+                <option value="{$key}" {in name="key" value="$row.task_id"}selected{/in}>{$vo}</option>
+                {/foreach}
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('TokenSymbol')}</label>
+        <div class="layui-input-block">
+            <select name="row[token_symbol]" lay-verify="required">
+                {foreach name="TokenSymbolList" item="vo"}
+                <option value="{$key}" {in name="key" value="$row.token_symbol"}selected{/in}>{$vo}</option>
+                {/foreach}
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('FromAddress')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[from_address]" value="{$row.from_address|default=''|htmlentities}" class="layui-input" autocomplete="off" lay-verify="required">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('ToAddress')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[to_address]" value="{$row.to_address|default=''|htmlentities}" class="layui-input" autocomplete="off" lay-verify="required">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Amount')}</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[amount]" value="{$row.amount|default=''|htmlentities}" class="layui-input" autocomplete="off" lay-verify="required">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Handingfee')}</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[handingfee]" value="{$row.handingfee|default=''|htmlentities}" class="layui-input" autocomplete="off" lay-verify="required">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Deduc')}</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[deduc]" value="{$row.deduc|default=''|htmlentities}" class="layui-input" autocomplete="off">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('AmountWei')}</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[amount_wei]" value="{$row.amount_wei|default=''|htmlentities}" class="layui-input" autocomplete="off" lay-verify="required">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Nonce')}</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[nonce]" value="{$row.nonce|default=''|htmlentities}" class="layui-input" autocomplete="off">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('TxHash')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[tx_hash]" value="{$row.tx_hash|default=''|htmlentities}" class="layui-input" autocomplete="off">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('RawTx')}</label>
+        <div class="layui-input-block">
+            <textarea name="row[raw_tx]" class="layui-textarea">{$row.raw_tx|default=''|htmlentities}</textarea>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Status')}</label>
+        <div class="layui-input-block">
+            {foreach name="StatusList" item="vo"}
+            <input type="radio" name="row[status]" value="{$key}" title="{$vo}" {in name="key" value="$row.status"}checked{/in}>
+            {/foreach}
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('BlockNumber')}</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[block_number]" value="{$row.block_number|default=''|htmlentities}" class="layui-input" autocomplete="off">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('CreatedAt')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[created_at]" value="{$row.created_at|default=''|htmlentities}" class="layui-input laydate" autocomplete="off" lay-verify="required">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('UpdatedAt')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[updated_at]" value="{$row.updated_at|default=''|htmlentities}" class="layui-input laydate" autocomplete="off" lay-verify="required">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('ErrorMessage')}</label>
+        <div class="layui-input-block">
+            <textarea name="row[error_message]" class="layui-textarea">{$row.error_message|default=''|htmlentities}</textarea>
+        </div>
+    </div>
+    <div class="layui-form-item layer-footer hide">
+        <div class="layui-input-block">
+            <input type="hidden" name="row[id]" value="{$row.id}">
+            <button class="layui-btn btn-theme-color" lay-submit>{:__('OK')}</button>
+            <button type="reset" class="layui-btn layui-btn-primary">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
+<script>
+layui.use(["badou"], function () {
+    layui.bdForm.api.bindevent($("form.layui-form"));
+});
+</script>

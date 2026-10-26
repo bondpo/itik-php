@@ -1,0 +1,134 @@
+{layout name="layout/form" /}
+<form class="layui-form" method="post">
+    {:token_field()}
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('OrderNo')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[order_no]" value="" class="layui-input" autocomplete="off">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('UserId')}</label>
+        <div class="layui-input-block">
+            <input type="hidden" id="c-user_id" name="row[user_id]" value="">
+            <div class="remoteSelect" data-input-id="c-user_id" data-field="nickname" data-primary-key="id" data-source="user.user/selectpage"></div>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('TaskId')}</label>
+        <div class="layui-input-block">
+            <select name="row[task_id]" lay-verify="required">
+                {foreach name="TaskIdList" item="vo"}
+                <option value="{$key}" {in name="key" value="0"}selected{/in}>{$vo}</option>
+                {/foreach}
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('TokenSymbol')}</label>
+        <div class="layui-input-block">
+            <select name="row[token_symbol]" lay-verify="required">
+                {foreach name="TokenSymbolList" item="vo"}
+                <option value="{$key}" {in name="key" value="USDT"}selected{/in}>{$vo}</option>
+                {/foreach}
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('FromAddress')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[from_address]" value="" class="layui-input" autocomplete="off" lay-verify="required">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('ToAddress')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[to_address]" value="" class="layui-input" autocomplete="off" lay-verify="required">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Amount')}</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[amount]" value="" class="layui-input" autocomplete="off" lay-verify="required">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Handingfee')}</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[handingfee]" value="" class="layui-input" autocomplete="off" lay-verify="required">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Deduc')}</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[deduc]" value="0.000000" class="layui-input" autocomplete="off">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('AmountWei')}</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[amount_wei]" value="" class="layui-input" autocomplete="off" lay-verify="required">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Nonce')}</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[nonce]" value="" class="layui-input" autocomplete="off">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('TxHash')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[tx_hash]" value="" class="layui-input" autocomplete="off">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('RawTx')}</label>
+        <div class="layui-input-block">
+            <textarea name="row[raw_tx]" class="layui-textarea"></textarea>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Status')}</label>
+        <div class="layui-input-block">
+            {foreach name="StatusList" item="vo"}
+            <input type="radio" name="row[status]" value="{$key}" title="{$vo}" {in name="key" value="wait"}checked{/in}>
+            {/foreach}
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('BlockNumber')}</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[block_number]" value="" class="layui-input" autocomplete="off">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('CreatedAt')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[created_at]" value="CURRENT_TIMESTAMP" class="layui-input laydate" autocomplete="off" lay-verify="required">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('UpdatedAt')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[updated_at]" value="CURRENT_TIMESTAMP" class="layui-input laydate" autocomplete="off" lay-verify="required">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('ErrorMessage')}</label>
+        <div class="layui-input-block">
+            <textarea name="row[error_message]" class="layui-textarea"></textarea>
+        </div>
+    </div>
+    <div class="layui-form-item layer-footer hide">
+        <div class="layui-input-block">
+            <button class="layui-btn btn-theme-color" lay-submit>{:__('OK')}</button>
+            <button type="reset" class="layui-btn layui-btn-primary">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
+<script>
+layui.use(["badou"], function () {
+    layui.bdForm.api.bindevent($("form.layui-form"));
+});
+</script>

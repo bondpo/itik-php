@@ -688,6 +688,12 @@
                     <div class="endpoint-info">/api/v1/billing/subscription <span class="endpoint-desc">订阅详情与六态判定</span></div>
                     <button class="btn btn-primary btn-sm" onclick="apiGetBillingSub()">查询订阅详情</button>
                 </div>
+
+                <div class="endpoint-row">
+                    <span class="method-tag method-get">POST</span>
+                    <div class="endpoint-info">/api/v1/billing/withdraw <span class="endpoint-desc">提现</span></div>
+                    <button class="btn btn-primary btn-sm" onclick="apiPostBillingWithdraw()">提现</button>
+                </div>
             </div>
         </div>
 
@@ -1517,6 +1523,13 @@
 
     async function apiGetBillingSub() {
         return request('/api/v1/billing/subscription');
+    }
+
+    async function apiPostBillingWithdraw(){
+        return request('/api/v1/billing/withdraw', {
+            method: 'POST',
+            body: { money: 1, code: 3258 }
+        });
     }
 
     /* -------------------------------------------------------------

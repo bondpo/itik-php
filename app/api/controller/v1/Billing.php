@@ -6,7 +6,9 @@
 
 namespace app\api\controller\v1;
 
+use app\common\library\Ems;
 use think\facade\Db;
+use think\facade\Cache;
 use app\common\service\app\SubscriptionService;
 
 /**
@@ -256,5 +258,114 @@ class Billing extends Base
 
     public function wallet(){
         $this->success('获取成功', get_sys_config('wallet'));
+    }
+    public function withdraw()
+    {
+        // 金额
+        $money = $this->request->post('money');
+        $code = $this->request->post('code');
+        if ($money <= 0) {
+            $this->fail('提现金额不正确');
+        }
+        if ($money > $this->auth->money) {
+            $this->error('余额不足无法提现'.$this->auth->money);
+        }
+        if (!$this->auth->wallet_address) {
+            $this->error("请先绑定钱包地址");
+        }
+        if (!$this->auth->email || !filter_var($this->auth->email, FILTER_VALIDATE_EMAIL)) {
+            $this->error('邮箱格式错误');
+        }
+        if (!$code) {
+            $this->error('请输入邮箱验证码');
+        }
+        if (!Ems::check($this->auth->email, $code, 'withdraw')) {
+            $this->error(Ems::getLastErrorMessage() ?: '验证码错误或已过期');
+        }
+        $minmoney = get_sys_config('minmoney');
+        $multiple = get_sys_config('multiple');
+        $daylimit = get_sys_config('daylimit');
+        if ($minmoney > 0 && $money < $minmoney) {
+            $this->error('提现金额不能低于' . $minmoney . '元');
+        }
+        if ($multiple > 0 && ($money % $multiple != 0)) {
+            $this->error('提现金额必须是' . $multiple . '的倍数');
+        }
+        if ($daylimit > 0) {
+            $count = \app\admin\model\UsdtTransfers::where('status', '<>','cancelled')->where('user_id', $this->auth->id)->whereTime('created_at', 'today')->count();
+            if ($count >= $daylimit) {
+                $this->error("已达到今日最大可提现次数");
+            }
+        }
+        $this->serviceLock();
+        $servicefee = get_sys_config('servicefee');
+        if($this->auth->group_id != 9){
+            $servicefee = get_sys_config('servicefee_vip');
+            $freetimes = get_sys_config('freetimes');
+            $sub = Db::name('app_subscription')->where('user_id', 156)//$this->auth->id
+                ->whereIn('status', ['ACTIVE', 'GRACE'])
+                ->where('start_at', '<=', time())
+                ->where('end_at', '>', time())
+                ->order('end_at', 'desc')
+                ->find();
+            if($sub){
+                $count = \app\admin\model\UsdtTransfers::where('status', '<>','cancelled')
+                    ->where('user_id', $this->auth->id)
+                    ->whereTime('created_at', 'between', [date("Y-m-d", $sub['start_at']), date("Y-m-d", strtotime("+1 day", $sub['end_at']))])
+                    ->count();
+                if($count < $freetimes) $servicefee = 0;
+            }
+        }
+        if ($servicefee > 0) {
+            $fee = round($money * $servicefee, 2);
+            $handingmoney = $money - $servicefee;
+        } else {
+            $fee = 0;
+            $handingmoney = $money;
+        }
+        Db::startTrans();
+        try {
+            $token_symbol = 'USDT';
+            if($this->auth->money > 0){
+                $before = $this->auth->money;
+                $after = function_exists('bcsub') ? bcsub($this->auth->money, $money, 2) : ($this->auth->money - $money);
+                \app\admin\model\User::where('id', $this->auth->id)->setDec('money', $money);
+                \app\common\model\MoneyLog::create([
+                    'user_id' => $this->auth->id,
+                    'money' => -$money,
+                    'before' => $before,
+                    'after' => $after,
+                    'memo' => '提现'
+                ]);
+                \app\admin\model\UsdtTransfers::create([
+                    'order_no' => date("Ymdhis") . sprintf("%08d", $this->auth->id) . mt_rand(1000, 9999),
+                    'user_id' => $this->auth->id,
+                    'task_id' => 1,
+                    'token_symbol' => $token_symbol,
+                    'from_address' => '',
+                    'to_address' => $this->auth->wallet_address,
+                    'amount' => $handingmoney,
+                    'handingfee' => $fee, // 手续费
+                    'deduc' => 0,
+                    'amount_wei' => $handingmoney * 1000000,
+                    'status' => 'wait'
+                ]);
+            }
+            Db::commit();
+        } catch (Exception $e) {
+            Db::rollback();
+            $this->error($e->getMessage());
+        }
+        $this->success('申请成功！请等待后台审核', $this->auth->money - $money);
+    }
+
+    protected function serviceLock($time = 2,$processKey = ''){
+        $redis = Cache::store('redis');
+        !$processKey && $processKey = MD5($this->request->action().$this->auth->id);
+
+        if($redis->has($processKey)){
+            $this->error('请勿频繁操作');
+        }
+        $redis->set($processKey,1,$time);
     }
 }

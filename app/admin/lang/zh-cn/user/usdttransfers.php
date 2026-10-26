@@ -1,0 +1,33 @@
+<?php
+
+return [
+    'Id' => 'ID',
+    'OrderNo' => '关联订单号',
+    'UserId' => 'UID,关联用户表',
+    'TaskId' => '任务ID',
+    'TaskId0' => '预留',
+    'TaskId1' => '提现',
+    'TokenSymbol' => '代币',
+    'FromAddress' => '转账发起地址（Optimism地址）',
+    'ToAddress' => '转账接收地址（Optimism地址）',
+    'Amount' => '转账金额（USDT,6位小数）',
+    'Handingfee' => '手续费（USDT,6位小数）',
+    'Deduc' => '补扣',
+    'AmountWei' => '转账金额（Wei单位,整数）',
+    'TxHash' => '交易哈希（Optimism网络）',
+    'Status' => '转账状态',
+    'StatusWait' => '等待',
+    'StatusPending' => '广播',
+    'StatusPrepared' => '签名',
+    'StatusBroadcast' => '广播',
+    'StatusSuccess' => '成功',
+    'StatusFailed' => '失败',
+    'StatusReverted' => '回滚',
+    'StatusStuck' => '卡住',
+    'StatusManualFixed' => '终止',
+    'StatusCancelled' => '取消',
+    'BlockNumber' => '确认区块号',
+    'CreatedAt' => '记录创建时间',
+    'UpdatedAt' => '记录更新时间',
+    'ErrorMessage' => '失败时的错误信息'
+];

@@ -148,16 +148,18 @@ class Ds
     }
 
     public function bonusAct($user, $bonus, $memo, $order_no=''){
-        $before = $user->money;
-        $after = function_exists('bcadd') ? bcadd($user->money, $bonus, 2) : ($user->money + $bonus);
-        \app\admin\model\User::where('id', $user->id)->setInc('money', $bonus);
-        \app\common\model\MoneyLog::create([
-            'user_id' => $user->id,
-            'money' => $bonus,
-            'before' => $before,
-            'after' => $after,
-            'memo' => $memo
-        ]);
+        if($user->group_id != 9){
+            $before = $user->money;
+            $after = function_exists('bcadd') ? bcadd($user->money, $bonus, 2) : ($user->money + $bonus);
+            \app\admin\model\User::where('id', $user->id)->setInc('money', $bonus);
+            \app\common\model\MoneyLog::create([
+                'user_id' => $user->id,
+                'money' => $bonus,
+                'before' => $before,
+                'after' => $after,
+                'memo' => $memo
+            ]);
+        }
     }
 
 }
