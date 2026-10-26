@@ -203,6 +203,52 @@ Translation::where('resource_type', 'category')->where('resource_id', 11)->updat
 $tree = $service->categories([['id' => 10, 'name' => '父分类', 'children' => [['id' => 11, 'name' => '子分类', 'children' => []]]]]);
 verify($tree[0]['children'][0]['name'] === 'Child' && $tree[0]['name'] === '父分类', '分类树批量翻译并保留层级和原文回退');
 
+// 批量审核必须以整批为单位校验和发布，保留译文来源与人工锁定。
+$approvalIds = [];
+for ($i = 1; $i <= 7; $i++) {
+    $sourceText = '批量审核原文' . $i;
+    Db::name('app_plan')->insert(['id' => 1000 + $i, 'name' => $sourceText, 'status' => 'normal']);
+    $item = Translation::create(['resource_type' => 'plan', 'resource_id' => 1000 + $i, 'field' => 'name',
+        'locale' => 'en', 'source_locale' => 'zh-cn', 'source_hash' => hash('sha256', $sourceText),
+        'source_text' => $sourceText, 'translated_text' => 'Approved text ' . $i,
+        'origin' => $i === 1 ? 'manual' : 'machine', 'status' => 'review', 'create_time' => time(), 'update_time' => time()]);
+    $approvalIds[] = (int)$item['id'];
+}
+verify(Translation::approveMany([$approvalIds[0], $approvalIds[1], $approvalIds[0]]) === 2, '批量审核发布去重后的待审核译文');
+$approved = Translation::find($approvalIds[0]);
+verify($approved['status'] === 'published' && $approved['origin'] === 'manual' && $approved['translated_text'] === 'Approved text 1', '批量审核保留人工锁定和译文内容');
+verify(Translation::find($approvalIds[1])['origin'] === 'machine', '仅审核机器译文不会误改为人工修订');
+
+function verifyApprovalRejected(array $ids, string $message): void
+{
+    try {
+        Translation::approveMany($ids);
+    } catch (\RuntimeException | \InvalidArgumentException $e) {
+        verify(true, $message);
+        return;
+    }
+    throw new RuntimeException('未拦截不合法批量审核：' . $message);
+}
+verifyApprovalRejected([], '禁止提交空审核批次');
+verifyApprovalRejected([$approvalIds[2], $approvalIds[0]], '混入非待审核译文时拒绝整批');
+verify(Translation::find($approvalIds[2])['status'] === 'review', '无效批次不会部分发布');
+Db::name('app_plan')->where('id', 1004)->update(['name' => '原文已修改']);
+verifyApprovalRejected([$approvalIds[2], $approvalIds[3]], '原文变更的译文不能通过批量审核');
+verify(Translation::find($approvalIds[2])['status'] === 'review', '过期记录导致整批回滚');
+Db::name('app_plan')->where('id', 1005)->update(['status' => 'hidden']);
+verifyApprovalRejected([$approvalIds[4]], '已下架原文的译文不能批量发布');
+Translation::where('id', $approvalIds[5])->update(['translated_text' => '']);
+verifyApprovalRejected([$approvalIds[5]], '原文非空时不能批量发布空译文');
+verifyApprovalRejected([$approvalIds[2], 999999], '部分译文不存在时整批拒绝');
+Db::execute("CREATE TRIGGER fail_bulk_approval BEFORE UPDATE ON test_app_translation WHEN NEW.id = " . $approvalIds[6] . " AND NEW.status = 'published' BEGIN SELECT RAISE(ABORT, 'approval failure'); END");
+try {
+    Translation::approveMany([$approvalIds[2], $approvalIds[6]]);
+    throw new RuntimeException('未触发审核失败');
+} catch (\think\db\exception\PDOException $e) {
+    verify(Translation::find($approvalIds[2])['status'] === 'review' && Translation::find($approvalIds[6])['status'] === 'review', '发布写入失败时所有译文维持待审核状态');
+}
+Db::execute('DROP TRIGGER fail_bulk_approval');
+
 $app->request->withSession($app->session);
 $auth = new class { public function check($rule) { return true; } };
 $cachePath = sys_get_temp_dir() . '/itik-i18n-template-' . bin2hex(random_bytes(8)) . '/';

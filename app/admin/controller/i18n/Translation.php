@@ -67,6 +67,21 @@ class Translation extends Backend
         $this->success('已加入翻译任务，等待 worker 执行');
     }
 
+    public function approve()
+    {
+        if (!$this->request->isPost()) {
+            $this->error('请使用 POST 请求');
+        }
+        $ids = $this->request->post('ids', '');
+        $ids = is_array($ids) ? $ids : explode(',', (string)$ids);
+        try {
+            $count = TranslationModel::approveMany($ids);
+        } catch (\Throwable $e) {
+            $this->error($e->getMessage());
+        }
+        $this->success('已审核通过并发布 ' . $count . ' 条译文');
+    }
+
     // 禁用通用写入入口，所有修订均须执行原文版本检查。
     public function add()
     {

@@ -34,9 +34,9 @@ class Resource extends Model
         return self::resourceQuery($type)->where('id', '>', $afterId)->order('id')->limit($limit)->select()->toArray();
     }
 
-    public static function current(string $type, int $id): ?array
+    public static function current(string $type, int $id, bool $lock = false): ?array
     {
-        $row = self::resourceQuery($type)->where('id', $id)->find();
+        $row = self::resourceQuery($type)->where('id', $id)->lock($lock)->find();
         return $row ?: null;
     }
 }

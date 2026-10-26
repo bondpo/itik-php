@@ -35,6 +35,7 @@ Db::transaction(function () {
     $translations = $ensure('i18n.translation', '译文管理', $top, '1', true);
     $ensure('i18n.translation/index', '查看译文', $translations, '2', false);
     $ensure('i18n.translation/edit', '修订和发布译文', $translations, '2', false);
+    $ensure('i18n.translation/approve', '批量审核发布', $translations, '2', false);
     $ensure('i18n.translation/retry', '重新机器翻译', $translations, '2', false);
 });
 echo "国际化数据表和后台权限菜单已初始化，请为管理员分配对应权限。\n";

@@ -97,6 +97,49 @@ class Translation extends Model
         });
     }
 
+    public static function approveMany(array $ids): int
+    {
+        $ids = array_values(array_unique(array_filter(array_map('intval', $ids), fn($id) => $id > 0)));
+        if (!$ids || count($ids) > 500) {
+            throw new \InvalidArgumentException('请选择 1 至 500 条待审核译文');
+        }
+        return Db::transaction(function () use ($ids) {
+            $rows = self::whereIn('id', $ids)->order('id')->lock(true)->select()->toArray();
+            if (count($rows) !== count($ids)) {
+                throw new \RuntimeException('部分译文已不存在，请刷新列表后重新选择');
+            }
+            $sources = [];
+            foreach ($rows as $row) {
+                $label = '译文 #' . $row['id'];
+                if ($row['status'] !== 'review') {
+                    throw new \RuntimeException($label . ' 不是待审核状态，请仅选择待审核译文');
+                }
+                $definition = Resource::definition($row['resource_type']);
+                if (!in_array($row['field'], $definition['fields'], true)) {
+                    throw new \RuntimeException($label . ' 的翻译字段不合法');
+                }
+                $key = $row['resource_type'] . ':' . $row['resource_id'];
+                if (!array_key_exists($key, $sources)) {
+                    // 锁定原文直至审核提交，避免审核过程中源内容被并发修改。
+                    $sources[$key] = Resource::current($row['resource_type'], (int)$row['resource_id'], true);
+                }
+                $source = $sources[$key];
+                if (!$source || !array_key_exists($row['field'], $source)) {
+                    throw new \RuntimeException($label . ' 的原文不存在或未发布');
+                }
+                if (hash('sha256', (string)$source[$row['field']]) !== $row['source_hash']) {
+                    throw new \RuntimeException($label . ' 原文已变更，请重新翻译或修订后再审核');
+                }
+                if (trim((string)$row['translated_text']) === '' && trim((string)$source[$row['field']]) !== '') {
+                    throw new \RuntimeException($label . ' 内容为空，请先补充译文');
+                }
+            }
+            // 仅改变发布状态，保留机器来源和已有人工锁定，不覆盖译文内容。
+            return self::whereIn('id', $ids)->where('status', 'review')
+                ->update(['status' => 'published', 'error' => '', 'update_time' => time()]);
+        });
+    }
+
     public static function revise(int $id, string $text, string $status, string $expectedHash): void
     {
         if (!in_array($status, ['review', 'published'], true)) {
