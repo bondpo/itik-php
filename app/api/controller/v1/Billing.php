@@ -302,7 +302,7 @@ class Billing extends Base
         if($this->auth->group_id != 9){
             $servicefee = get_sys_config('servicefee_vip');
             $freetimes = get_sys_config('freetimes');
-            $sub = Db::name('app_subscription')->where('user_id', 156)//$this->auth->id
+            $sub = Db::name('app_subscription')->where('user_id', $this->auth->id)
                 ->whereIn('status', ['ACTIVE', 'GRACE'])
                 ->where('start_at', '<=', time())
                 ->where('end_at', '>', time())
