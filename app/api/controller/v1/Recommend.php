@@ -87,7 +87,7 @@ class Recommend extends Base
             $this->fail($ret['message'], self::CODE_RATE_LIMITED, $ret);
         }
 
-        $this->success('已生成 ' . $ret['generated'] . ' 条推荐', $ret);
+        $this->success($this->translations()->formatMessage('已生成 {count} 条推荐', ['count' => $ret['generated']]), $ret);
     }
 
     /**

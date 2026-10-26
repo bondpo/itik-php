@@ -27,7 +27,7 @@ class Plan extends Base
     {
         $list = Db::name('app_plan')
             ->where('status', 'normal')
-            ->field('plan_code,role_code,name,price,dis,start_time,end_time,currency,duration_days,feature_flags,weigh')
+            ->field('id,plan_code,role_code,name,price,dis,start_time,end_time,currency,duration_days,feature_flags,weigh')
             ->order('weigh', 'desc')
             ->select();
 
@@ -46,6 +46,11 @@ class Plan extends Base
             $list[$k]['end_time']         = $item['end_time'];
         }
 
+        $list = $this->translations()->rows('plan', $list);
+        foreach ($list as &$item) {
+            unset($item['id']);
+        }
+        unset($item);
         $this->success('', ['list' => $list]);
     }
 }

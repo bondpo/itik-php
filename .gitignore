@@ -31,7 +31,10 @@ AGENTS.md
 .agents/skills/*
 !.agents/skills/badoucms/
 !.agents/skills/badoucms/**
-/docs
-/database
+/docs/*
+!/docs/i18n.md
+/database/*
+!/database/i18n.sql
+!/database/init_i18n.php
 /MATRIX_IM_GUIDE.md
 /MATRIX_ADMIN_DEV_GUIDE.md

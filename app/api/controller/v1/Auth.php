@@ -460,7 +460,7 @@ class Auth extends Base
         } catch (\RuntimeException $e) {
             $this->fail($e->getMessage(), self::CODE_BIZ_FAIL);
         } catch (\Throwable $e) {
-            $this->fail('系统处理失败: ' . $e->getMessage(), self::CODE_SERVER_ERROR);
+            $this->fail($this->translations()->message('系统处理失败: ') . $e->getMessage(), self::CODE_SERVER_ERROR);
         }
 
         // 成功响应位于完整的 try/catch 之后

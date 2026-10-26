@@ -52,7 +52,7 @@ class Promotion extends Base
             $list[$k]['duration_days'] = (int)$item['duration_days'];
             $list[$k]['exposure_cap'] = (int)$item['exposure_cap'];
         }
-        $this->success('', ['list' => $list]);
+        $this->success('', ['list' => $this->translations()->rows('promotion_package', $list)]);
     }
 
     /**

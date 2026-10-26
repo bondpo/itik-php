@@ -1,0 +1,17 @@
+{layout name="layout/default" /}
+<div class="layui-card"><div class="layui-card-body">
+    <blockquote class="layui-elem-quote">使用百度通用文本翻译 API（APPID + 密钥）。保存后由服务器定时执行翻译任务，人工修订不会被自动覆盖。</blockquote>
+    <form class="layui-form" method="post">
+        {:token_field()}
+        <div class="layui-form-item"><label class="layui-form-label">启用翻译</label><div class="layui-input-block"><input type="checkbox" name="row[enabled]" value="1" lay-skin="switch" {if $row.enabled}checked{/if}></div></div>
+        <div class="layui-form-item"><label class="layui-form-label">百度 APPID</label><div class="layui-input-block"><input class="layui-input" name="row[appid]" value="{$row.appid|htmlentities}" autocomplete="off"></div></div>
+        <div class="layui-form-item"><label class="layui-form-label">百度密钥</label><div class="layui-input-block"><input type="password" class="layui-input" name="row[secret]" autocomplete="new-password" value="" placeholder="{if $row.has_secret}已配置，留空保留原密钥{else /}请输入百度翻译密钥{/if}"></div></div>
+        <div class="layui-form-item"><label class="layui-form-label">原文语言</label><div class="layui-input-block"><select name="row[source_locale]">{foreach $languages as $code=>$language}<option value="{$code|htmlentities}" {if $row.source_locale==$code}selected{/if}>{$language.name|htmlentities}</option>{/foreach}</select><div class="layui-form-mid layui-text-em">须与数据库原文一致；已有译文时不能直接切换。</div></div></div>
+        <div class="layui-form-item"><label class="layui-form-label">目标语言</label><div class="layui-input-block">{foreach $languages as $code=>$language}<input type="checkbox" name="row[target_locales][]" value="{$code|htmlentities}" title="{$language.name|htmlentities}" {if in_array($code,$row.target_locales)}checked{/if}>{/foreach}<div class="layui-form-mid layui-text-em">不要勾选原文语言。扩展语种在 config/i18n.php 配置。</div></div></div>
+        <div class="layui-form-item"><label class="layui-form-label">自动发布</label><div class="layui-input-block"><input type="checkbox" name="row[auto_publish]" value="1" lay-skin="switch" {if $row.auto_publish}checked{/if}><div class="layui-form-mid layui-text-em">关闭时机器译文需在译文管理中人工确认发布。</div></div></div>
+        <div class="layui-form-item"><label class="layui-form-label">请求超时</label><div class="layui-input-block"><input type="number" name="row[timeout]" value="{$row.timeout|htmlentities}" class="layui-input" min="1" max="60" lay-verify="number"><div class="layui-form-mid layui-text-em">单位：秒</div></div></div>
+        <div class="layui-form-item"><label class="layui-form-label">调用间隔</label><div class="layui-input-block"><input type="number" name="row[interval_ms]" value="{$row.interval_ms|htmlentities}" class="layui-input" min="100" max="60000" lay-verify="number"><div class="layui-form-mid layui-text-em">单位：毫秒；默认 1100，请根据百度账户 QPS 配额设置。</div></div></div>
+        <div class="layui-form-item"><div class="layui-input-block"><button class="layui-btn btn-theme-color" lay-submit>保存配置</button></div></div>
+    </form>
+</div></div>
+<script>layui.use(['badou'], function () { layui.bdForm.api.bindevent($('form.layui-form')); });</script>

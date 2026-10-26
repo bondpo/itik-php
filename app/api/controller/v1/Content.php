@@ -59,9 +59,7 @@ class Content extends Base
         }
         $keyword = trim((string)$this->request->param('keyword', ''));
         if ($keyword !== '') {
-            $query->where(function ($q) use ($keyword) {
-                $q->whereLike('title', "%{$keyword}%")->whereOr('summary', 'like', "%{$keyword}%");
-            });
+            $this->translations()->search($query, 'content', ['title', 'summary'], $keyword);
         }
         $tag = trim((string)$this->request->param('tag', ''));
         if ($tag !== '') {
@@ -75,7 +73,7 @@ class Content extends Base
             ->field('id,author_id,project_id,type,title,cover,summary,tags,category_l1,category_l2,views,published_at,create_time')
             ->select();
 
-        $this->success('', $this->pageResult($list, $total, $page, $limit));
+        $this->success('', $this->pageResult($this->translations()->rows('content', $list), $total, $page, $limit));
     }
 
     /**
@@ -120,7 +118,7 @@ class Content extends Base
             ->field('id,nickname,avatar')
             ->find() ?: null;
 
-        $this->success('', ['content' => $content]);
+        $this->success('', ['content' => $this->translations()->row('content', $content)]);
     }
 
     /**
@@ -306,7 +304,7 @@ class Content extends Base
                 if ($v !== '') {
                     $allowed = $f === 'type' ? self::TYPES : self::VISIBILITIES;
                     if (!in_array($v, $allowed, true)) {
-                        $this->fail(($f === 'type' ? '内容类型' : '可见性') . '不合法', self::CODE_PARAM_INVALID);
+                        $this->fail($f === 'type' ? '内容类型不合法' : '可见性不合法', self::CODE_PARAM_INVALID);
                     }
                 }
                 if ($v === '') {

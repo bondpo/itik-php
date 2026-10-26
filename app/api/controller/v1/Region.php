@@ -147,7 +147,7 @@ class Region extends Base
      */
     private function langParam(): string
     {
-        return strtolower((string) $this->request->param('lang', 'zh')) === 'en' ? 'en' : 'zh';
+        return str_starts_with(strtolower($this->app->lang->getLangSet()), 'en') ? 'en' : 'zh';
     }
 
     /**

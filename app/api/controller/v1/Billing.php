@@ -134,7 +134,7 @@ class Billing extends Base
             Db::commit();
         } catch (\Throwable $e) {
             Db::rollback();
-            $this->fail('关闭失败：' . $e->getMessage(), self::CODE_BIZ_FAIL);
+            $this->fail($this->translations()->message('关闭失败：') . $e->getMessage(), self::CODE_BIZ_FAIL);
         }
 
         $this->success('订单已关闭');
@@ -268,7 +268,7 @@ class Billing extends Base
             $this->fail('提现金额不正确');
         }
         if ($money > $this->auth->money) {
-            $this->error('余额不足无法提现'.$this->auth->money);
+            $this->error($this->translations()->formatMessage('余额不足无法提现{money}', ['money' => $this->auth->money]));
         }
         if (!$this->auth->wallet_address) {
             $this->error("请先绑定钱包地址");
@@ -286,10 +286,10 @@ class Billing extends Base
         $multiple = get_sys_config('multiple');
         $daylimit = get_sys_config('daylimit');
         if ($minmoney > 0 && $money < $minmoney) {
-            $this->error('提现金额不能低于' . $minmoney . '元');
+            $this->error($this->translations()->formatMessage('提现金额不能低于{money}元', ['money' => $minmoney]));
         }
         if ($multiple > 0 && ($money % $multiple != 0)) {
-            $this->error('提现金额必须是' . $multiple . '的倍数');
+            $this->error($this->translations()->formatMessage('提现金额必须是{multiple}的倍数', ['multiple' => $multiple]));
         }
         if ($daylimit > 0) {
             $count = \app\admin\model\UsdtTransfers::where('status', '<>','cancelled')->where('user_id', $this->auth->id)->whereTime('created_at', 'today')->count();

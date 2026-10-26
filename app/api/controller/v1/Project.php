@@ -67,6 +67,7 @@ class Project extends Base
             ->column('count(*)', 'category_id');
 
         $this->attachProjectCounts($list, $projectCountMap);
+        $list = $this->translations()->categories($list);
 
         $this->success('', [
             'list' => $list,
@@ -115,9 +116,7 @@ class Project extends Base
 
         $keyword = trim((string)$this->request->param('keyword', ''));
         if ($keyword !== '') {
-            $query->where(function ($q) use ($keyword) {
-                $q->whereLike('name', "%{$keyword}%")->whereOr('subtitle', 'like', "%{$keyword}%");
-            });
+            $this->translations()->search($query, 'project', ['name', 'subtitle'], $keyword);
         }
         $region = (string)$this->request->param('region', '');
         if ($region !== '') {
@@ -140,7 +139,7 @@ class Project extends Base
             ->toArray();
 
         // 列表仅暴露公开字段（不含 owner_user_id 等敏感信息）
-        $this->success('', $this->pageResult($list, $total, $page, $limit));
+        $this->success('', $this->pageResult($this->translations()->projects($list), $total, $page, $limit));
     }
 
     /**
@@ -196,6 +195,8 @@ class Project extends Base
             ->select()
             ->toArray();
 
+        $project = $this->translations()->projects([$project])[0];
+        $project['timelines'] = $this->translations()->rows('timeline', $project['timelines']);
         $this->success('', [
             'project'           => $project,
             'is_certified'      => (int)$project['certified'] === 1,
@@ -270,7 +271,7 @@ class Project extends Base
         $data['update_time'] = time();
         Db::name('app_project')->where('id', $id)->update($data);
 
-        $this->success('已保存' . ($project['status'] === 'normal' ? '，修改内容将重新审核' : ''), $data);
+        $this->success($project['status'] === 'normal' ? '已保存，修改内容将重新审核' : '已保存', $data);
     }
 
     /**
@@ -316,7 +317,7 @@ class Project extends Base
             ->order('id', 'desc')
             ->select();
 
-        $this->success('', ['list' => $list, 'project' => ['id' => $project['id'], 'name' => $project['name']]]);
+        $this->success('', ['list' => $this->translations()->rows('material', $list), 'project' => $this->translations()->row('project', ['id' => $project['id'], 'name' => $project['name']])]);
     }
 
     /**
@@ -491,7 +492,7 @@ class Project extends Base
 
         $this->success('', [
             'project_id' => $projectId,
-            'list'       => $items,
+            'list'       => $this->translations()->rows('timeline', $items),
             'total'      => count($items),
         ]);
     }

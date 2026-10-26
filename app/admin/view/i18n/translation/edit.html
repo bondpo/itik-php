@@ -1,0 +1,22 @@
+{layout name="layout/form" /}
+<form class="layui-form" method="post">
+    {:token_field()}
+    <input type="hidden" name="row[source_hash]" value="{$row.source_hash|htmlentities}">
+    <div class="layui-form-item"><label class="layui-form-label">目标语言</label><div class="layui-input-block"><input readonly class="layui-input" value="{$row.locale|htmlentities}"></div></div>
+    <div class="layui-form-item"><label class="layui-form-label">当前原文</label><div class="layui-input-block"><textarea readonly class="layui-textarea" rows="7">{$row.source_text|htmlentities}</textarea></div></div>
+    <div class="layui-form-item"><label class="layui-form-label">译文</label><div class="layui-input-block"><textarea name="row[translated_text]" class="layui-textarea" rows="10">{$row.translated_text|htmlentities}</textarea><div class="layui-form-mid layui-text-em">正文可包含 HTML；保存后锁定，不再被机器翻译覆盖。</div></div></div>
+    <div class="layui-form-item"><label class="layui-form-label">发布状态</label><div class="layui-input-block"><select name="row[status]"><option value="review">待审核</option><option value="published" {if $row.status=='published'}selected{/if}>已发布</option></select></div></div>
+    <div class="layui-form-item layer-footer hide"><div class="layui-input-block"><button class="layui-btn btn-theme-color" lay-submit>保存修订</button><button type="reset" class="layui-btn layui-btn-primary">重置</button></div></div>
+</form>
+{if $auth->check('i18n.translation/retry') && $row.origin=='machine'}
+<div class="layui-form-item"><div class="layui-input-block"><button type="button" class="layui-btn layui-btn-primary" id="retry-translation">重新机器翻译</button></div></div>
+{/if}
+<script>
+layui.use(['badou'], function () {
+    layui.bdForm.api.bindevent($('form.layui-form'));
+    $('#retry-translation').on('click', function () {
+        layui.badou.api.ajax({
+            url: "{:url('i18n.translation/retry', ['ids'=>$row.id])}", type: 'POST', data: {__token__: $('form.layui-form input[name="__token__"]').val()}}, function () { location.reload(); });
+    });
+});
+</script>

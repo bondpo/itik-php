@@ -252,6 +252,13 @@ class Base extends Api
         $this->result($msg, $data, $code);
     }
 
+    protected ?\app\common\service\i18n\TranslationService $translationService = null;
+
+    protected function translations(): \app\common\service\i18n\TranslationService
+    {
+        return $this->translationService ??= new \app\common\service\i18n\TranslationService();
+    }
+
     /**
      * 覆盖基类 result，追加 request_id 并统一 code/msg/data 结构
      */
@@ -259,7 +266,7 @@ class Base extends Api
     {
         $result = [
             'code'       => $code,
-            'msg'        => $msg,
+            'msg'        => $this->translations()->message($msg),
             'data'       => $data,
             'request_id' => $this->requestId,
             'time'       => $this->request->server('REQUEST_TIME'),

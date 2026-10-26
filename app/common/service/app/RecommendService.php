@@ -382,12 +382,13 @@ class RecommendService
                     ->alias('p')
                     ->leftJoin('app_project_category c', 'p.category_id = c.id')
                     ->whereIn('p.id', array_unique($pids))
-                    ->field('p.id,p.name,p.cover,p.certified,c.name as category_name')
+                    ->field('p.id,p.name,p.cover,p.certified,p.category_id,c.name as category_name')
                     ->select()->toArray(),
                 null, 'id'
             )
             : [];
 
+        $projects = (new \app\common\service\i18n\TranslationService())->projects($projects);
         foreach ($rows as $k => $r) {
             $tid = (int)$r['target_id'];
             if ($r['target_type'] === 'user') {
