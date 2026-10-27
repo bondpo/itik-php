@@ -209,7 +209,7 @@ class Project extends Base
      */
     public function save()
     {
-        $this->requireRole(self::ROLE_OWNER);
+//        $this->requireRole(self::ROLE_OWNER); //后端不判断权限
         $this->requireSubscription(true, '项目方订阅不可用，请先开通或续费');
 
         $data = $this->collectProjectInput(true);
