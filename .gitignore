@@ -41,4 +41,5 @@ AGENTS.md
 !/database/init_consult_operations.php
 /MATRIX_IM_GUIDE.md
 /MATRIX_ADMIN_DEV_GUIDE.md
-/tests
+/tests/*
+!/tests/password_login_test.php

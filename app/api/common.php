@@ -38,6 +38,7 @@ Route::group('v1', function () {
     Route::post('auth/email/send-code', [Auth::class, 'sendCode']);
     Route::post('auth/email/register', [Auth::class, 'register']);
     Route::post('auth/email/login', [Auth::class, 'login']);
+    Route::post('auth/email/password-login', [Auth::class, 'passwordLogin']);
     Route::post('auth/logout', [Auth::class, 'logout']);
     Route::post('auth/wallet/challenge', [Auth::class, 'walletChallenge']);
     Route::post('auth/wallet/verify', [Auth::class, 'walletVerify']);

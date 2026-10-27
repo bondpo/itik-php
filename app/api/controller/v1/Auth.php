@@ -20,6 +20,7 @@ use app\common\service\TpWalletService;
  *   POST /api/v1/auth/email/send-code   发送邮箱验证码
  *   POST /api/v1/auth/email/register    邮箱注册
  *   POST /api/v1/auth/email/login       邮箱验证码登录
+ *   POST /api/v1/auth/email/password-login 邮箱密码登录
  *   POST /api/v1/auth/logout            退出登录
  *   POST /api/v1/auth/wallet/challenge  钱包挑战 (SIWE Nonce)
  *   POST /api/v1/auth/wallet/verify     钱包验签登录
@@ -28,7 +29,7 @@ use app\common\service\TpWalletService;
 class Auth extends Base
 {
     /** 无需登录 */
-    protected $noNeedLogin = ['sendCode', 'register', 'login', 'walletChallenge', 'walletVerify', 'tpLogin'];
+    protected $noNeedLogin = ['sendCode', 'register', 'login', 'passwordLogin', 'walletChallenge', 'walletVerify', 'tpLogin'];
     /** 无需鉴权 */
     protected $noNeedRight = '*';
 
@@ -44,6 +45,7 @@ class Auth extends Base
         if (!$email || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $this->fail('邮箱格式错误', self::CODE_PARAM_INVALID);
         }
+
         if (!preg_match('/^[a-z0-9_\-]{3,30}$/i', $event)) {
             $this->fail('事件名称错误', self::CODE_PARAM_INVALID);
         }
@@ -93,9 +95,11 @@ class Auth extends Base
         if (!$email || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $this->fail('邮箱格式错误', self::CODE_PARAM_INVALID);
         }
+
         if (!$code) {
             $this->fail('请输入邮箱验证码', self::CODE_PARAM_MISSING);
         }
+
         if (strlen($password) < 6) {
             $this->fail('密码至少 6 位', self::CODE_PARAM_INVALID);
         }
@@ -107,16 +111,17 @@ class Auth extends Base
         // 用户名：优先使用邮箱前缀，冲突则追加随机串
         $username = preg_replace('/[^a-z0-9_]/i', '', strstr($email, '@', true) ?: 'u');
         $username = substr($username ?: 'u', 0, 20);
+
         if (Db::name('user')->where('username', $username)->find()) {
             $username .= mt_rand(100, 999);
         }
 
         $visitorGroupId = (int)(Db::name('user_group')->where('rules', self::ROLE_VISITOR)->value('id') ?: 0);
-
         $extend = [
             'nickname' => $nickname ?: $username,
             'group_id' => $visitorGroupId,
         ];
+
         if ($inviteCode !== '') {
             $extend['invite_code'] = $inviteCode;
         }
@@ -205,6 +210,38 @@ class Auth extends Base
             'role'     => $this->resolveRole($userId),
             'token'    => $this->auth->getToken(),
             'matrix'   => $matrixAuth,
+        ]);
+    }
+
+    /**
+     * 邮箱密码登录，复用会员认证的密码校验和失败锁定。
+     */
+    public function passwordLogin()
+    {
+        $email = trim((string)$this->request->post('email', ''));
+        $password = (string)$this->request->post('password', '');
+
+        if (!$email || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $this->fail('邮箱格式错误', self::CODE_PARAM_INVALID);
+        }
+        if ($password === '') {
+            $this->fail('请输入密码', self::CODE_PARAM_MISSING);
+        }
+        if (!$this->auth->login($email, $password)) {
+            $this->fail('邮箱或密码错误，或账号暂不可用', self::CODE_UNAUTHORIZED);
+        }
+
+        $user = $this->auth->getUser();
+        $userId = (int)$user->id;
+        $nickname = (string)$user->nickname;
+        $matrixAuth = (new MatrixService())->syncUserOnAuth($userId, $password, $nickname);
+
+        $this->success('登录成功', [
+            'user_id' => $userId,
+            'nickname' => $nickname,
+            'role' => $this->resolveRole($userId),
+            'token' => $this->auth->getToken(),
+            'matrix' => $matrixAuth,
         ]);
     }
 
@@ -344,7 +381,6 @@ class Auth extends Base
         if ($inviterId > 0) {
             (new MatrixService())->addDirectFriend((int)$user->id, (string)($matrixAuth['access_token'] ?? ''), $inviterId);
         }
-
 
         $this->success($isNewUser ? '钱包注册并登录成功' : '钱包登录成功', [
             'user_id'        => $userId,

@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------
 # 项目社区信息交互平台 —— API 接口文档（OpenAPI 3.0）
-# 生成时间：2026-10-05 01:15
-# 接口：102 个（平台 /api/v1 + CMS /api/cms），92 个路径
+# 生成时间：2026-10-27
+# 接口：105 个，94 个路径
 # 参数：位置/类型由控制器源码提取，必填按接口语义标注。
 # 鉴权：请求头 token: <access_token>；响应统一 {code,msg,data,request_id,time}。
 # ----------------------------------------------------------------------
@@ -133,6 +133,65 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiResponse"
+  /api/v1/auth/email/password-login:
+    post:
+      tags: [认证]
+      summary: 邮箱密码登录
+      description: |
+        使用注册时设置的密码登录，无需邮箱验证码；原邮箱验证码登录接口保持不变。
+        复用会员认证：账号须为 normal 状态；连续密码错误达到 10 次后，距离最近失败不足 24 小时拒绝登录。
+        认证失败统一返回 code=20001，不区分邮箱不存在、密码错误、账号禁用或暂时锁定。
+        成功返回 user_id、nickname、role、token、matrix，与邮箱验证码登录保持一致。
+        matrix 为现有 IM 登录数据，服务不可用时可为 null；后续业务请求在 token 请求头中携带返回的 token。
+      operationId: auth_passwordLogin
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: 已注册会员邮箱
+                  example: user@example.com
+                password:
+                  type: string
+                  format: password
+                  writeOnly: true
+                  description: 会员密码，原样提交，不做前端哈希
+      responses:
+        "200":
+          description: code=1 成功；10001 邮箱格式错误；10002 密码为空；20001 认证失败（HTTP 状态仍为 200）
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          user_id: { type: integer }
+                          nickname: { type: string }
+                          role: { type: string, description: 当前业务角色 }
+                          token: { type: string, description: 业务访问令牌 }
+                          matrix: { type: object, nullable: true, description: 现有 Matrix 登录信息 }
+              examples:
+                success:
+                  value:
+                    code: 1
+                    msg: 登录成功
+                    data: { user_id: 1, nickname: 示例会员, role: VISITOR, token: example-access-token, matrix: null }
+                invalidCredentials:
+                  value:
+                    code: 20001
+                    msg: 邮箱或密码错误，或账号暂不可用
+                    data: null
   /api/v1/auth/logout:
     post:
       tags: [认证]
