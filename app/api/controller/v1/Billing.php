@@ -347,7 +347,6 @@ class Billing extends Base
                     'amount' => $handingmoney,
                     'handingfee' => $fee, // 手续费
                     'deduc' => 0,
-                    'amount_wei' => $handingmoney * 1000000,
                     'status' => 'wait'
                 ]);
             }
