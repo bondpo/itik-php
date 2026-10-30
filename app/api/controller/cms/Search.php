@@ -62,7 +62,7 @@ class Search extends Base
 
         $this->success('', [
             'keyword' => $keyword,
-            'list'    => $list,
+            'list'    => $this->translations()->rows('cms_archive', $list),
             'total'   => $total,
             'page'    => $page,
             'limit'   => $limit,
@@ -98,7 +98,7 @@ class Search extends Base
             ->where('status', 'normal')->whereNull('deletetime')
             ->whereLike('title', "%{$keyword}%")
             ->field('id,title')->order('views', 'desc')->limit(10)->select()->toArray();
-        $this->success('', ['list' => $list]);
+        $this->success('', ['list' => $this->translations()->rows('cms_archive', $list)]);
     }
 
     /**

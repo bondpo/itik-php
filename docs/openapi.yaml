@@ -1897,9 +1897,16 @@ paths:
     get:
       tags: ["CMS-内容"]
       summary: 内容详情（含副表自定义字段/标签/上下篇）
+      description: |
+        支持 lang 查询参数或 think-lang 请求头，例如 think-lang: en。
+        标题、摘要、SEO 标题、关键词、正文使用当前语言已发布且原文版本有效的译文；无有效译文时回退原文。
+        正文可能存于 CMS 模型副表：data.archives.content 与 data.custom 中 name=content 的 value 返回相同语言正文。
+        上下篇标题同步使用当前语言译文，其他自定义字段保持原样。普通读取不调用百度翻译。
       operationId: archives_detail
       security: []
       parameters:
+        - $ref: "#/components/parameters/LanguageQuery"
+        - $ref: "#/components/parameters/LanguageHeader"
         - name: id
           in: query
           required: true

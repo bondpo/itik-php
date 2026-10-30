@@ -136,7 +136,7 @@ class Channel extends Base
 
         $this->success('', [
             'channel' => $channel,
-            'list'    => $this->decorateArchives($list),
+            'list'    => $this->translations()->rows('cms_archive', $this->decorateArchives($list)),
             'total'   => $total,
             'page'    => $page,
             'limit'   => $limit,

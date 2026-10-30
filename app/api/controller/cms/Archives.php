@@ -79,12 +79,22 @@ class Archives extends Base
             ->where('status', 'normal')->whereNull('deletetime')->where('id', '>', $id)
             ->order('id', 'asc')->field('id,title')->find();
 
+        $row = $this->translations()->row('cms_archive', \app\common\model\i18n\Resource::withCmsBody([$row])[0]);
+        foreach ($custom as &$field) {
+            if ($field['name'] === 'content' && array_key_exists('content', $row)) {
+                $field['value'] = $row['content'];
+            }
+        }
+        unset($field);
+        $prev = $prev ? $this->translations()->row('cms_archive', $prev) : null;
+        $next = $next ? $this->translations()->row('cms_archive', $next) : null;
+
         // 内容字段白名单输出（剔除模板/内部字段）
-        $content = $this->pick($row, $this->onlyExisting('cms_archives', [
+        $content = $this->pick($row, array_unique(array_merge($this->onlyExisting('cms_archives', [
             'id','channel_id','model_id','title','flag','image','images','seotitle','keywords',
             'description','content','tags','price','outlink','weigh','views','likes','dislikes','comments','diyname',
             'publishtime','createtime','updatetime','memo',
-        ]));
+        ]), ['content'])));
 
         $this->success('', [
             'archives' => $content,
@@ -119,7 +129,7 @@ class Archives extends Base
             ->field($this->fieldString('cms_archives', self::LIST_FIELDS))
             ->order('views', 'desc')->limit($limit)->select()->toArray();
 
-        $this->success('', ['list' => $list]);
+        $this->success('', ['list' => $this->translations()->rows('cms_archive', $list)]);
     }
 
     /**

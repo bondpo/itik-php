@@ -32,6 +32,7 @@ class I18nStrictSqlite extends \think\db\connector\Sqlite
 
 $app = new think\App();
 $app->initialize();
+$cmsArchiveDefinition = config('i18n.resources.cms_archive');
 set_exception_handler(function (Throwable $e) { fwrite(STDERR, (string)$e . PHP_EOL); exit(1); });
 $app->config->set(['default' => 'i18n_test', 'connections' => ['i18n_test' => [
     'type' => '\\I18nStrictSqlite', 'builder' => '\\think\\db\\builder\\Sqlite', 'database' => ':memory:', 'prefix' => 'test_', 'debug' => false,
@@ -248,6 +249,41 @@ try {
     verify(Translation::find($approvalIds[2])['status'] === 'review' && Translation::find($approvalIds[6])['status'] === 'review', '发布写入失败时所有译文维持待审核状态');
 }
 Db::execute('DROP TRIGGER fail_bulk_approval');
+
+// CMS 副表正文必须参与扫描、版本校验和人工审核。
+$app->config->set(['resources' => ['cms_archive' => $cmsArchiveDefinition]], 'i18n');
+Db::execute('CREATE TABLE test_cms_archives (id INTEGER PRIMARY KEY, model_id INTEGER, title TEXT, description TEXT, status TEXT, deletetime INTEGER)');
+Db::execute('CREATE TABLE test_cms_model (id INTEGER PRIMARY KEY, "table" TEXT)');
+Db::execute('CREATE TABLE test_cms_addonarticle (id INTEGER PRIMARY KEY, content TEXT)');
+Db::name('cms_model')->insert(['id' => 1, 'table' => 'cms_addonarticle']);
+Db::name('cms_archives')->insertAll([
+    ['id' => 1, 'model_id' => 1, 'title' => 'CMS标题', 'description' => 'CMS摘要', 'status' => 'normal', 'deletetime' => null],
+    ['id' => 2, 'model_id' => 1, 'title' => '未发布', 'description' => '', 'status' => 'hidden', 'deletetime' => null],
+    ['id' => 3, 'model_id' => 1, 'title' => '已删除', 'description' => '', 'status' => 'normal', 'deletetime' => 1],
+]);
+Db::name('cms_addonarticle')->insert(['id' => 1, 'content' => '<p>CMS正文</p>']);
+$cmsSource = Resource::current('cms_archive', 1);
+verify($cmsSource['content'] === '<p>CMS正文</p>', 'CMS从模型副表读取正文原文');
+verify(count(Resource::batch('cms_archive', 0)) === 1, 'CMS扫描排除未发布和已删除文章');
+$cmsService = new TranslationService($options);
+$cmsService->scan();
+$cmsTasks = Translation::where('resource_type', 'cms_archive')->select()->toArray();
+verify(count($cmsTasks) >= 3 && in_array('content', array_column($cmsTasks, 'field'), true), 'CMS扫描生成标题、摘要与副表正文翻译任务');
+foreach ($cmsTasks as $cmsTask) {
+    Translation::revise((int)$cmsTask['id'], $cmsTask['field'] === 'content' ? '<p>CMS body</p>' : 'CMS translated', 'published', hash('sha256', $cmsSource[$cmsTask['field']]));
+}
+$cmsEnglish = $cmsService->rows('cms_archive', [$cmsSource], 'en')[0];
+verify($cmsEnglish['title'] === 'CMS translated' && $cmsEnglish['content'] === '<p>CMS body</p>', 'CMS已发布标题和富文本正文覆盖展示字段');
+verify($cmsService->rows('cms_archive', [$cmsSource], 'zh-cn')[0]['content'] === '<p>CMS正文</p>', 'CMS原文语言保留原始正文');
+Db::name('cms_addonarticle')->where('id', 1)->update(['content' => '<p>修改后的正文</p>']);
+$cmsUpdated = Resource::current('cms_archive', 1);
+verify($cmsService->rows('cms_archive', [$cmsUpdated], 'en')[0]['content'] === '<p>修改后的正文</p>', 'CMS副表正文修改后过期译文立即回退原文');
+try {
+    Translation::revise((int)array_values(array_filter($cmsTasks, fn($item) => $item['field'] === 'content'))[0]['id'], 'Old body', 'published', hash('sha256', $cmsSource['content']));
+    throw new RuntimeException('未拒绝CMS过期正文');
+} catch (RuntimeException $e) {
+    verify(str_contains($e->getMessage(), '原文已发生变化'), 'CMS人工修订校验副表正文版本');
+}
 
 // 广告语言筛选在排序和数量限制之前执行，旧广告默认通用。
 Db::execute("CREATE TABLE test_cms_block (id INTEGER PRIMARY KEY AUTOINCREMENT, type TEXT, name TEXT, title TEXT, image TEXT, url TEXT, content TEXT, weigh INTEGER DEFAULT 0, begintime INTEGER, endtime INTEGER, status TEXT DEFAULT 'normal', lang TEXT NOT NULL DEFAULT '', createtime INTEGER, updatetime INTEGER)");

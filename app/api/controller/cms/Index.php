@@ -49,8 +49,8 @@ class Index extends Base
             'config'   => $this->siteConfig(),
             'channels' => $channelTree,
             'blocks'   => $blocks,
-            'hot'      => $hot,
-            'latest'   => $latest,
+            'hot'      => $this->translations()->rows('cms_archive', $hot),
+            'latest'   => $this->translations()->rows('cms_archive', $latest),
         ]);
     }
 

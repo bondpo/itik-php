@@ -69,6 +69,6 @@ class Tag extends Base
             ->field($this->fieldString('cms_archives', ['id','channel_id','title','image','description','tags','views','comments','likes','publishtime']))
             ->select()->toArray();
 
-        $this->success('', ['tag' => $tag, 'list' => $list, 'total' => $total, 'page' => $page, 'limit' => $limit]);
+        $this->success('', ['tag' => $tag, 'list' => $this->translations()->rows('cms_archive', $list), 'total' => $total, 'page' => $page, 'limit' => $limit]);
     }
 }
