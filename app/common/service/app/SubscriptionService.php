@@ -76,7 +76,11 @@ class SubscriptionService
         }
         $usd = (float)$usd;
         $blc = (float)$blc;
-        if (((float)$plan['price'] - (float)$discount) != ($usd + $blc) || $usd < 0 || $blc < 0) {
+        $price   = (float)$plan['price'];
+        $discount = (float)$discount;
+        $remaining = $price - $discount;
+        $paid      = $usd + $blc;
+        if ($usd < 0 || $blc < 0 || abs($remaining - $paid) > 0.000001) {
             throw new \Exception('支付金额异常');
         }
         $user = Db::name('user')->where('id', $userId)->find();
