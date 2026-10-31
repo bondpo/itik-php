@@ -466,7 +466,7 @@ class User extends Base
 
     public function findFri(){
         $username = $this->request->post('username');
-        $user = \app\common\model\User::where('username', $username)->find();
+        $user = \app\common\model\User::whereOr('username', $username)->whereOr('invite_code', $username)->find();
         $params = [];
         if(!$user){
             $this->error('未找到好友');

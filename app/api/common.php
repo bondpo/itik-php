@@ -74,6 +74,8 @@ Route::group('v1', function () {
     Route::get('billing/subscription', [Billing::class, 'subscription']);
     Route::post('billing/subscription/renew', [Billing::class, 'renew']);
     Route::post('billing/pay/notify', [Billing::class, 'notify']);
+    Route::post('billing/pay/tp-init', [Billing::class, 'tpInit']);
+    Route::post('billing/pay/tp-callback', [Billing::class, 'tpCallback']);
     Route::post('billing/withdraw', [Billing::class, 'withdraw']);
     Route::get('billing/wallet', [Billing::class, 'wallet']);
 

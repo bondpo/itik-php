@@ -74,7 +74,9 @@ class SubscriptionService
                 $discount = (float)$plan['dis'];
             }
         }
-        if( ($plan['price'] - $discount) != ($usd + $blc) || $$usd < 0 || $blc < 0){
+        $usd = (float)$usd;
+        $blc = (float)$blc;
+        if (((float)$plan['price'] - (float)$discount) != ($usd + $blc) || $usd < 0 || $blc < 0) {
             throw new \Exception('支付金额异常');
         }
         $user = Db::name('user')->where('id', $userId)->find();
@@ -216,9 +218,10 @@ class SubscriptionService
             throw new \Exception('支付处理失败：' . $e->getMessage());
         }
 
+        $sub = Db::name('app_subscription')->where('source_order_id', $order['id'])->find();
         return [
             'order'        => Db::name('app_order')->where('id', $order['id'])->find(),
-            'subscription' => Db::name('app_subscription')->where('id', $subId)->find(),
+            'subscription' => $sub ?: [],
             'repeated'     => false,
         ];
     }

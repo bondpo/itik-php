@@ -10,6 +10,7 @@ use app\common\library\Ems;
 use think\facade\Db;
 use think\facade\Cache;
 use app\common\service\app\SubscriptionService;
+use app\common\service\TpPayService;
 
 /**
  * 订阅与订单接口
@@ -22,10 +23,12 @@ use app\common\service\app\SubscriptionService;
  *   GET  /api/v1/billing/subscription        当前订阅
  *   POST /api/v1/billing/subscription/renew  续费（复用 createOrder）
  *   POST /api/v1/billing/pay/notify          支付回调（服务端验签，公开）
+ *   POST /api/v1/billing/pay/tp-init         生成 TP 转账 DeepLink（需登录）
+ *   POST /api/v1/billing/pay/tp-callback     TP 转账结果回调（公开，验链）
  */
 class Billing extends Base
 {
-    protected $noNeedLogin = ['notify'];
+    protected $noNeedLogin = ['notify', 'tpCallback'];
     protected $noNeedRight = '*';
 
     /** @var SubscriptionService */
@@ -88,12 +91,85 @@ class Billing extends Base
             $this->fail($e->getMessage(), self::CODE_BIZ_FAIL);
         }
 
+        $payHint = '订单已创建';
+        $tpPay = null;
+        $orderUsd = (float)($ret['order']['usd'] ?? 0);
+        $orderStatus = (string)($ret['order']['status'] ?? '');
+        if ($orderUsd > 0 && $orderStatus === SubscriptionService::ORDER_PENDING) {
+            try {
+                $tpPay = (new TpPayService())->createPaySession($this->userId(), (string)$ret['order']['order_no']);
+                $payHint = '请打开 TokenPocket 完成 USDT 支付，支付结果将自动回调确认';
+            } catch (\Throwable $eTp) {
+                $payHint = '订单已创建，请调用 /billing/pay/tp-init 拉起支付：' . $eTp->getMessage();
+            }
+        } elseif ($orderUsd <= 0 && $orderStatus === SubscriptionService::ORDER_PENDING) {
+            try {
+                $paid = $this->service->paySuccess((string)$ret['order']['order_no'], 'BLC', 'blc-' . $ret['order']['order_no'], ['source' => 'create-blc']);
+                $ret['order'] = $paid['order'];
+                $ret['subscription'] = $paid['subscription'];
+                $payHint = '余额已扣，订单已确认';
+            } catch (\Throwable $eBlc) {
+                $payHint = '余额已扣减，确认失败：' . $eBlc->getMessage();
+            }
+        }
+
         $this->success($ret['repeated'] ? '订单已存在' : '下单成功', [
             'order'        => $this->formatOrder($ret['order']),
             'subscription' => $ret['subscription'],
             'repeated'     => $ret['repeated'],
-            'pay_hint'     => '支付渠道尚未开放，订单已创建并进入待支付状态',
+            'pay_hint'     => $payHint,
+            'tp_pay'       => $tpPay,
         ]);
+    }
+
+    /**
+     * 生成 TokenPocket USDT 转账 DeepLink
+     */
+    public function tpInit()
+    {
+        $orderNo = (string)$this->request->post('order_no', '');
+        if ($orderNo === '') {
+            $this->fail('缺少 order_no', self::CODE_PARAM_MISSING);
+        }
+        try {
+            $data = (new TpPayService())->createPaySession($this->userId(), $orderNo);
+        } catch (\Throwable $e) {
+            $this->fail($e->getMessage(), self::CODE_BIZ_FAIL);
+        }
+        $this->success('ok', $data);
+    }
+
+    /**
+     * TokenPocket transfer 回调（钱包 POST，无登录）
+     */
+    public function tpCallback()
+    {
+        $raw = $this->request->post();
+        if (!is_array($raw) || $raw === []) {
+            $raw = $this->request->param();
+        }
+        $json = $this->request->getContent();
+        if (is_string($json) && $json !== '' && ($json[0] === '{' || $json[0] === '[')) {
+            $decoded = json_decode($json, true);
+            if (is_array($decoded)) {
+                $raw = array_merge(is_array($raw) ? $raw : [], $decoded);
+            }
+        }
+        if (!is_array($raw)) {
+            $raw = [];
+        }
+
+        try {
+            $ret = (new TpPayService())->handleCallback($raw);
+        } catch (\Throwable $e) {
+            \think\facade\Log::warning('[billing/tp-callback] ' . $e->getMessage(), ['raw' => $raw]);
+            $this->fail($e->getMessage(), self::CODE_BIZ_FAIL);
+        }
+
+        if (empty($ret['ok'])) {
+            $this->success((string)($ret['message'] ?? 'ignored'), $ret);
+        }
+        $this->success($ret['repeated'] ? '重复回调' : '支付已确认', $ret);
     }
 
     /**
@@ -182,17 +258,29 @@ class Billing extends Base
         }
 
         $idemKey = (string)($this->request->header('Idempotency-Key') ?: ('renew-' . $this->userId() . '-' . $planCode . '-' . substr((string)microtime(true), -4)));
+        $usd = (string)$this->request->post('usd', 0);
+        $blc = (string)$this->request->post('blc', 0);
 
         try {
-            $ret = $this->service->createOrder($this->userId(), $planCode, $idemKey);
+            $ret = $this->service->createOrder($this->userId(), $planCode, $idemKey, '', $usd, $blc);
         } catch (\Throwable $e) {
             $this->fail($e->getMessage(), self::CODE_BIZ_FAIL);
+        }
+
+        $tpPay = null;
+        $orderUsd = (float)($ret['order']['usd'] ?? 0);
+        if ($orderUsd > 0 && (string)($ret['order']['status'] ?? '') === SubscriptionService::ORDER_PENDING) {
+            try {
+                $tpPay = (new TpPayService())->createPaySession($this->userId(), (string)$ret['order']['order_no']);
+            } catch (\Throwable $eTp) {
+            }
         }
 
         $this->success('续费订单已创建', [
             'order'    => $this->formatOrder($ret['order']),
             'repeated' => $ret['repeated'],
             'pay_hint' => '支付成功后有效期将在原到期时间基础上顺延',
+            'tp_pay'   => $tpPay,
         ]);
     }
 
