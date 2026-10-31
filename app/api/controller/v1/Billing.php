@@ -262,7 +262,7 @@ class Billing extends Base
     public function withdraw()
     {
         // 金额
-        $money = $this->request->post('money');
+        $money = $this->request->post('amount');
         $code = $this->request->post('code');
         if ($money <= 0) {
             $this->fail('提现金额不正确');
