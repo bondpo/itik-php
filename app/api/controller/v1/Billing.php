@@ -69,6 +69,8 @@ class Billing extends Base
         $planCode = (string)$this->request->post('plan_code', '');
         $coupon   = (string)$this->request->post('coupon_code', '');
         $idemKey  = (string)($this->request->header('Idempotency-Key') ?: $this->request->post('idempotent_key', ''));
+        $usd   = (string)$this->request->post('usd', 0);
+        $blc   = (string)$this->request->post('blc', 0);
 
         if ($planCode === '') {
             $this->fail('请选择套餐', self::CODE_PARAM_MISSING);
@@ -81,7 +83,7 @@ class Billing extends Base
         }
 
         try {
-            $ret = $this->service->createOrder($this->userId(), $planCode, $idemKey, $coupon);
+            $ret = $this->service->createOrder($this->userId(), $planCode, $idemKey, $coupon, $usd, $blc);
         } catch (\Throwable $e) {
             $this->fail($e->getMessage(), self::CODE_BIZ_FAIL);
         }

@@ -268,7 +268,7 @@ class User extends Base
         }
 
         Ems::flush($this->boundEmail(), 'modify_pwd');
-        $this->success($this->translations()->message('密码修改成功'));
+        $this->success('密码修改成功');
     }
 
     /**

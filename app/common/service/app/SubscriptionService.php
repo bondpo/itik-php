@@ -9,6 +9,7 @@
 
 namespace app\common\service\app;
 
+use app\common\service\Ds;
 use think\facade\Db;
 use think\facade\Log;
 
@@ -42,7 +43,7 @@ class SubscriptionService
      * @return array{order:array,subscription:array,repeated:bool}
      * @throws \Exception
      */
-    public function createOrder(int $userId, string $planCode, string $idempotentKey = '', string $couponCode = ''): array
+    public function createOrder(int $userId, string $planCode, string $idempotentKey = '', string $couponCode = '', $usd, $blc): array
     {
         if ($userId <= 0) {
             throw new \Exception('用户无效');
@@ -73,9 +74,29 @@ class SubscriptionService
                 $discount = (float)$plan['dis'];
             }
         }
-
+        if( ($plan['price'] - $discount) != ($usd + $blc) || $$usd < 0 || $blc < 0){
+            throw new \Exception('支付金额异常');
+        }
+        $user = Db::name('user')->where('id', $userId)->find();
+        if($blc > $user['money']){
+            throw new \Exception('余额不足');
+        }
+        if($usd > 0) $pay_type = 'USDT';
+        else $pay_type = 'BLC';
         Db::startTrans();
         try {
+            if($blc > 0) {
+                $before = $user['money'];
+                $after = function_exists('bcsub') ? bcsub($user['money'], $blc, 2) : ($user['money'] - $blc);
+                \app\admin\model\User::where('id', $userId)->setDec('money', $blc);
+                \app\common\model\MoneyLog::create([
+                    'user_id' => $userId,
+                    'money' => -$blc,
+                    'before' => $before,
+                    'after' => $after,
+                    'memo' => '订阅'
+                ]);
+            }
             $orderId = Db::name('app_order')->insertGetId([
                 'order_no'       => $orderNo,
                 'user_id'        => $userId,
@@ -83,11 +104,13 @@ class SubscriptionService
                 'amount'         => $plan['price'],
                 'currency'       => $plan['currency'],
                 'status'         => self::ORDER_PENDING,
-                'pay_type'       => '',
+                'pay_type'       => $pay_type,
                 'pay_trade_no'   => '',
                 'idempotent_key' => $idempotentKey,
                 'coupon_code'    => $couponCode,
                 'discount'       => $discount,
+                'usd'            => $usd,
+                'blc'            => $blc,
                 'paid_at'        => 0,
                 'expire_at'      => $now + 3600, // 1 小时内未支付自动关闭
                 'create_time'    => $now,
@@ -164,15 +187,28 @@ class SubscriptionService
 
         Db::startTrans();
         try {
-            // 1) 订单置为已支付
-            Db::name('app_order')->where('id', $order['id'])->update([
-                'status'       => self::ORDER_BROADCAST,
-                'pay_type'     => $payType,
-                'pay_trade_no' => $tradeNo,
-                'pay_payload'  => $payload ? json_encode($payload, JSON_UNESCAPED_UNICODE) : null,
-                'paid_at'      => $now,
-                'update_time'  => $now,
-            ]);
+            if($order['usd'] > 0) {
+                // 1) 订单置为已支付
+                Db::name('app_order')->where('id', $order['id'])->update([
+                    'status' => self::ORDER_BROADCAST,
+//                'pay_type'     => $payType,
+                    'pay_trade_no' => $tradeNo,
+                    'pay_payload' => $payload ? json_encode($payload, JSON_UNESCAPED_UNICODE) : null,
+                    'paid_at' => $now,
+                    'update_time' => $now,
+                ]);
+            }else{
+                Db::name('app_order')->where('id', $order['id'])->update([
+                    'status' => self::ORDER_PAID,
+//                'pay_type'     => $payType,
+                    'pay_trade_no' => $tradeNo,
+                    'pay_payload' => $payload ? json_encode($payload, JSON_UNESCAPED_UNICODE) : null,
+                    'paid_at' => $now,
+                    'update_time' => $now,
+                ]);
+                $ds = new Ds();
+                $ds->orderAct($order['id']);
+            }
 
             Db::commit();
         } catch (\Throwable $e) {

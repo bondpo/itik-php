@@ -69,8 +69,8 @@ class Ds
 
             $service->audit('system', 0, 'order.pay', 'order', (int)$order['id'], ['status' => self::ORDER_PENDING], [
                 'status'   => self::ORDER_PAID,
-                'pay_type' => $payType,
-                'trade_no' => $tradeNo,
+                'pay_type' => $order['pay_type'],
+                'trade_no' => $order['pay_trade_no'],
                 'sub_id'   => $subId,
                 'end_at'   => $subData['end_at'],
             ]);
@@ -83,6 +83,7 @@ class Ds
         $order = \app\admin\model\app\Order::where('id', $order_id)->find();
         if($order && $order->status == 'paid' && ($order->amount == 100 || $order->amount == 3000)){
             $user = \app\admin\model\User::where('id', $order['user_id'])->find();
+            $amount = $order->amount - $order->discount;
             if($user){
                 $update = [];
                 $active = false;
@@ -90,7 +91,7 @@ class Ds
                     $update['act_time'] = time();
                     $active = true;
                 }
-                $update['perf_self'] = $user->perf_self+$order->amount;
+                $update['perf_self'] = $user->perf_self+$amount;
                 \app\admin\model\User::where('id', $user->id)->update($update);
 
                 $pUser = \app\admin\model\User::where('id', $user->inviter_id)->find();
@@ -114,17 +115,17 @@ class Ds
                             } else {
                                 $rate = 0.6;
                             }
-                            $bonus = $order->amount * $rate;
+                            $bonus = $amount * $rate;
                             $this->bonusAct($pUser, $bonus, '分享奖励');
                         }
                     }
                     if($pUser->lv_team > $teamLv){
-                        $bonus = $order->amount * ($tLvs[$pUser->lv_team]['rate'] - $tLvs[$teamLv]['rate']);
+                        $bonus = $amount * ($tLvs[$pUser->lv_team]['rate'] - $tLvs[$teamLv]['rate']);
                         $this->bonusAct($pUser, $bonus, '社区奖励');
                         $teamLv = $pUser->lv_team;
                         if($pUser->lv_team >= $pjLv) $pjRate = 0.01;
                     }else if($pUser->lv_team == $teamLv && $teamLv >= $pjLv && $pjRate > 0){
-                        $bonus = $order->amount * $pjRate;
+                        $bonus = $amount * $pjRate;
                         $this->bonusAct($pUser, $bonus, '社区平级');
                         $pjRate = 0;
                     }
@@ -133,9 +134,9 @@ class Ds
                             $update['nums_iv'] = Db::raw("nums_iv+1");
                         $update['nums_team'] = Db::raw("nums_team+1");
                     }
-                    $update['perf_team'] = Db::raw("perf_team+{$order->amount}");
+                    $update['perf_team'] = Db::raw("perf_team+{$amount}");
                     foreach($tLvs as $lv => $tLv){
-                        if($lv > $pUser->lv_team && ($pUser->perf_team+$order->amount) >= $tLv['perf']) {
+                        if($lv > $pUser->lv_team && ($pUser->perf_team+$amount) >= $tLv['perf']) {
                             $update['lv_team'] = $lv;
                         }
                     }
