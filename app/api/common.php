@@ -52,6 +52,7 @@ Route::group('v1', function () {
     Route::get('users/me/bindings', [User::class, 'bindings']);
     Route::post('users/me/email/send-code', [User::class, 'emailSendCode']);
     Route::post('users/me/email/bind', [User::class, 'emailBind']);
+    Route::post('users/me/modify/pwd', [User::class, 'modifyPwd']);
     Route::post('users/me/wallet/challenge', [User::class, 'walletChallenge']);
     Route::post('users/me/wallet/bind', [User::class, 'walletBind']);
     Route::post('users/find-fri', [User::class, 'findFri']);

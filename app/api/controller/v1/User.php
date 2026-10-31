@@ -6,6 +6,7 @@
 
 namespace app\api\controller\v1;
 
+use app\common\library\FrontendAuth;
 use app\common\service\MatrixService;
 use think\facade\Db;
 use app\common\library\Ems;
@@ -228,6 +229,46 @@ class User extends Base
 
         Ems::flush($email, 'bind_email');
         $this->success('邮箱绑定成功', ['email' => $email]);
+    }
+
+    /**
+     * 修改密码 —— 校验验证码并完成修改
+     */
+    public function modifyPwd()
+    {
+        $userId = $this->userId();
+        $code   = (string)$this->request->post('code', '');
+        $password   = (string)$this->request->post('password', '');
+
+        if (!$code) {
+            $this->fail('请输入邮箱验证码', self::CODE_PARAM_MISSING);
+        }
+
+        if ($this->boundEmail() == null) {
+            $this->fail('当前账号未绑定邮箱', self::CODE_STATE_INVALID);
+        }
+
+        if (empty($password) || strlen($password) < 6) {
+            $this->fail('密码不能为空且长度不能少于6位');
+        }
+
+        if (!Ems::check($this->boundEmail(), $code, 'modify_pwd')) {
+            $this->fail(Ems::getLastErrorMessage() ?: '验证码错误或已过期');
+        }
+
+        Db::startTrans();
+        try {
+            $auth = new FrontendAuth();
+            $passwd = $auth->getEncryptPassword($password);
+            Db::name('user')->where(['id' => $userId])->update(['password' => $passwd]);
+            Db::commit();
+        } catch (\Throwable) {
+            Db::rollback();
+            $this->fail('密码修改失败');
+        }
+
+        Ems::flush($this->boundEmail(), 'modify_pwd');
+        $this->success($this->translations()->message('密码修改成功'));
     }
 
     /**
