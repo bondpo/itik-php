@@ -106,90 +106,89 @@ class Ems
                 try {
                     $mail = new Email();
                     $mail->addAddress($params->email);
-                    $mail->setSubject('itiklink验证码！');
+                    $mail->setSubject('itiklink Verification Code！');
                     $expire = ceil(self::$expire / 60);
                     $code = htmlspecialchars((string) $params->code, ENT_QUOTES, 'UTF-8');
                     $appName = 'itiklink';
+
+                    $lang =  'en';
+                    $title = 'Email Verification Code';
+                    $mainTitle = 'Your Email Verification Code';
+                    $greeting = "Hello!<br>We received your verification code request. Please use the code below to complete verification.";
+                    $codeLabel = 'Your verification code';
+                    $expireText = "Please complete verification within {$expire} minutes";
+                    $securityTitle = 'Security Tip:';
+                    $securityContent = 'Do not share your verification code with anyone, including those claiming to be customer service. If this was not initiated by you, please ignore this email and check your account security.';
+                    $noticeTitle = 'Please note:';
+                    $noticeContent = 'We will never ask for your verification code or password via phone, email, or messaging apps. Be cautious of phishing emails and always visit the official website.';
+                    $footerAuto = 'This is an automated email. Please do not reply.';
+                    $copyright = '. All rights reserved.';
                     $html = <<<HTML
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="{$lang}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>邮箱验证码</title>
+    <title>{$title}</title>
 </head>
-<body style="margin:0;padding:0;background-color:#1e1e1e;font-family:Arial,'Microsoft YaHei',sans-serif;color:#eaecef;">
+<body style="margin:0;padding:0;background-color:#1e1e1e;font-family:Arial,'Microsoft YaHei','PingFang SC','Hiragino Sans GB',sans-serif;color:#eaecef;">
 
-<table width="100%" cellpadding="0" cellspacing="0" border="0"
+<table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation"
        style="background-color:#1e1e1e;padding:35px 15px;">
     <tr>
         <td align="center">
-            <table width="100%" cellpadding="0" cellspacing="0" border="0"
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation"
                    style="max-width:600px;background-color:#1e1e1e;">
-
                 <tr>
                     <td style="padding:10px 0 30px;font-size:26px;font-weight:bold;color:#f0b90b;">
                         {$appName}
                     </td>
                 </tr>
-
                 <tr>
                     <td style="font-size:26px;font-weight:bold;line-height:1.6;padding-bottom:20px;color:#ffffff;">
-                        您的邮箱验证码
+                        {$mainTitle}
                     </td>
                 </tr>
-
                 <tr>
                     <td style="font-size:16px;line-height:1.9;color:#eaecef;padding-bottom:20px;">
-                        您好！<br>
-                        我们收到了您的验证码请求。请使用以下验证码完成验证。
+                        {$greeting}
                     </td>
                 </tr>
-
                 <tr>
-                    <td align="center"
-                        style="padding:25px 15px;background-color:#2b2b2b;border-radius:8px;">
+                    <td align="center" style="padding:25px 15px;background-color:#2b2b2b;border-radius:8px;">
                         <div style="font-size:14px;color:#b7bdc6;padding-bottom:12px;">
-                            您的验证码
+                            {$codeLabel}
                         </div>
-                        <div style="font-size:36px;font-weight:bold;letter-spacing:8px;color:#f0b90b;">
+                        <div style="font-size:36px;font-weight:bold;letter-spacing:8px;color:#f0b90b;font-family:Arial,Helvetica,sans-serif;">
                             {$code}
                         </div>
                         <div style="font-size:14px;color:#b7bdc6;padding-top:15px;">
-                            请在 {$expire} 分钟内完成验证
+                            {$expireText}
                         </div>
                     </td>
                 </tr>
-
                 <tr>
                     <td style="padding-top:30px;font-size:16px;line-height:1.9;color:#eaecef;">
-                        <strong style="color:#ffffff;">安全提示：</strong>
-                        请勿向任何人透露您的验证码，包括自称客服或工作人员的人员。
-                        如果这不是您本人的操作，请忽略此邮件，并检查您的账户安全。
+                        <strong style="color:#ffffff;">{$securityTitle}</strong><br>
+                        {$securityContent}
                     </td>
                 </tr>
-
                 <tr>
                     <td style="padding-top:25px;font-size:14px;line-height:1.9;color:#b7bdc6;">
-                        <strong style="color:#ffffff;">请注意：</strong>
-                        我们不会通过电话、邮件或即时通讯工具向您索取验证码或账户密码。
-                        请谨慎识别钓鱼邮件，确保您访问的是正确的官方网站。
+                        <strong style="color:#ffffff;">{$noticeTitle}</strong><br>
+                        {$noticeContent}
                     </td>
                 </tr>
-
                 <tr>
-                    <td style="padding-top:35px;border-top:1px solid #353535;margin-top:25px;
-                               font-size:13px;line-height:1.8;color:#848e9c;text-align:center;">
-                        此邮件由系统自动发送，请勿直接回复。<br>
-                        &copy; 2026 {$appName}，版权所有
+                    <td style="padding-top:35px;border-top:1px solid #353535;font-size:13px;line-height:1.8;color:#848e9c;text-align:center;">
+                        {$footerAuto}<br>
+                        &copy; 2026 {$appName}{$copyright}
                     </td>
                 </tr>
-
             </table>
         </td>
     </tr>
 </table>
-
 </body>
 </html>
 HTML;
