@@ -52,6 +52,7 @@ class Base extends Api
     public const ROLE_MEMBER  = 'MEMBER';  //会员
     public const ROLE_VISITOR = 'VISITOR';  //游客
 
+
     /** 订阅六态 */
     public const SUB_PENDING   = 'PENDING_PAYMENT';
     public const SUB_ACTIVE    = 'ACTIVE';
@@ -111,6 +112,20 @@ class Base extends Api
         $rules = trim((string)($group['rules'] ?? ''));
         $roles = [self::ROLE_OWNER, self::ROLE_LEADER, self::ROLE_MEMBER];
         return in_array($rules, $roles, true) ? $rules : self::ROLE_VISITOR;
+    }
+
+    protected function getGroupName(int $userId){
+        if ($userId <= 0) {
+            return '';
+        }
+        $group = Db::name('user')
+            ->alias('u')
+            ->join('user_group g', 'g.id = u.group_id')
+            ->where('u.id', $userId)
+            ->field('g.name')
+            ->find();
+        $name = trim((string)($group['name'] ?? ''));
+        return $name;
     }
 
     /**

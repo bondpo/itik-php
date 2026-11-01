@@ -19,6 +19,11 @@ class Subscription extends Backend
     {
         parent::initialize();
         $this->model = new \app\admin\model\app\Subscription();
+
+        $plans = Db::name("app_plan")->order('id ASC')->column('name', 'plan_code');
+        $this->view->assign('plans', $plans);
+        $groupList = Db::name("user_group")->order('id ASC')->column('name', 'rules');
+        $this->view->assign('groupData', $groupList);
     }
 
     public function index()

@@ -87,7 +87,7 @@ class Ds
             if($user){
                 $update = [];
                 $active = false;
-                if($user->group_id == 9) {
+                if($user->group_id == 1) {
                     $update['act_time'] = time();
                     $active = true;
                 }
@@ -149,7 +149,7 @@ class Ds
     }
 
     public function bonusAct($user, $bonus, $memo, $order_no=''){
-        if($user->group_id != 9){
+        if($user->group_id != 1){
             $before = $user->money;
             $after = function_exists('bcadd') ? bcadd($user->money, $bonus, 2) : ($user->money + $bonus);
             \app\admin\model\User::where('id', $user->id)->setInc('money', $bonus);

@@ -19,6 +19,9 @@ class Plan extends Backend
     {
         parent::initialize();
         $this->model = new \app\admin\model\app\Plan();
+
+        $groupList = Db::name("user_group")->order('id ASC')->column('name', 'rules');
+        $this->view->assign('groupData', $groupList);
     }
 
     public function index()

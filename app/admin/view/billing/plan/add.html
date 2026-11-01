@@ -13,10 +13,9 @@
         <label class="layui-form-label">适用角色</label>
         <div class="layui-input-block">
             <select name="row[role_code]">
-                <option value="OWNER">项目方</option>
-                <option value="LEADER">社区长</option>
-                <option value="MEMBER">会员</option>
-                <option value="VISITOR">游客</option>
+                {foreach $groupData as $key=>$value}
+                <option value="{$key}">{$value}</option>
+                {/foreach}
             </select>
         </div>
     </div>

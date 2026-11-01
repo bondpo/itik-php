@@ -62,9 +62,11 @@ class User extends Base
                 'money'       => $user['money'],
                 'score'       => (int)$user['score'],
                 'level'       => (int)$user['level'],
-                'lv_vip'      => (int)$user['lv_vip'],
+                'group_id'    => $user['group_id'],
+                'group_name'  => $this->getGroupName($user['id']),
+//                'lv_vip'      => (int)$user['lv_vip'],
                 'lv_team'     => (int)$user['lv_team'],
-                'lv_vip_name' => Db::name('user_lv_vip')->where('id', $user['lv_vip'])->value('name'),
+//                'lv_vip_name' => Db::name('user_lv_vip')->where('id', $user['lv_vip'])->value('name'),
                 'lv_team_name'=> $user['lv_team'] == 1 ? '' : Db::name('user_lv_team')->where('id', $user['lv_team'])->value('name'),
                 'wallet_address' => $user['wallet_address'],
             ],
@@ -87,7 +89,7 @@ class User extends Base
     public function update()
     {
         $userId = $this->userId();
-        $allow = ['nickname', 'avatar', 'gender', 'birthday', 'bio'];
+        $allow = ['nickname', 'avatar', 'gender', 'birthday', 'bio', 'inviter_id'];
         $data = [];
         foreach ($allow as $field) {
             $val = $this->request->put($field, null);
@@ -111,6 +113,13 @@ class User extends Base
         }
         if (isset($data['bio']) && mb_strlen((string)$data['bio']) > 100) {
             $this->fail('简介不能超过 100 字符', self::CODE_PARAM_INVALID);
+        }
+        if (isset($data['inviter_id']) && $data['inviter_id'] != '') {
+            $inviter_id = Db::name('user')->where('id', $userId)->value('inviter_id');
+            if($inviter_id > 0) $this->fail('已绑定推荐人无法修改!');
+            $ivUser = Db::name('user')->where('invite_code', $data['inviter_id'])->find();
+            if(!$ivUser) $this->fail('推荐人不存在!');
+            $data['inviter_id'] = $ivUser['id'];
         }
 
         $data['update_time'] = time();
@@ -496,6 +505,22 @@ class User extends Base
             $this->success(__('Successful'), $params);
         } else {
             $this->error('获取异常');
+        }
+    }
+
+    public function myFri(){
+        $users = \app\common\model\User::where('inviter_id', $this->userId())->select();
+        $params = [];
+        foreach ($users as $user) {
+            $params[$user['id']]['id'] = $user['id'];
+            $params[$user['id']]['username'] = $user['username'];
+            $params[$user['id']]['nickname'] = $user['nickname'];
+            $params[$user['id']]['groupName'] = $this->getGroupName((int)$user['id']);
+        }
+        if (!empty($params)) {
+            $this->success(__('Successful'), $params);
+        } else {
+            $this->error('未找到好友');
         }
     }
 }

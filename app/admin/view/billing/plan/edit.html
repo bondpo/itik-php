@@ -6,6 +6,7 @@
         <label class="layui-form-label">套餐代码</label>
         <div class="layui-input-block">
             <input type="text" name="row[plan_code]" value="{$row.plan_code|default=''}" placeholder="套餐代码" autocomplete="off" class="layui-input" lay-verify="required" />
+
         </div>
     </div>
 
@@ -13,10 +14,9 @@
         <label class="layui-form-label">适用角色</label>
         <div class="layui-input-block">
             <select name="row[role_code]">
-                <option value="OWNER" {:$row.role_code=='OWNER'?'selected':''} >项目方</option>
-                <option value="LEADER" {:$row.role_code=='LEADER'?'selected':''} >社区长</option>
-                <option value="MEMBER" {:$row.role_code=='MEMBER'?'selected':''} >会员</option>
-                <option value="VISITOR" {:$row.role_code=='VISITOR'?'selected':''} >游客</option>
+                {foreach $groupData as $key=>$value}
+                <option value="{$key}" {if $key==$row.role_code} selected {/if}>{$value}</option>
+                {/foreach}
             </select>
         </div>
     </div>
