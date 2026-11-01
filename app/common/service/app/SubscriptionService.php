@@ -103,6 +103,7 @@ class SubscriptionService
                     'memo' => '订阅'
                 ]);
             }
+
             $orderId = Db::name('app_order')->insertGetId([
                 'order_no'       => $orderNo,
                 'user_id'        => $userId,
@@ -142,7 +143,16 @@ class SubscriptionService
                 'amount'    => $plan['price'],
                 'currency'  => $plan['currency'],
             ]);
-
+            if($pay_type == 'BLC'){
+                Db::name('app_order')->where('id', $orderId)->update([
+                    'status' => self::ORDER_PAID,
+//                'pay_type'     => $payType,
+                    'paid_at' => $now,
+                    'update_time' => $now,
+                ]);
+                $ds = new Ds();
+                $ds->orderAct($orderId);
+            }
             Db::commit();
         } catch (\Throwable $e) {
             Db::rollback();
@@ -203,18 +213,19 @@ class SubscriptionService
                     'paid_at' => $now,
                     'update_time' => $now,
                 ]);
-            }else{
-                Db::name('app_order')->where('id', $order['id'])->update([
-                    'status' => self::ORDER_PAID,
-//                'pay_type'     => $payType,
-                    'pay_trade_no' => $tradeNo,
-                    'pay_payload' => $payload ? json_encode($payload, JSON_UNESCAPED_UNICODE) : null,
-                    'paid_at' => $now,
-                    'update_time' => $now,
-                ]);
-                $ds = new Ds();
-                $ds->orderAct($order['id']);
             }
+//            else{
+//                Db::name('app_order')->where('id', $order['id'])->update([
+//                    'status' => self::ORDER_PAID,
+////                'pay_type'     => $payType,
+//                    'pay_trade_no' => $tradeNo,
+//                    'pay_payload' => $payload ? json_encode($payload, JSON_UNESCAPED_UNICODE) : null,
+//                    'paid_at' => $now,
+//                    'update_time' => $now,
+//                ]);
+//                $ds = new Ds();
+//                $ds->orderAct($order['id']);
+//            }
 
             Db::commit();
         } catch (\Throwable $e) {
