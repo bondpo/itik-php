@@ -24,6 +24,7 @@ use app\api\controller\v1\Recommend;
 use app\api\controller\v1\Promotion;
 use app\api\controller\v1\Consult;
 use app\api\controller\v1\Region;
+use app\api\controller\v1\PageImages;
 use app\api\controller\cms\Index      as CmsIndex;
 use app\api\controller\cms\Channel    as CmsChannel;
 use app\api\controller\cms\Archives   as CmsArchives;
@@ -143,6 +144,9 @@ Route::group('v1', function () {
     Route::post('consultations/messages', [Consult::class, 'send']);
     Route::post('consultations/read', [Consult::class, 'read']);
     Route::post('consultations/close', [Consult::class, 'close']);
+
+    /* ---------------- 页面图片 ---------------- */
+    Route::post('page/images', [PageImages::class, 'index']);
 
 })->completeMatch()->allowCrossDomain();
 

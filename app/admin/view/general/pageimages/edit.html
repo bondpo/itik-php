@@ -1,0 +1,72 @@
+{layout name="layout/form" /}
+<form class="layui-form" method="post">
+    {:token_field()}
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Page')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[page]" value="{$row.page|default=''|htmlentities}" class="layui-input" autocomplete="off">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Lang')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[lang]" value="{$row.lang|default=''|htmlentities}" class="layui-input" autocomplete="off">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Url')}</label>
+        <div class="layui-input-block">
+            <input
+                    type="text"
+                    id="c-url"
+                    name="row[url]"
+                    lay-verify=""
+                    class="layui-input"
+                    style="width: 70%"
+                    value="{$row.url}"
+                    autocomplete="off"
+                    placeholder="{:__('Url')}" />
+            <div class="layui-input-suffix" style="width: 30%">
+                <button
+                        type="button"
+                        data-input-id="c-url"
+                        data-preview-id="p-url"
+                        class="layui-btn btn-bdupload">
+                    <i class="fa fa-upload"></i>
+                    上传
+                </button>
+                <button type="button" data-input-id="c-url" class="layui-btn layui-bg-green btn-bdchoose">
+                    <i class="fa fa-list"></i>
+                    选择
+                </button>
+            </div>
+            <div class="layui-upload-list" id="p-url"></div>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Weigh')}</label>
+        <div class="layui-input-block">
+            <input type="number" name="row[weigh]" value="{$row.weigh|default=''|htmlentities}" class="layui-input" autocomplete="off">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">{:__('Status')}</label>
+        <div class="layui-input-block">
+            {foreach name="StatusList" item="vo"}
+            <input type="radio" name="row[status]" value="{$key}" title="{$vo}" {in name="key" value="$row.status"}checked{/in}>
+            {/foreach}
+        </div>
+    </div>
+    <div class="layui-form-item layer-footer hide">
+        <div class="layui-input-block">
+            <input type="hidden" name="row[id]" value="{$row.id}">
+            <button class="layui-btn btn-theme-color" lay-submit>{:__('OK')}</button>
+            <button type="reset" class="layui-btn layui-btn-primary">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
+<script>
+layui.use(["badou"], function () {
+    layui.bdForm.api.bindevent($("form.layui-form"));
+});
+</script>
