@@ -227,6 +227,7 @@ class Upload
             throw new UploadException(__('No file upload or server upload limit exceeded'));
         }
 
+        // 保留原有文件校验
         $this->checkSize();
         $this->checkExecutable();
         $this->checkMimetype();
@@ -234,23 +235,52 @@ class Upload
 
         $savekey = $savekey ? $savekey : $this->getSavekey();
         $savekey = '/' . ltrim($savekey, '/');
+
         $uploadDir = substr($savekey, 0, strripos($savekey, '/') + 1);
         $fileName = substr($savekey, strripos($savekey, '/') + 1);
 
-        $destDir = root_path() . $baseDir . str_replace('/', DS, $uploadDir);
-
         $sha1 = $this->file->hash();
-        try {
-            $file = $this->file->move($destDir, $fileName);
-        } catch (FileException $e) {
-            // 上传失败获取错误信息
-            throw new UploadException($e->getMessage());
+
+        // 根据 SILO 配置决定存储方式
+        $storage = !empty(config('silo.enabled')) ? 'silo' : 'local';
+
+        if ($storage === 'silo') {
+            try {
+                $silo = new SiloStorage();
+
+                $objectKey = ltrim($uploadDir . $fileName, '/');
+
+                $silo->upload(
+                    $this->file->getPathname(),
+                    $objectKey,
+                    $this->fileInfo['type']
+                );
+
+                // 数据库保存完整对象 Key
+                $attachmentUrl = '/' . $objectKey;
+
+            } catch (\Throwable $e) {
+                throw new UploadException($e->getMessage());
+            }
+        } else {
+            // 原有本地上传逻辑保持不变
+            $destDir = root_path() . $baseDir . str_replace('/', DS, $uploadDir);
+
+            try {
+                $file = $this->file->move($destDir, $fileName);
+            } catch (FileException $e) {
+                throw new UploadException($e->getMessage());
+            }
+
+            $this->file = $file;
+            $attachmentUrl = $uploadDir . $fileName;
         }
 
-        $this->file = $file;
         $category = request()->post('category');
         $category = array_key_exists($category, config('site.attachmentcategory') ?? []) ? $category : '';
+
         $auth = AdminAuth::instance();
+
         $params = array(
             'admin_id'    => (int)session('admin.id'),
             'user_id'     => (int)$auth->id,
@@ -262,16 +292,19 @@ class Upload
             'imagetype'   => $this->fileInfo['suffix'],
             'imageframes' => 0,
             'mimetype'    => $this->fileInfo['type'],
-            'url'         => $uploadDir . $fileName,
-            'upload_time'  => time(),
-            'storage'     => 'local',
+            'url'         => $attachmentUrl,
+            'upload_time' => time(),
+            'storage'     => $storage,
             'sha1'        => $sha1,
             'extparam'    => '',
         );
+
         $attachment = new Attachment();
         $attachment->data(array_filter($params));
         $attachment->save();
+
         Event::trigger("upload_after", $attachment);
+
         return $attachment;
     }
 

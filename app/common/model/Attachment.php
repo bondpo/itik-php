@@ -27,7 +27,8 @@ class Attachment extends Model
     ];
 
     protected $append = [
-        'thumb_style'
+        'thumb_style',
+        'fullurl'
     ];
 
 
@@ -44,6 +45,37 @@ class Attachment extends Model
     public function setCategoryAttr($value)
     {
         return $value == 'unclassed' ? '' : $value;
+    }
+
+    /**
+     * 获取附件完整访问地址
+     */
+    public function getFullurlAttr($value, $data)
+    {
+        $url = $data['url'] ?? '';
+
+        if (($data['storage'] ?? 'local') === 'silo') {
+            $config = config('silo');
+
+            $baseUrl = rtrim($config['public_url'] ?? '', '/');
+            $bucket = trim($config['bucket'] ?? '', '/');
+
+            if ($baseUrl && $bucket) {
+                if (!preg_match('~/' . preg_quote($bucket, '~') . '$~', $baseUrl)) {
+                    $baseUrl .= '/' . $bucket;
+                }
+
+                return $baseUrl . '/' . ltrim($url, '/');
+            }
+        }
+
+        $cdnurl = preg_replace(
+            "/\/(\w+)\.php$/i",
+            '',
+            request()->root()
+        );
+
+        return $cdnurl . $url;
     }
 
     /**
