@@ -84,6 +84,7 @@ Route::group('v1', function () {
     /* ---------------- 项目 ---------------- */
     Route::get('projects/categories', [Project::class, 'categories']);
     Route::get('projects', [Project::class, 'index']);
+    Route::get('projects/my', [Project::class, 'myProjects']);
     Route::get('projects/detail', [Project::class, 'detail']);
     Route::post('projects', [Project::class, 'save']);
     Route::post('projects/update', [Project::class, 'update']);

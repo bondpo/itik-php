@@ -134,7 +134,56 @@ class Project extends Base
             ->order($orderby, $orderway)
             ->order('id', 'desc')
             ->page($page, $limit)
-            ->field('id,name,subtitle,cover,category_id,region,tags,certified,views,follows,sort_weight,create_time')
+            ->field('id,name,subtitle,logo,cover,category_id,region,tags,summary,content,audience,material,video,start_time,certified,views,follows,sort_weight,status,create_time')
+            ->select()
+            ->toArray();
+
+        // 列表仅暴露公开字段（不含 owner_user_id 等敏感信息）
+        $this->success('', $this->pageResult($this->translations()->projects($list), $total, $page, $limit));
+    }
+
+    /**
+     * 项目列表（我的）
+     * 仅返回审核通过且未下架的项目；支持按 category_id、关键词、地区等过滤，关联分类输出。
+     */
+    public function myProjects()
+    {
+        [$page, $limit] = $this->pageParams();
+        [$orderby, $orderway] = $this->orderParams(['id', 'sort_weight', 'views', 'follows', 'create_time', 'publish_time'], 'sort_weight');
+
+
+        $uid = $this->userId();
+        $query = ProjectModel::where('owner_user_id', $uid);
+
+        // 关联分类筛选（若为父分类，级联查询其子分类）
+        $categoryId = (int)$this->request->param('category_id', 0);
+        if ($categoryId > 0) {
+            $subCategoryIds = ProjectCategory::where('pid', $categoryId)->column('id');
+            $allCategoryIds = array_merge([$categoryId], $subCategoryIds);
+            $query->whereIn('category_id', $allCategoryIds);
+        }
+
+        $keyword = trim((string)$this->request->param('keyword', ''));
+        if ($keyword !== '') {
+            $this->translations()->search($query, 'project', ['name', 'subtitle'], $keyword);
+        }
+        $region = (string)$this->request->param('region', '');
+        if ($region !== '') {
+            $query->where('region', $region);
+        }
+//        $certified = $this->request->param('certified', '');
+//        if ($certified !== '') {
+//            $query->where('certified', (int)$certified);
+//        }
+
+        $total = (clone $query)->count();
+        $list = $query->with(['category' => function ($q) {
+            $q->field('id,pid,name,slug,icon');
+        }])
+            ->order($orderby, $orderway)
+            ->order('id', 'desc')
+            ->page($page, $limit)
+            ->field('id,name,subtitle,logo,cover,category_id,region,tags,summary,content,audience,material,video,start_time,certified,views,follows,sort_weight,status,create_time')
             ->select()
             ->toArray();
 
@@ -258,7 +307,16 @@ class Project extends Base
     {
         $id = (int)$this->request->post('id', 0);
         $project = $this->findOwnedProject($id);
-
+        if (!$project) $this->fail('未找到该项目,或无权修改');
+        $status = $this->request->param('status', '');
+        if($status == 'hidden') {
+            Db::name('app_project')->where('id', $id)->update(['status' => $status]);
+            $this->success('已隐藏');
+        }
+        if($status == 'offline') {
+            Db::name('app_project')->where('id', $id)->update(['status' => $status]);
+            $this->success('已删除');
+        }
         $data = $this->collectProjectInput(false);
         if (!$data) {
             $this->fail('没有需要更新的字段', self::CODE_PARAM_MISSING);
@@ -622,8 +680,8 @@ class Project extends Base
     protected function collectProjectInput(bool $isCreate): array
     {
         $fields = [
-            'name', 'subtitle', 'cover',
-            'region', 'tags', 'summary', 'content', 'seo_title', 'seo_keywords', 'seo_description',
+            'name', 'subtitle', 'logo', 'cover',
+            'region', 'tags', 'summary', 'content', 'audience', 'material', 'video', 'start_time', 'seo_title', 'seo_keywords', 'seo_description',
         ];
         $data = [];
         foreach ($fields as $f) {
