@@ -24,6 +24,7 @@ class Project extends Model
     protected $type = [
         'create_time' => 'int',
         'update_time' => 'int',
+        'start_time' => 'int',
     ];
 
     /** 所属项目方 */
@@ -45,5 +46,10 @@ class Project extends Model
             ->where('status', 'normal')
             ->order('event_time', 'desc')
             ->order('id', 'desc');
+    }
+
+    public function setStartTimeAttr($value)
+    {
+        return $value && !is_numeric($value) ? strtotime($value) : $value;
     }
 }

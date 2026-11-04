@@ -9,6 +9,7 @@ namespace app\api\controller\v1;
 use app\admin\model\app\Project as ProjectModel;
 use app\admin\model\app\ProjectCategory;
 use app\admin\model\app\ProjectTimeline;
+use app\common\service\MatrixService;
 use think\facade\Db;
 
 /**
@@ -134,7 +135,7 @@ class Project extends Base
             ->order($orderby, $orderway)
             ->order('id', 'desc')
             ->page($page, $limit)
-            ->field('id,name,subtitle,logo,cover,category_id,region,tags,summary,content,audience,material,video,start_time,certified,views,follows,sort_weight,status,create_time')
+            ->field('id,name,subtitle,is_hot,is_new,logo,cover,category_id,region,tags,summary,content,audience,material,video,start_time,certified,views,follows,sort_weight,status,create_time')
             ->select()
             ->toArray();
 
@@ -229,6 +230,10 @@ class Project extends Base
             ->where('id', (int)$project['owner_user_id'])
             ->field('id,nickname,avatar')
             ->find() ?: null;
+        $user_group_id = Db::name('user')->where('id', $this->userId())->value('group_id') ?? 0;
+        if($project['owner'] && $user_group_id > 1 && $project['owner_user_id'] != $this->userId()) {
+            $project['owner']['imUser'] = (new MatrixService())->buildUserId($project['owner']['id']);
+        }
         $project['leaders'] = Db::name('app_project_member')
             ->where('project_id', $id)
             ->where('role', 'leader')

@@ -103,30 +103,34 @@ class Ds
                 while($pUser){
                     $update = [];
                     if($loop == 1){
-                        $ivUser = \app\admin\model\User::where('inviter_id', $pUser->id)->where('act_time', '>', 0)->order('act_time asc')->field('id,act_time')->select()->toArray();
-                        if(!empty($ivUser)){
-                            $rankMap = [];
-                            foreach ($ivUser as $i => $u) {
-                                $rankMap[$u['id']] = $i + 1;
+                        $rate = 0;
+                        if($order->plan_code == 'PLAN_OWNER_1Y') $rate = 0.5;
+                        else{
+                            $ivUser = \app\admin\model\User::where('inviter_id', $pUser->id)->where('act_time', '>', 0)->order('act_time asc')->field('id,act_time')->select()->toArray();
+                            if(!empty($ivUser)){
+                                $rankMap = [];
+                                foreach ($ivUser as $i => $u) {
+                                    $rankMap[$u['id']] = $i + 1;
+                                }
+                                $sort = $rankMap[$user->id];
+                                if ($sort & 1) {
+                                    $rate = 0.4;
+                                } else {
+                                    $rate = 0.6;
+                                }
                             }
-                            $sort = $rankMap[$user->id];
-                            if ($sort & 1) {
-                                $rate = 0.4;
-                            } else {
-                                $rate = 0.6;
-                            }
-                            $bonus = $amount * $rate;
-                            $this->bonusAct($pUser, $bonus, '分享奖励');
                         }
+                        $bonus = $amount * $rate;
+                        if($bonus > 0) $this->bonusAct($pUser, $bonus, '分享奖励', $order->order_no);
                     }
                     if($pUser->lv_team > $teamLv){
                         $bonus = $amount * ($tLvs[$pUser->lv_team]['rate'] - $tLvs[$teamLv]['rate']);
-                        $this->bonusAct($pUser, $bonus, '社区奖励');
+                        $this->bonusAct($pUser, $bonus, '社区奖励', $order->order_no);
                         $teamLv = $pUser->lv_team;
                         if($pUser->lv_team >= $pjLv) $pjRate = 0.01;
                     }else if($pUser->lv_team == $teamLv && $teamLv >= $pjLv && $pjRate > 0){
                         $bonus = $amount * $pjRate;
-                        $this->bonusAct($pUser, $bonus, '社区平级');
+                        $this->bonusAct($pUser, $bonus, '社区平级', $order->order_no);
                         $pjRate = 0;
                     }
                     if($active){
@@ -158,7 +162,8 @@ class Ds
                 'money' => $bonus,
                 'before' => $before,
                 'after' => $after,
-                'memo' => $memo
+                'memo' => $memo,
+                'order_no' => $order_no
             ]);
         }
     }

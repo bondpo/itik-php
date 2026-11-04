@@ -38,12 +38,13 @@ layui.use(["badou", "table"], function () {
         toolbar: "#toolbar",
         cols: [[
                     { type: "checkbox" },
-                    { field: "id", title: __('Id'), width: 80, sort: true },
-                    { field: "user_id", title: __('UserId'), searchType: 'remoteSelect' },
-                    { field: "money", title: __('Money') },
-                    { field: "before", title: __('Before') },
-                    { field: "after", title: __('After') },
+                    { field: "id", title: __('Id'), width: 20, sort: true },
+                    { field: "user_id", title: __('UserId'), width: 20, searchType: 'remoteSelect' },
+                    { field: "money", title: __('Money'), width: 80 },
+                    { field: "before", title: __('Before'), width: 80 },
+                    { field: "after", title: __('After'), width: 80 },
                     { field: "memo", title: __('Memo'), operate: 'LIKE' },
+                    { field: "order_no", title: __('OrderNo'), operate: 'LIKE' },
                     { field: "createtime", title: __('Createtime'), searchType: 'time', templet: bdTable.api.formatter.datetime },
                     { title: __("Operate"), width: 180, templet: bdTable.api.formatter.operate }
         ]],

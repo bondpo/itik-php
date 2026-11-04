@@ -14,11 +14,12 @@ return [
         'ru' => ['name' => 'Русский', 'baidu' => 'ru'],
         'ar' => ['name' => 'العربية', 'baidu' => 'ara'],
         'pt' => ['name' => 'Português', 'baidu' => 'pt'],
+        'vi' => ['name' => 'Tiếng Việt', 'baidu' => 'vie'],
     ],
     // 仅允许翻译展示字段，标识、状态、金额及用户隐私不进入翻译服务。
     'resources' => [
         'api_message' => ['table' => 'app_i18n_message', 'fields' => ['text'], 'status' => 'normal'],
-        'project' => ['table' => 'app_project', 'fields' => ['name', 'subtitle', 'summary', 'content'], 'status' => 'normal', 'soft_delete' => true],
+        'project' => ['table' => 'app_project', 'fields' => ['name', 'subtitle', 'summary', 'content','audience'], 'status' => 'normal', 'soft_delete' => true],
         'cms_archive' => ['table' => 'cms_archives', 'fields' => ['title', 'description', 'seotitle', 'keywords', 'content'], 'status' => 'normal', 'soft_delete' => true],
         'content' => ['table' => 'app_content', 'fields' => ['title', 'summary', 'content'], 'status' => 'normal', 'soft_delete' => true],
         'category' => ['table' => 'app_project_category', 'fields' => ['name', 'description'], 'status' => 'normal'],
@@ -26,5 +27,6 @@ return [
         'promotion_package' => ['table' => 'app_promotion_package', 'fields' => ['name'], 'status' => 'normal'],
         'timeline' => ['table' => 'app_project_timeline', 'fields' => ['title', 'tag', 'summary', 'content'], 'status' => 'normal'],
         'material' => ['table' => 'app_project_material', 'fields' => ['title'], 'status_field' => 'review_status', 'status' => 'normal'],
+        'group' => ['table' => 'user_group', 'fields' => ['name'], 'status' => 'normal'],
     ],
 ];

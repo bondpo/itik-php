@@ -22,6 +22,44 @@
             <input type="text" name="row[subtitle]" value="{$row.subtitle|default=''}" placeholder="副标题" autocomplete="off" class="layui-input" />
         </div>
     </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">是否热门</label>
+        <div class="layui-input-block">
+            <input type="hidden" name="row[is_hot]" value="0" />
+            <input type="checkbox" name="row[is_hot]" value="1" lay-skin="switch" lay-text="是|否" {if isset($row.is_hot) && $row.is_hot == 1}checked{/if} />
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">是否最新</label>
+        <div class="layui-input-block">
+            <input type="hidden" name="row[is_new]" value="0" />
+            <input type="checkbox" name="row[is_new]" value="1" lay-skin="switch" lay-text="是|否" {if isset($row.is_new) && $row.is_new == 1}checked{/if} />
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">启动时间</label>
+        <div class="layui-input-block">
+            <input
+                    type="text"
+                    name="row[start_time]"
+                    value="{$row.start_time|default=time()|date='Y-m-d H:i:s'|}"
+                    readonly
+                    placeholder="启动时间"
+                    class="layui-input laydate" />
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">LOGO</label>
+        <div class="layui-input-block">
+            <input type="text" id="c-logo" name="row[logo]" value="{$row.logo|default=''}" placeholder="LOGO图片地址" autocomplete="off" class="layui-input" style="width:70%" />
+            <div class="layui-input-suffix" style="width:30%">
+                <button type="button" data-input-id="c-logo" data-preview-id="p-logo" class="layui-btn btn-bdupload"><i class="fa fa-upload"></i> 上传</button>
+                <button type="button" data-input-id="c-logo" class="layui-btn layui-bg-green btn-bdchoose"><i class="fa fa-list"></i> 选择</button>
+            </div>
+            <div class="layui-upload-list" id="p-logo"></div>
+        </div>
+    </div>
 
     <div class="layui-form-item">
         <label class="layui-form-label">封面</label>
@@ -77,7 +115,70 @@
     <div class="layui-form-item layui-form-text">
         <label class="layui-form-label">正文</label>
         <div class="layui-input-block">
-            <textarea name="row[content]" placeholder="正文" class="layui-textarea">{$row.content|default=''}</textarea>
+            <textarea name="row[content]" placeholder="正文" class="layui-textarea editor">{$row.content|default=''}</textarea>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">受众</label>
+        <div class="layui-input-block">
+            <input type="text" name="row[audience]" value="{$row.audience|default=''}" placeholder="受众人群" autocomplete="off" class="layui-input" />
+        </div>
+    </div>
+    <!-- material 仅支持 PDF / PPT / PPTX -->
+    <div class="layui-form-item">
+        <label class="layui-form-label">补充资料</label>
+        <div class="layui-input-block">
+            <input type="text" id="c-material" name="row[material]" value="{$row.material|default=''}" placeholder="资料文件地址（PDF / PPT / PPTX）" autocomplete="off" class="layui-input" style="width:70%" />
+            <div class="layui-input-suffix" style="width:30%">
+                <button type="button" data-input-id="c-material" data-preview-id="p-material" class="layui-btn btn-bdupload"><i class="fa fa-upload"></i> 上传</button>
+                <button type="button" data-input-id="c-material" class="layui-btn layui-bg-green btn-bdchoose"><i class="fa fa-list"></i> 选择</button>
+            </div>
+<!--            <div class="layui-upload-list" id="p-material"></div>-->
+
+            <!-- 预览区域 -->
+            <div id="preview-material" style="margin-top:12px; display:none;">
+                <div id="preview-material-content"></div>
+
+                <div style="margin-top:8px;">
+                    <a id="link-material" href="" target="_blank" class="layui-btn layui-btn-xs layui-btn-primary">
+                        <i class="fa fa-external-link"></i> 新窗口打开 / 下载
+                    </a>
+                    <button type="button" class="layui-btn layui-btn-xs layui-btn-danger" id="btn-clear-material">
+                        <i class="fa fa-trash"></i> 清除
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MP4 -->
+    <div class="layui-form-item">
+        <label class="layui-form-label">MP4 视频</label>
+        <div class="layui-input-block">
+            <input type="text" id="c-mp4" name="row[video]" value="{$row.video|default=''}" placeholder="MP4 视频地址" autocomplete="off" class="layui-input" style="width:70%" />
+            <div class="layui-input-suffix" style="width:30%">
+                <button type="button" data-input-id="c-mp4" data-preview-id="p-mp4" class="layui-btn btn-bdupload"><i class="fa fa-upload"></i> 上传</button>
+                <button type="button" data-input-id="c-mp4" class="layui-btn layui-bg-green btn-bdchoose"><i class="fa fa-list"></i> 选择</button>
+            </div>
+<!--            <div class="layui-upload-list" id="p-mp4"></div>-->
+
+            <!-- 预览区域：默认隐藏 -->
+            <div id="preview-mp4" style="margin-top:12px; display:none;">
+                <video id="video-mp4"
+                       controls
+                       preload="metadata"
+                       style="max-width:100%; max-height:420px; border:1px solid #e6e6e6; border-radius:4px; background:#000;">
+                    您的浏览器不支持 video 标签。
+                </video>
+                <div style="margin-top:6px;">
+                    <a id="link-mp4" href="" target="_blank" class="layui-btn layui-btn-xs layui-btn-primary">
+                        <i class="fa fa-external-link"></i> 新窗口打开
+                    </a>
+                    <button type="button" class="layui-btn layui-btn-xs layui-btn-danger" id="btn-clear-mp4">
+                        <i class="fa fa-trash"></i> 清除
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -174,6 +275,100 @@
 
 <script>
     layui.use(["form", "badou"], function () {
+        var form = layui.form;
+        var badou = layui.badou;
+        var $ = layui.$;
+
         layui.bdForm.api.bindevent($("form.layui-form"));
+
+        // 更新 MP4 预览
+        function updateMp4Preview() {
+            var rawUrl = $.trim($("#c-mp4").val());
+            var fullUrl = badou.api.cdnurl(rawUrl);
+            var $preview = $("#preview-mp4");
+            var $video  = $("#video-mp4");
+
+            if (!fullUrl) {
+                $video.removeAttr("src");
+                $video[0].load();
+                $preview.hide();
+                return;
+            }
+
+            $video.attr("src", fullUrl);
+            $video[0].load();                     // 必须重新 load
+            $("#link-mp4").attr("href", fullUrl);
+            $preview.show();
+        }
+
+// 监听变化
+        $("#c-mp4").on("input change blur", function () {
+            updateMp4Preview();
+        });
+
+// 清除按钮
+        $("#btn-clear-mp4").on("click", function () {
+            $("#c-mp4").val("").trigger("change");
+        });
+
+// 页面加载时执行一次
+        updateMp4Preview();
+
+        // 兼容上传/选择组件（延迟一点等值写进去）
+        $(document).on("click", ".btn-bdupload, .btn-bdchoose", function () {
+            setTimeout(updateMp4Preview, 600);
+        });
+
+        // 判断是否为 PPT/PPTX
+        function isOffice(url) {
+            var ext = (url.split("?")[0].split(".").pop() || "").toLowerCase();
+            return ["ppt", "pptx"].includes(ext);
+        }
+
+        // 更新预览
+        function updateMaterialPreview() {
+            var rawUrl  = $.trim($("#c-material").val());
+            var fullUrl = badou.api.cdnurl(rawUrl);
+            var $preview = $("#preview-material");
+            var $content = $("#preview-material-content");
+
+            if (!fullUrl) {
+                $content.empty();
+                $preview.hide();
+                return;
+            }
+
+            var html = "";
+            if (isOffice(fullUrl)) {
+                // PPT / PPTX 使用微软在线预览
+                var officeUrl = "https://view.officeapps.live.com/op/view.aspx?src=" + encodeURIComponent(fullUrl);
+                html = `<iframe src="${officeUrl}" width="100%" height="520" frameborder="0" style="border:1px solid #e6e6e6; border-radius:4px;"></iframe>`;
+            } else {
+                // PDF 直接用 iframe
+                html = `<iframe src="${fullUrl}" width="100%" height="520" frameborder="0" style="border:1px solid #e6e6e6; border-radius:4px;"></iframe>`;
+            }
+
+            $content.html(html);
+            $("#link-material").attr("href", fullUrl);
+            $preview.show();
+        }
+
+        // 监听变化
+        $("#c-material").on("input change blur", function () {
+            updateMaterialPreview();
+        });
+
+        // 清除
+        $("#btn-clear-material").on("click", function () {
+            $("#c-material").val("").trigger("change");
+        });
+
+        // 页面加载时执行
+        updateMaterialPreview();
+
+        // 兼容上传/选择组件
+        $(document).on("click", ".btn-bdupload[data-input-id='c-material'], .btn-bdchoose[data-input-id='c-material']", function () {
+            setTimeout(updateMaterialPreview, 600);
+        });
     });
 </script>

@@ -122,8 +122,9 @@ class Base extends Api
             ->alias('u')
             ->join('user_group g', 'g.id = u.group_id')
             ->where('u.id', $userId)
-            ->field('g.name')
+            ->field('g.id,g.name')
             ->find();
+        $group = $this->translations()->row('group', $group);
         $name = trim((string)($group['name'] ?? ''));
         return $name;
     }
