@@ -25,6 +25,7 @@ use app\api\controller\v1\Promotion;
 use app\api\controller\v1\Consult;
 use app\api\controller\v1\Region;
 use app\api\controller\v1\PageImages;
+use app\api\controller\v1\Money;
 use app\api\controller\cms\Index      as CmsIndex;
 use app\api\controller\cms\Channel    as CmsChannel;
 use app\api\controller\cms\Archives   as CmsArchives;
@@ -59,6 +60,8 @@ Route::group('v1', function () {
     Route::post('users/find-fri', [User::class, 'findFri']);
     Route::post('users/friends', [User::class, 'friends']);
     Route::get('users/my-fri', [User::class, 'myFri']);
+    Route::get('users/money-log', [Money::class, 'index']);
+    Route::get('users/money-stat', [Money::class, 'stat']);
 
     /* ---------------- 套餐（公开） ---------------- */
     Route::get('roles/plans', [Plan::class, 'index']);
