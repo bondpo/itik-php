@@ -420,15 +420,18 @@ class Billing extends Base
                 $before = $this->auth->money;
                 $after = function_exists('bcsub') ? bcsub($this->auth->money, $money, 2) : ($this->auth->money - $money);
                 \app\admin\model\User::where('id', $this->auth->id)->setDec('money', $money);
+                $order_no = date("Ymdhis") . sprintf("%08d", $this->auth->id) . mt_rand(1000, 9999);
                 \app\common\model\MoneyLog::create([
                     'user_id' => $this->auth->id,
                     'money' => -$money,
                     'before' => $before,
                     'after' => $after,
-                    'memo' => '提现'
+                    'type' => 'withdraw',
+                    'memo' => '提现',
+                    'order_no' => $order_no,
                 ]);
                 \app\admin\model\UsdtTransfers::create([
-                    'order_no' => date("Ymdhis") . sprintf("%08d", $this->auth->id) . mt_rand(1000, 9999),
+                    'order_no' => $order_no,
                     'user_id' => $this->auth->id,
                     'task_id' => 1,
                     'token_symbol' => $token_symbol,

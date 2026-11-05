@@ -28,5 +28,6 @@ return [
         'timeline' => ['table' => 'app_project_timeline', 'fields' => ['title', 'tag', 'summary', 'content'], 'status' => 'normal'],
         'material' => ['table' => 'app_project_material', 'fields' => ['title'], 'status_field' => 'review_status', 'status' => 'normal'],
         'group' => ['table' => 'user_group', 'fields' => ['name'], 'status' => 'normal'],
+        'bonus_memo' => ['table' => 'bonus_memo', 'fields' => ['name'], 'status' => 'normal'],
     ],
 ];

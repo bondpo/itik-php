@@ -20,6 +20,10 @@ class Ds
     public const ORDER_PAID     = 'paid';
     public const ORDER_CLOSED   = 'closed';
     public const ORDER_REFUNDED = 'refunded';
+    public function __construct()
+    {
+        $this->memo = \app\admin\model\BonusMemo::where('id', '>', 0)->column('name', 'code');
+    }
 
     public function orderAct($order_id=1){
         $service = new SubscriptionService();
@@ -121,16 +125,16 @@ class Ds
                             }
                         }
                         $bonus = $amount * $rate;
-                        if($bonus > 0) $this->bonusAct($pUser, $bonus, '分享奖励', $order->order_no);
+                        if($bonus > 0) $this->bonusAct($pUser, $bonus, 'share', $order->order_no);
                     }
                     if($pUser->lv_team > $teamLv){
                         $bonus = $amount * ($tLvs[$pUser->lv_team]['rate'] - $tLvs[$teamLv]['rate']);
-                        $this->bonusAct($pUser, $bonus, '社区奖励', $order->order_no);
+                        $this->bonusAct($pUser, $bonus, 'community', $order->order_no);
                         $teamLv = $pUser->lv_team;
                         if($pUser->lv_team >= $pjLv) $pjRate = 0.01;
                     }else if($pUser->lv_team == $teamLv && $teamLv >= $pjLv && $pjRate > 0){
                         $bonus = $amount * $pjRate;
-                        $this->bonusAct($pUser, $bonus, '社区平级', $order->order_no);
+                        $this->bonusAct($pUser, $bonus, 'peerLv', $order->order_no);
                         $pjRate = 0;
                     }
                     if($active){
@@ -152,7 +156,7 @@ class Ds
         }
     }
 
-    public function bonusAct($user, $bonus, $memo, $order_no=''){
+    public function bonusAct($user, $bonus, $type, $order_no=''){
         if($user->group_id != 1){
             $before = $user->money;
             $after = function_exists('bcadd') ? bcadd($user->money, $bonus, 2) : ($user->money + $bonus);
@@ -162,7 +166,8 @@ class Ds
                 'money' => $bonus,
                 'before' => $before,
                 'after' => $after,
-                'memo' => $memo,
+                'type' => $type,
+                'memo' => $this->memo[$type],
                 'order_no' => $order_no
             ]);
         }

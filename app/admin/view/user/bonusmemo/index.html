@@ -1,0 +1,48 @@
+{layout name="layout/default" /}
+
+<div class="layui-card">
+    <div class="layui-card-body">
+        <table class="layui-hide" id="user_bonusmemo" data-operate-edit="{:$auth->check('user.bonusmemo/edit')}" data-operate-del="{:$auth->check('user.bonusmemo/del')}"></table>
+    </div>
+</div>
+
+<script type="text/html" id="toolbar">
+    <a href="javascript:;" lay-event="refresh" class="layui-btn btn-refresh layui-bg-black"><i class="fa fa-refresh"></i></a>
+    <button class="layui-btn layui-bg-green {:$auth->check('user.bonusmemo/add')?'':'hide'}" lay-event="add"><i class="fa fa-plus"></i> {:__('Add')}</button>
+    <button class="layui-btn layui-bg-blue btn-disabled disabled {:$auth->check('user.bonusmemo/edit')?'':'hide'}" lay-event="edit"><i class="fa fa-pencil"></i> {:__('Edit')}</button>
+    <button class="layui-btn layui-bg-red btn-disabled disabled {:$auth->check('user.bonusmemo/del')?'':'hide'}" lay-event="del"><i class="fa fa-trash"></i> {:__('Del')}</button>
+    
+</script>
+
+<script>
+layui.use(["badou", "table"], function () {
+    var bdTable = layui.bdTable;
+    var table = layui.table;
+    bdTable.api.init({
+        table: table,
+        extend: {
+            index_url: "user.bonusmemo/index",
+            add_url: "user.bonusmemo/add",
+            edit_url: "user.bonusmemo/edit",
+            del_url: "user.bonusmemo/del",
+            multi_url: "user.bonusmemo/multi",
+            table: "bonus_memo",
+        },
+    });
+    bdTable.render({
+        elem: "#user_bonusmemo",
+        url: "{:url('user.bonusmemo/index')}",
+        pk: "id",
+        sortName: "id",
+        even: true,
+        toolbar: "#toolbar",
+        cols: [[
+                    { type: "checkbox" },
+                    { field: "id", title: __('Id'), width: 80, sort: true },
+                    { field: "code", title: __('Code'), operate: 'LIKE' },
+                    { field: "name", title: __('Name'), operate: 'LIKE' },
+                    { title: __("Operate"), width: 180, templet: bdTable.api.formatter.operate }
+        ]],
+    });
+});
+</script>

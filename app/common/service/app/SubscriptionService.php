@@ -100,6 +100,7 @@ class SubscriptionService
                     'money' => -$blc,
                     'before' => $before,
                     'after' => $after,
+                    'type' => 'sub',
                     'memo' => '订阅',
                     'order_no' => $orderNo,
                 ]);
