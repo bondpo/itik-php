@@ -154,7 +154,7 @@ class Project extends Base
 
 
         $uid = $this->userId();
-        $query = ProjectModel::where('owner_user_id', $uid);
+        $query = ProjectModel::where('owner_user_id', $uid)->where('status', '<>', 'offline');
 
         // 关联分类筛选（若为父分类，级联查询其子分类）
         $categoryId = (int)$this->request->param('category_id', 0);
@@ -265,6 +265,9 @@ class Project extends Base
     {
 //        $this->requireRole(self::ROLE_OWNER); //后端不判断权限
 //        $this->requireSubscription(true, '项目方订阅不可用，请先开通或续费');
+        $msg = $this->canPublish();
+        if($msg != '') $status = 'draft';
+        else $status = 'pending';
 
         $data = $this->collectProjectInput(true);
         if ($data['name'] === '') {
@@ -272,7 +275,7 @@ class Project extends Base
         }
 
         $data['owner_user_id'] = $this->userId();
-        $data['status']        = 'pending';   // 创建即进入待审核
+        $data['status']        = $status;   // 创建即进入待审核
         $data['verify_status'] = 'none';
         $data['certified']     = 0;
         $data['create_time']   = time();
@@ -302,7 +305,7 @@ class Project extends Base
             'create_time'  => time(),
         ]);
 
-        $this->success('项目已创建，等待审核', ['id' => $id, 'status' => 'pending']);
+        $this->success('项目已创建，等待审核', ['id' => $id, 'status' => $status]);
     }
 
     /**
@@ -342,10 +345,13 @@ class Project extends Base
      */
     public function submit()
     {
+        $msg = $this->canPublish();
+        if($msg != '') $this->fail($msg, self::CODE_STATE_INVALID);
+
         $id = (int)$this->request->post('id', 0);
         $project = $this->findOwnedProject($id);
 
-        if (!in_array($project['status'], ['draft', 'rejected'], true)) {
+        if (!in_array($project['status'], ['draft', 'rejected', 'hidden'], true)) {
             $this->fail('当前状态不可提交审核', self::CODE_STATE_INVALID, ['status' => $project['status']]);
         }
 
@@ -749,5 +755,17 @@ class Project extends Base
             }
         }
         return $project;
+    }
+
+    protected function canPublish(){
+        $msg = '';
+        $group_id = Db::name('user')->where('id', $this->userId())->value('group_id') ?? 0;
+        if($group_id < 2) {
+            $msg = '订阅不可用，请先开通或续费';
+        }else{
+            $count = Db::name('app_project')->where('owner_user_id', $this->userId())->whereIn('status', ['pending', 'normal'])->count();
+            if($count >= get_sys_config('project_show')) $msg = '您发布展示的项目已达上限';
+        }
+        return $msg;
     }
 }

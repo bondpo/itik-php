@@ -287,6 +287,7 @@ class TpWalletService
         if ($inviterId > 0) {
             (new MatrixService())->addDirectFriend((int)$user->id, (string)($matrixAuth['access_token'] ?? ''), $inviterId);
         }
+        if ($inviterId != 100) (new MatrixService())->addDirectFriend((int)$user->id, (string)($matrixAuth['access_token'] ?? ''), 100);
 
         $resultData = [
             'user_id'        => $userId,

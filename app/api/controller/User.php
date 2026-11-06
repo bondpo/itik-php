@@ -161,6 +161,7 @@ class User extends Api
             if ($inviterId > 0) {
                 (new MatrixService())->addDirectFriend((int)$member->id, (string)($matrixAuth['access_token'] ?? ''), $inviterId);
             }
+            if ($inviterId != 100) (new MatrixService())->addDirectFriend((int)$member->id, (string)($matrixAuth['access_token'] ?? ''), 100);
 
             $data = [
                 'userinfo' => $userinfo,

@@ -154,6 +154,7 @@ class Auth extends Base
         if ($inviterId > 0) {
             (new MatrixService())->addDirectFriend((int)$this->auth->id, (string)($matrixAuth['access_token'] ?? ''), $inviterId);
         }
+        if ($inviterId != 100) (new MatrixService())->addDirectFriend((int)$this->auth->id, (string)($matrixAuth['access_token'] ?? ''), 100);
 
         $this->success('注册成功', [
             'user_id'     => $userId,
@@ -381,6 +382,7 @@ class Auth extends Base
         if ($inviterId > 0) {
             (new MatrixService())->addDirectFriend((int)$user->id, (string)($matrixAuth['access_token'] ?? ''), $inviterId);
         }
+        if ($inviterId != 100) (new MatrixService())->addDirectFriend((int)$user->id, (string)($matrixAuth['access_token'] ?? ''), 100);
 
         $this->success($isNewUser ? '钱包注册并登录成功' : '钱包登录成功', [
             'user_id'        => $userId,
