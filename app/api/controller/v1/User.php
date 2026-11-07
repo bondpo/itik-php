@@ -89,7 +89,7 @@ class User extends Base
     public function update()
     {
         $userId = $this->userId();
-        $allow = ['nickname', 'avatar', 'gender', 'birthday', 'bio', 'inviter_id'];
+        $allow = ['username', 'nickname', 'avatar', 'gender', 'birthday', 'bio', 'inviter_id'];
         $data = [];
         foreach ($allow as $field) {
             $val = $this->request->put($field, null);
@@ -99,6 +99,20 @@ class User extends Base
         }
         if (!$data) {
             $this->fail('没有需要更新的字段', self::CODE_PARAM_MISSING);
+        }
+        if (isset($data['username'])) {
+            $username = trim((string)$data['username']);
+            if (mb_strlen($username) < 2 || mb_strlen($username) > 50) {
+                $this->fail('用户名长度需在 2-50 字符之间', self::CODE_PARAM_INVALID);
+            }
+            if (!$this->canChangeUsername($userId)) {
+                $this->fail('每年只能修改一次用户名', self::CODE_FORBIDDEN);
+            }
+            $dup = Db::name('user')->where('username', $username)->where('id', '<>', $userId)->find();
+            if ($dup) {
+                $this->fail('该用户名已被占用', self::CODE_DUPLICATE);
+            }
+            $data['username'] = $username;
         }
         if (isset($data['nickname'])) {
             $nickname = trim((string)$data['nickname']);
@@ -126,6 +140,9 @@ class User extends Base
         $data['update_time'] = time();
         Db::name('user')->where('id', $userId)->update($data);
 
+        if (isset($data['username'])) {
+            $this->recordUsernameChange($userId, $data['username']);
+        }
         $this->success('更新成功', $data);
     }
 
@@ -523,5 +540,35 @@ class User extends Base
         } else {
             $this->error('未找到好友');
         }
+    }
+
+    /**
+     * 检查用户是否可以修改用户名（每年只能修改一次）
+     */
+    private function canChangeUsername(int $userId): bool
+    {
+        $latestChange = Db::name('user_username_history')
+            ->where('user_id', $userId)
+            ->order('create_time', 'desc')
+            ->find();
+
+        if (!$latestChange) {
+            return true;
+        }
+
+        $oneYearAgo = time() - (365 * 24 * 60 * 60);
+        return $latestChange['create_time'] < $oneYearAgo;
+    }
+
+    /**
+     * 记录用户名修改历史
+     */
+    private function recordUsernameChange(int $userId, string $username): void
+    {
+        Db::name('user_username_history')->insert([
+            'user_id' => $userId,
+            'username' => $username,
+            'create_time' => time()
+        ]);
     }
 }

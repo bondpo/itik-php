@@ -7,10 +7,10 @@ return [
     'cors_request_domain' => 'localhost,127.0.0.1,*',
     //后台登录失败尝试次数
     'admin_failure_retry' => 10,
-    //后台登录失败超过次数后锁定时间 默认1天（单位秒）
-    'admin_failure_lock_time' => 86400,
+    //后台登录失败超过次数后锁定时间 默认100天（单位秒）
+    'admin_failure_lock_time' => 864000,
     //后台登录保持时间 默认1天（单位秒）
-    'admin_keep_time' => 86400,
+    'admin_keep_time' => 864000,
     //登录验证码
     'admin_login_captcha' => true,
     //后台登录提示
@@ -47,7 +47,9 @@ return [
                 // 存储token的表名
                 'table'  => 'token',
                 // 默认 token 有效时间
-                'expire' => 2592000,
+                'expire' => 7776000,
+                // 默认 token 延期检测
+                'check' => 2592000,
             ],
             'redis' => [
                 'type'       => 'Redis',

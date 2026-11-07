@@ -74,8 +74,29 @@ class Mysql extends Driver
             return [];
         }
 
-        $data['token']      = $token; // 返回未加密的token给客户端使用
-        $data['expires_in'] = $this->getExpiredIn($data['expire_time'] ?? 0); // 返回剩余有效时间
+//        $data['token']      = $token; // 返回未加密的token给客户端使用
+//        $data['expires_in'] = $this->getExpiredIn($data['expire_time'] ?? 0); // 返回剩余有效时间
+
+        $expireTime = $data['expire_time'] ?? 0;
+        
+        if ($expireTime > 0) {
+            $currentConfigExpire = $this->options['expire'] ?? 2592000;  // 从配置获取过期时间
+            $refreshThreshold = $this->options['check'] ?? 864000;  // 从配置获取过期时间
+            $remainingTime = $expireTime - time();
+
+            if ($remainingTime < $refreshThreshold) {
+                $newExpireTime = time() + $currentConfigExpire;
+                $this->handler->where('token', $this->getEncryptedToken($token))
+                    ->update(['expire_time' => $newExpireTime]);
+                $data['expires_in'] = $currentConfigExpire;
+            } else {
+                $data['expires_in'] = $remainingTime;
+            }
+        } else {
+            $data['expires_in'] = 0;
+        }
+        
+        $data['token'] = $token;
         return $data;
     }
 
