@@ -116,9 +116,10 @@ class User extends Base
         }
         if (isset($data['inviter_id']) && $data['inviter_id'] != '') {
             $inviter_id = Db::name('user')->where('id', $userId)->value('inviter_id');
-            if($inviter_id > 0) $this->fail('已绑定推荐人无法修改!');
+            if($inviter_id > 0) $this->fail('已绑定推荐人无法修改');
             $ivUser = Db::name('user')->where('invite_code', $data['inviter_id'])->find();
-            if(!$ivUser) $this->fail('推荐人不存在!');
+            if(!$ivUser) $this->fail('推荐人不存在');
+            if($ivUser['id'] == $userId) $this->fail('推荐人不能是自己');
             $data['inviter_id'] = $ivUser['id'];
         }
 
