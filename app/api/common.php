@@ -83,6 +83,8 @@ Route::group('v1', function () {
     Route::post('billing/pay/tp-callback', [Billing::class, 'tpCallback']);
     Route::post('billing/withdraw', [Billing::class, 'withdraw']);
     Route::get('billing/wallet', [Billing::class, 'wallet']);
+    Route::rule('billing/transfer/check', [Billing::class, 'checkRecipient'], 'GET|POST');
+    Route::post('billing/transfer', [Billing::class, 'transfer']);
 
     /* ---------------- 项目 ---------------- */
     Route::get('projects/categories', [Project::class, 'categories']);

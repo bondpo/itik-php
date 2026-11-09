@@ -11,6 +11,8 @@ use think\facade\Db;
 use think\facade\Cache;
 use app\common\service\app\SubscriptionService;
 use app\common\service\TpPayService;
+use app\common\model\User as UserModel;
+use app\common\model\MoneyLog;
 
 /**
  * 订阅与订单接口
@@ -25,6 +27,8 @@ use app\common\service\TpPayService;
  *   POST /api/v1/billing/pay/notify          支付回调（服务端验签，公开）
  *   POST /api/v1/billing/pay/tp-init         生成 TP 转账 DeepLink（需登录）
  *   POST /api/v1/billing/pay/tp-callback     TP 转账结果回调（公开，验链）
+ *   GET|POST /api/v1/billing/transfer/check  检查收款人（基于 invite_code）
+ *   POST /api/v1/billing/transfer            用户间转账（防重、整数金额、邮箱验证码、基于 invite_code）
  */
 class Billing extends Base
 {
@@ -459,5 +463,326 @@ class Billing extends Base
             $this->error('请勿频繁操作');
         }
         $redis->set($processKey,1,$time);
+    }
+
+    /**
+     * 检查收款人信息（转账前预检）
+     * 路由：GET|POST /api/v1/billing/transfer/check
+     */
+    public function checkRecipient()
+    {
+        $senderId = $this->userId();
+        if ($senderId <= 0) {
+            $this->fail('请先登录', self::CODE_UNAUTHORIZED);
+        }
+
+        $inviteCode = strtoupper(trim((string)$this->request->param('invite_code', '')));
+        if ($inviteCode === '') {
+            $this->fail('请输入收款人邀请码', self::CODE_PARAM_MISSING);
+        }
+
+        $recipient = UserModel::where('invite_code', $inviteCode)->find();
+        if (!$recipient) {
+            $this->fail('收款人不存在，请核对邀请码', self::CODE_NOT_FOUND);
+        }
+
+        if ((int)$recipient->id === $senderId) {
+            $this->fail('不能向自己转账', self::CODE_PARAM_INVALID);
+        }
+
+        if ((string)$recipient->status !== 'normal') {
+            $this->fail('收款人账号状态异常，无法收款', self::CODE_STATE_INVALID);
+        }
+
+        $nickname = (string)($recipient->nickname ?: $recipient->username);
+        $avatar = (string)($recipient->avatar ?: '');
+        if ($avatar !== '' && function_exists('cdnurl')) {
+            $avatar = cdnurl($avatar, true);
+        }
+
+        $this->success('查询成功', [
+            'invite_code'     => $recipient->invite_code,
+            'nickname_masked' => $this->maskNickname($nickname),
+            'avatar'          => $avatar,
+        ]);
+    }
+
+    /**
+     * 用户余额转账
+     * 路由：POST /api/v1/billing/transfer
+     *
+     * 规则：
+     * 1. 防重复提交：分布式锁（3s）+ 幂等键（Idempotency-Key / idempotency_key，缓存 300s）
+     * 2. 转账金额必须为正整数
+     * 3. 转账对象基于 bd_user.invite_code
+     * 4. 事务保证原子性，升序行级悲观锁避免死锁，资金日志写入 bd_user_money_log
+     */
+    public function transfer()
+    {
+        $senderId = $this->userId();
+        if ($senderId <= 0) {
+            $this->fail('请先登录', self::CODE_UNAUTHORIZED);
+        }
+
+        // 1. 幂等检查（若客户端重试携带同一幂等Key且已处理成功，则直接返回上次成功数据）
+        $idemKey = trim((string)($this->request->header('Idempotency-Key') ?: $this->request->post('idempotency_key', '')));
+        if ($idemKey !== '') {
+            if (mb_strlen($idemKey) > 64) {
+                $this->fail('Idempotency-Key 过长（最多 64 字符）', self::CODE_PARAM_INVALID);
+            }
+            $cached = Cache::get('idemp:transfer:' . $senderId . ':' . $idemKey);
+            if ($cached && is_array($cached)) {
+                $this->success('转账已完成（幂等返回）', $cached);
+            }
+        }
+
+        // 2. 防重提交分布式锁（3秒防抖）
+        if (!$this->acquireTransferLock($senderId, 3)) {
+            $this->fail('操作过于频繁，请勿重复提交', self::CODE_RATE_LIMITED);
+        }
+
+        // 3. 参数校验
+        $inviteCode = strtoupper(trim((string)$this->request->post('invite_code', '')));
+        if ($inviteCode === '') {
+            $this->releaseTransferLock($senderId);
+            $this->fail('请输入收款人邀请码', self::CODE_PARAM_MISSING);
+        }
+
+        $rawAmount = $this->request->post('amount');
+        if ($rawAmount === null || $rawAmount === '' || !preg_match('/^[1-9]\d*$/', (string)$rawAmount)) {
+            $this->releaseTransferLock($senderId);
+            $this->fail('转账金额必须是正整数', self::CODE_PARAM_INVALID);
+        }
+        $amount = (int)$rawAmount;
+        if ($amount < 1) {
+            $this->releaseTransferLock($senderId);
+            $this->fail('转账金额最低为 1', self::CODE_PARAM_INVALID);
+        }
+        if ($amount > 100000000) {
+            $this->releaseTransferLock($senderId);
+            $this->fail('单笔转账金额超出上限', self::CODE_PARAM_INVALID);
+        }
+
+        $remark = trim((string)$this->request->post('remark', ''));
+        if (mb_strlen($remark) > 50) {
+            $this->releaseTransferLock($senderId);
+            $this->fail('备注说明最多50字', self::CODE_PARAM_INVALID);
+        }
+
+        // 邮箱验证码校验（参考提现验证码规范）
+        $code = trim((string)$this->request->post('code', ''));
+        if ($code === '') {
+            $this->releaseTransferLock($senderId);
+            $this->fail('请输入邮箱验证码', self::CODE_PARAM_MISSING);
+        }
+
+        $senderPre = UserModel::where('id', $senderId)->find();
+        if (!$senderPre) {
+            $this->releaseTransferLock($senderId);
+            $this->fail('付款人账号异常', self::CODE_NOT_FOUND);
+        }
+
+        $senderEmail = (string)($senderPre->email ?: ($this->auth->email ?? ''));
+        if (!$senderEmail || !filter_var($senderEmail, FILTER_VALIDATE_EMAIL)) {
+            $this->releaseTransferLock($senderId);
+            $this->fail('当前账号尚未绑定有效邮箱，请先前往绑定邮箱', self::CODE_STATE_INVALID);
+        }
+
+        // 验证验证码（优先 transfer 事件，兼容 withdraw 事件）
+        $checkPassed = Ems::check($senderEmail, $code, 'transfer');
+        $eventUsed = 'transfer';
+        if (!$checkPassed && Ems::check($senderEmail, $code, 'withdraw')) {
+            $checkPassed = true;
+            $eventUsed = 'withdraw';
+        }
+
+        if (!$checkPassed) {
+            $this->releaseTransferLock($senderId);
+            $this->fail(Ems::getLastErrorMessage() ?: '验证码错误或已过期', self::CODE_PARAM_INVALID);
+        }
+
+        // 4. 收款人前置验证
+        $receiverPre = UserModel::where('invite_code', $inviteCode)->find();
+        if (!$receiverPre) {
+            $this->releaseTransferLock($senderId);
+            $this->fail('收款人不存在，请核对邀请码', self::CODE_NOT_FOUND);
+        }
+        if ((int)$receiverPre->id === $senderId) {
+            $this->releaseTransferLock($senderId);
+            $this->fail('不能向自己转账', self::CODE_PARAM_INVALID);
+        }
+        if ((string)$receiverPre->status !== 'normal') {
+            $this->releaseTransferLock($senderId);
+            $this->fail('收款人账号状态异常，无法收款', self::CODE_STATE_INVALID);
+        }
+        $receiverId = (int)$receiverPre->id;
+
+        // 5. 付款人当前余额前置检查
+        $senderPre = UserModel::where('id', $senderId)->find();
+        if (!$senderPre || bccomp((string)$senderPre->money, (string)$amount, 2) < 0) {
+            $this->releaseTransferLock($senderId);
+            $this->fail('当前可用余额不足', self::CODE_BIZ_FAIL);
+        }
+
+        // 6. 事务内加锁执行划转
+        $orderNo = 'TF' . date('YmdHis') . sprintf('%06d', $senderId) . mt_rand(1000, 9999);
+        $resultData = null;
+
+        Db::startTrans();
+        try {
+            // 严格按 ID 升序锁定双边行记录，避免相互转账时可能产生的死锁（Deadlock）
+            $firstId = min($senderId, $receiverId);
+            $secondId = max($senderId, $receiverId);
+
+            $userA = UserModel::where('id', $firstId)->lock(true)->find();
+            $userB = UserModel::where('id', $secondId)->lock(true)->find();
+
+            $sender = ($firstId === $senderId) ? $userA : $userB;
+            $receiver = ($firstId === $receiverId) ? $userA : $userB;
+
+            if (!$sender || !$receiver) {
+                throw new \Exception('转账用户数据读取失败，请稍后重试');
+            }
+            if ((string)$receiver->status !== 'normal') {
+                throw new \Exception('收款人账号状态异常，转账终止');
+            }
+
+            $senderBefore = (string)$sender->money;
+            if (bccomp($senderBefore, (string)$amount, 2) < 0) {
+                throw new \Exception('可用余额不足');
+            }
+
+            // 计算变动后余额
+            $senderAfter = bcsub($senderBefore, (string)$amount, 2);
+            $receiverBefore = (string)$receiver->money;
+            $receiverAfter = bcadd($receiverBefore, (string)$amount, 2);
+
+            // 扣除付款人余额
+            $sender->money = $senderAfter;
+            $sender->save();
+
+            // 增加收款人余额
+            $receiver->money = $receiverAfter;
+            $receiver->save();
+
+            // 生成备注
+            $senderName = (string)($sender->nickname ?: $sender->username);
+            $receiverName = (string)($receiver->nickname ?: $receiver->username);
+
+            $senderMemo = '转账支出给用户: ' . $receiverName . '(' . $receiver->invite_code . ')';
+            if ($remark !== '') {
+                $senderMemo .= ' [' . $remark . ']';
+            }
+
+            $receiverMemo = '收到转账: 来自用户 ' . $senderName . '(' . $sender->invite_code . ')';
+            if ($remark !== '') {
+                $receiverMemo .= ' [' . $remark . ']';
+            }
+
+            $nowTime = time();
+
+            // 写入付款人资金变动日志
+            MoneyLog::create([
+                'user_id'    => $senderId,
+                'money'      => -1 * $amount,
+                'before'     => $senderBefore,
+                'after'      => $senderAfter,
+                'type'       => 'transfer_out',
+                'memo'       => $senderMemo,
+                'order_no'   => $orderNo,
+                'createtime' => $nowTime,
+            ]);
+
+            // 写入收款人资金变动日志
+            MoneyLog::create([
+                'user_id'    => $receiverId,
+                'money'      => $amount,
+                'before'     => $receiverBefore,
+                'after'      => $receiverAfter,
+                'type'       => 'transfer_in',
+                'memo'       => $receiverMemo,
+                'order_no'   => $orderNo,
+                'createtime' => $nowTime,
+            ]);
+
+            Db::commit();
+
+            $resultData = [
+                'order_no'          => $orderNo,
+                'amount'            => $amount,
+                'balance'           => $senderAfter,
+                'receiver_invite'   => $receiver->invite_code,
+                'receiver_nickname' => $this->maskNickname($receiverName),
+                'transfer_time'     => date('Y-m-d H:i:s', $nowTime),
+            ];
+        } catch (\Throwable $e) {
+            Db::rollback();
+            $this->releaseTransferLock($senderId);
+            $this->fail($e->getMessage(), self::CODE_BIZ_FAIL);
+        }
+
+        // 7. 写入幂等记录（有效期 5 分钟）
+        if ($idemKey !== '' && $resultData !== null) {
+            try {
+                Cache::set('idemp:transfer:' . $senderId . ':' . $idemKey, $resultData, 300);
+            } catch (\Throwable) {
+            }
+        }
+
+        // 8. 成功后销毁该验证码，防止在有效期内被二次利用
+        try {
+            Ems::flush($senderEmail, $eventUsed);
+        } catch (\Throwable) {
+        }
+
+        // 9. 成功响应
+        $this->success('转账成功', $resultData);
+    }
+
+    /**
+     * 获取转账防重提交分布式锁
+     */
+    protected function acquireTransferLock(int $userId, int $ttl = 3): bool
+    {
+        $lockKey = 'lock:transfer:user:' . $userId;
+        try {
+            $redis = Cache::store('redis')->handler();
+            return (bool)$redis->set($lockKey, '1', ['nx', 'ex' => $ttl]);
+        } catch (\Throwable $e) {
+            if (Cache::has($lockKey)) {
+                return false;
+            }
+            Cache::set($lockKey, 1, $ttl);
+            return true;
+        }
+    }
+
+    /**
+     * 释放转账分布式锁
+     */
+    protected function releaseTransferLock(int $userId): void
+    {
+        $lockKey = 'lock:transfer:user:' . $userId;
+        try {
+            $redis = Cache::store('redis')->handler();
+            $redis->del($lockKey);
+        } catch (\Throwable $e) {
+            Cache::delete($lockKey);
+        }
+    }
+
+    /**
+     * 昵称脱敏
+     */
+    protected function maskNickname(string $name): string
+    {
+        $len = mb_strlen($name, 'UTF-8');
+        if ($len <= 1) {
+            return $name . '*';
+        }
+        if ($len === 2) {
+            return mb_substr($name, 0, 1, 'UTF-8') . '*';
+        }
+        return mb_substr($name, 0, 1, 'UTF-8') . str_repeat('*', min(4, $len - 2)) . mb_substr($name, -1, 1, 'UTF-8');
     }
 }
