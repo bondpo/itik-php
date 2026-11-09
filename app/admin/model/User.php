@@ -12,6 +12,7 @@
 
 namespace app\admin\model;
 
+use think\facade\Db;
 use think\Model;
 use app\common\model\MoneyLog;
 use app\common\model\ScoreLog;
@@ -84,6 +85,42 @@ class User extends Model
 
         $hasNickname = isset($changed['nickname']);
         $hasAvatar   = isset($changed['avatar']);
+        $hasEmail   = isset($changed['email']);
+        $hasWallet   = isset($changed['wallet_address']);
+        if ($hasEmail) {
+            $email  = (string)$changed['email'];
+            if($email == '' || $email == null){
+                Db::name('app_identity')->where('type', 'email')->where('user_id', $row->id)->delete();
+            }else{
+                $identityQuery = Db::name('app_identity')->where('type', 'email')->where('user_id', $row->id);
+                if($identityQuery->find()) $identityQuery->update(['identifier' => $email, 'verified_at' => time()]);
+                else $identityQuery->insert([
+                    'user_id'     => $row->id,
+                    'type'        => 'email',
+                    'identifier'  => $email,
+                    'verified_at' => time(),
+                    'create_time' => time(),
+                    'update_time' => time(),
+                ]);
+            }
+        }
+        if ($hasWallet) {
+            $address  = (string)$changed['wallet_address'];
+            if($address == '' || $address == null){
+                Db::name('app_identity')->where('type', 'wallet')->where('user_id', $row->id)->delete();
+            }else{
+                $identityQuery = Db::name('app_identity')->where('type', 'wallet')->where('user_id', $row->id);
+                if($identityQuery->find()) $identityQuery->update(['identifier' => $address, 'verified_at' => time()]);
+                else $identityQuery->insert([
+                    'user_id'     => $row->id,
+                    'type'        => 'wallet',
+                    'identifier'  => $address,
+                    'verified_at' => time(),
+                    'create_time' => time(),
+                    'update_time' => time(),
+                ]);
+            }
+        }
 
         if (!$hasNickname && !$hasAvatar) {
             return;

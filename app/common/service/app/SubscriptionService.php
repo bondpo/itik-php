@@ -94,7 +94,7 @@ class SubscriptionService
             if($blc > 0) {
                 $before = $user['money'];
                 $after = function_exists('bcsub') ? bcsub($user['money'], $blc, 2) : ($user['money'] - $blc);
-                \app\admin\model\User::where('id', $userId)->setDec('money', $blc);
+                \app\common\model\User::where('id', $userId)->setDec('money', $blc);
                 \app\common\model\MoneyLog::create([
                     'user_id' => $userId,
                     'money' => -$blc,

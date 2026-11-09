@@ -86,7 +86,7 @@ class Ds
     public function userAct($order_id=1){
         $order = \app\admin\model\app\Order::where('id', $order_id)->find();
         if($order && $order->status == 'paid' && ($order->amount == 100 || $order->amount == 3000)){
-            $user = \app\admin\model\User::where('id', $order['user_id'])->find();
+            $user = \app\common\model\User::where('id', $order['user_id'])->find();
             $amount = $order->amount - $order->discount;
             if($user){
                 $update = [];
@@ -96,10 +96,10 @@ class Ds
                     $active = true;
                 }
                 $update['perf_self'] = $user->perf_self+$amount;
-                \app\admin\model\User::where('id', $user->id)->update($update);
+                \app\common\model\User::where('id', $user->id)->update($update);
 
-                $pUser = \app\admin\model\User::where('id', $user->inviter_id)->find();
-                $tLvs = \app\admin\model\UserLvTeam::where('status', '1')->column('name,perf,rate', 'id');
+                $pUser = \app\common\model\User::where('id', $user->inviter_id)->find();
+                $tLvs = \app\common\model\UserLvTeam::where('status', '1')->column('name,perf,rate', 'id');
                 $teamLv = 1;
                 $pjRate = 0.01;
                 $pjLv = 6;
@@ -110,7 +110,7 @@ class Ds
                         $rate = 0;
                         if($order->plan_code == 'PLAN_OWNER_1Y') $rate = 0.5;
                         else{
-                            $ivUser = \app\admin\model\User::where('inviter_id', $pUser->id)->where('act_time', '>', 0)->order('act_time asc')->field('id,act_time')->select()->toArray();
+                            $ivUser = \app\common\model\User::where('inviter_id', $pUser->id)->where('act_time', '>', 0)->order('act_time asc')->field('id,act_time')->select()->toArray();
                             if(!empty($ivUser)){
                                 $rankMap = [];
                                 foreach ($ivUser as $i => $u) {
@@ -148,8 +148,8 @@ class Ds
                             $update['lv_team'] = $lv;
                         }
                     }
-                    \app\admin\model\User::where('id', $pUser->id)->update($update);
-                    $pUser = \app\admin\model\User::where('id', $pUser->inviter_id)->find();
+                    \app\common\model\User::where('id', $pUser->id)->update($update);
+                    $pUser = \app\common\model\User::where('id', $pUser->inviter_id)->find();
                     $loop++;
                 }
             }
@@ -160,7 +160,7 @@ class Ds
         if($user->group_id != 1){
             $before = $user->money;
             $after = function_exists('bcadd') ? bcadd($user->money, $bonus, 2) : ($user->money + $bonus);
-            \app\admin\model\User::where('id', $user->id)->setInc('money', $bonus);
+            \app\common\model\User::where('id', $user->id)->setInc('money', $bonus);
             \app\common\model\MoneyLog::create([
                 'user_id' => $user->id,
                 'money' => $bonus,

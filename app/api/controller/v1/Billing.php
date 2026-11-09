@@ -423,7 +423,7 @@ class Billing extends Base
             if($this->auth->money > 0){
                 $before = $this->auth->money;
                 $after = function_exists('bcsub') ? bcsub($this->auth->money, $money, 2) : ($this->auth->money - $money);
-                \app\admin\model\User::where('id', $this->auth->id)->setDec('money', $money);
+                \app\common\model\User::where('id', $this->auth->id)->setDec('money', $money);
                 $order_no = date("Ymdhis") . sprintf("%08d", $this->auth->id) . mt_rand(1000, 9999);
                 \app\common\model\MoneyLog::create([
                     'user_id' => $this->auth->id,
